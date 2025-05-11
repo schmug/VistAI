@@ -1,0 +1,57 @@
+run = ["npm", "run", "dev"]
+hidden = [".github"]
+
+entrypoint = "server/index.ts"
+
+[packager]
+language = "nodejs"
+  [packager.features]
+  enabledForHosting = true
+  packageSearch = true
+
+[languages.typescript]
+pattern = "**/{*.ts,*.tsx}"
+  [languages.typescript.languageServer]
+  start = ["typescript-language-server", "--stdio"]
+
+[languages.javascript]
+pattern = "**/{*.js,*.jsx}"
+  [languages.javascript.languageServer]
+  start = ["typescript-language-server", "--stdio"]
+
+# Node module caching
+[interpreter]
+command = ["prybar-nodejs", "-q", "--no-banner", "-e", "process.env.REPLIT_SERVER_PORT ? require('./server/simple-index.ts') : process.exit(0)"]
+
+[nix]
+channel = "stable-23_11"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix"]
+
+[deployment]
+run = ["sh", "-c", "npm run start"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 5001
+
+[env]
+PORT = "5000"
+REPLIT_DEPLOYMENT = "true"
+
+[persistance]
+persistentFolderIds = ["db_data"]
+
+# New workflow
+[dev]
+  [dev.simple]
+  name = "Simple server"
+  description = "Run the simplified static server"
+  command = ["./run-simple.sh"]
+  watch = ["server", "shared"]

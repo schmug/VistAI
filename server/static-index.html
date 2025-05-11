@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AISearch - Multi-LLM Search Engine</title>
+  <meta name="description" content="Compare results from leading AI models in one search">
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Remixicon -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #9333EA;
+      --primary-hover: #7928CA;
+      --secondary: #EC4899;
+      --accent: #10B981;
+      --background: #0B0B0F;
+      --card: #1A1A24;
+      --border: #2A2A3C;
+      --text: #F8F8F8;
+      --text-muted: #A0A0B8;
+      
+      /* Model colors */
+      --model-gpt: #10B981;
+      --model-claude: #9333EA;
+      --model-llama: #F59E0B;
+      --model-mistral: #3B82F6;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--text);
+    }
+    
+    .card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .search-bar {
+      display: flex;
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      overflow: hidden;
+      padding: 0.75rem 1.25rem;
+      transition: all 0.2s;
+    }
+    
+    .search-bar:focus-within {
+      border-color: var(--primary);
+    }
+    
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+    
+    .model-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .model-badge-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Model specific styles */
+    .model-gpt {
+      color: var(--model-gpt);
+    }
+    .model-gpt-bg {
+      background-color: rgba(16, 185, 129, 0.2);
+    }
+    
+    .model-claude {
+      color: var(--model-claude);
+    }
+    .model-claude-bg {
+      background-color: rgba(147, 51, 234, 0.2);
+    }
+    
+    .model-llama {
+      color: var(--model-llama);
+    }
+    .model-llama-bg {
+      background-color: rgba(245, 158, 11, 0.2);
+    }
+    
+    .model-mistral {
+      color: var(--model-mistral);
+    }
+    .model-mistral-bg {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    
+    .skeleton {
+      background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--background)]">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-[var(--primary)]">AISearch</h1>
+        
+        <div id="header-search" class="hidden md:block w-[400px]">
+          <!-- Will be populated when search is performed -->
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button id="stats-button" class="text-[var(--text-muted)] hover:text-[var(--text)] p-2">
+            <i class="ri-dashboard-line text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="flex-1 container mx-auto px-4 py-8">
+      
+      <!-- Home page -->
+      <div id="home-page" class="flex flex-col items-center justify-center min-h-[70vh]">
+        <div class="text-center mb-8">
+          <h2 class="text-4xl md:text-5xl font-bold mb-2">
+            <span class="text-[var(--primary)]">AI</span>Search
+          </h2>
+          <p class="text-[var(--text-muted)] max-w-md mx-auto">
+            Compare results from leading AI models in one search
+          </p>
+        </div>
+        
+        <div class="w-full max-w-2xl mx-auto">
+          <div class="search-bar">
+            <i class="ri-search-line text-[var(--text-muted)] mr-3 text-xl"></i>
+            <input type="text" id="search-input" class="search-input" placeholder="Ask AI anything...">
+            <button id="search-button" class="btn btn-primary ml-2">Search</button>
+          </div>
+          
+          <div class="flex flex-wrap justify-center gap-2 mt-5" id="suggestions">
+            <!-- Suggestions will be populated here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Results page -->
+      <div id="results-page" class="hidden fade-in">
+        <!-- Model filter pills -->
+        <div id="model-filters" class="mb-6 flex flex-wrap gap-2">
+          <!-- Will be populated with model filters -->
+        </div>
+        
+        <!-- Results stats -->
+        <div id="results-stats" class="text-sm text-[var(--text-muted)] mb-4">
+          <!-- Will show result stats -->
+        </div>
+        
+        <!-- Loading skeleton -->
+        <div id="loading-skeleton" class="space-y-6">
+          <!-- Will show loading skeleton -->
+        </div>
+        
+        <!-- Results container -->
+        <div id="results-container" class="space-y-6">
+          <!-- Will be populated with results -->
+        </div>
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="border-t border-[var(--border)] py-6 mt-auto">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="text-[var(--text-muted)] text-sm">
+            <p>
+              © 2025 AISearch • 
+              <button class="hover:text-[var(--primary)]">Terms</button> • 
+              <button class="hover:text-[var(--primary)]">Privacy</button>
+            </p>
+          </div>
+          
+          <div class="flex items-center gap-4 text-sm text-[var(--text-muted)]">
+            <button id="home-button" class="hover:text-[var(--primary)]">Home</button>
+            <button class="hover:text-[var(--primary)]">Dashboard</button>
+            <button class="hover:text-[var(--primary)]">API</button>
+            <button class="hover:text-[var(--primary)]">Pricing</button>
+          </div>
+        </div>
+        
+        <div class="mt-4 text-center text-xs text-[var(--text-muted)]">
+          <p>
+            Powered by <a href="https://openrouter.ai" target="_blank" class="text-[var(--primary)] hover:underline">OpenRouter</a>. 
+            Each result comes from different AI models. User clicks help determine which models provide the best answers.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Suggestions for search
+    const suggestions = [
+      "Explain quantum computing",
+      "Create a workout plan",
+      "Compare React vs Vue",
+      "Summarize climate change solutions",
+      "Recipe for vegan chocolate cake"
+    ];
+    
+    // Get random suggestions
+    function getRandomSuggestions(count = 3) {
+      const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+    
+    // Format search time
+    function formatSearchTime(ms) {
+      return (ms / 1000).toFixed(2);
+    }
+    
+    // Get model info
+    function getModelInfo(modelId) {
+      const shortName = modelId.split('/').pop();
+      
+      const models = {
+        'gpt-4': {
+          name: 'GPT-4',
+          icon: 'ri-openai-fill',
+          colorClass: 'model-gpt',
+          bgClass: 'model-gpt-bg'
+        },
+        'claude-2': {
+          name: 'Claude 2',
+          icon: 'ri-code-box-line',
+          colorClass: 'model-claude',
+          bgClass: 'model-claude-bg'
+        },
+        'llama-2-70b-chat': {
+          name: 'Llama 2',
+          icon: 'ri-fire-line',
+          colorClass: 'model-llama',
+          bgClass: 'model-llama-bg'
+        },
+        'mistral-7b-instruct': {
+          name: 'Mistral',
+          icon: 'ri-wind-line',
+          colorClass: 'model-mistral',
+          bgClass: 'model-mistral-bg'
+        }
+      };
+      
+      return models[shortName] || {
+        name: shortName,
+        icon: 'ri-robot-line',
+        colorClass: 'text-[var(--primary)]',
+        bgClass: 'bg-[rgba(147,51,234,0.2)]'
+      };
+    }
+    
+    // DOM elements
+    const homePage = document.getElementById('home-page');
+    const resultsPage = document.getElementById('results-page');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const suggestionsContainer = document.getElementById('suggestions');
+    const headerSearch = document.getElementById('header-search');
+    const modelFilters = document.getElementById('model-filters');
+    const resultsStats = document.getElementById('results-stats');
+    const loadingSkeleton = document.getElementById('loading-skeleton');
+    const resultsContainer = document.getElementById('results-container');
+    const homeButton = document.getElementById('home-button');
+    const statsButton = document.getElementById('stats-button');
+    
+    // Current state
+    let currentQuery = '';
+    let searchResults = null;
+    let selectedModel = null;
+    
+    // Show loading skeleton
+    function showLoadingSkeleton() {
+      loadingSkeleton.innerHTML = '';
+      
+      for (let i = 0; i < 4; i++) {
+        loadingSkeleton.innerHTML += `
+          <div class="card p-5">
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full skeleton"></div>
+                <div class="w-16 h-4 rounded skeleton"></div>
+              </div>
+              <div class="flex gap-2">
+                <div class="w-8 h-8 rounded skeleton"></div>
+                <div class="w-8 h-8 rounded skeleton"></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="w-3/4 h-6 rounded skeleton"></div>
+              <div class="w-full h-4 rounded skeleton"></div>
+              <div class="w-full h-4 rounded skeleton"></div>
+              <div class="w-2/3 h-4 rounded skeleton"></div>
+              ${i % 2 === 0 ? `
+                <div class="w-full h-4 rounded skeleton"></div>
+                <div class="w-5/6 h-4 rounded skeleton"></div>
+              ` : ''}
+            </div>
+            <div class="mt-4 pt-4 border-t border-[var(--border)] flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full skeleton"></div>
+                <div class="w-8 h-8 rounded-full skeleton"></div>
+              </div>
+              <div class="w-32 h-4 rounded skeleton"></div>
+            </div>
+          </div>
+        `;
+      }
+      
+      loadingSkeleton.classList.remove('hidden');
+      resultsContainer.classList.add('hidden');
+    }
+    
+    // Show results
+    function showResults() {
+      // Hide loading, show results
+      loadingSkeleton.classList.add('hidden');
+      resultsContainer.classList.remove('hidden');
+      
+      // Filter results by selected model
+      const filteredResults = selectedModel 
+        ? searchResults.results.filter(result => result.modelId.includes(selectedModel))
+        : searchResults.results;
+      
+      // Update results container
+      if (filteredResults.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="p-6 text-center border border-[var(--border)] rounded-lg">
+            <h3 class="text-lg font-medium mb-2">No Results Found</h3>
+            <p class="text-[var(--text-muted)]">
+              ${selectedModel 
+                ? `No results from the selected model. Try another model or remove the filter.`
+                : `We couldn't find any results for your query. Try a different search term.`}
+            </p>
+          </div>
+        `;
+        return;
+      }
+      
+      resultsContainer.innerHTML = '';
+      
+      filteredResults.forEach(result => {
+        const model = getModelInfo(result.modelId);
+        
+        resultsContainer.innerHTML += `
+          <div class="card p-5" data-result-id="${result.id}">
+            <div class="flex justify-between items-center mb-4">
+              <div class="model-badge">
+                <div class="model-badge-icon ${model.bgClass}">
+                  <i class="${model.icon} ${model.colorClass}"></i>
+                </div>
+                <span class="${model.colorClass} font-medium">${model.name}</span>
+              </div>
+              
+              <div class="flex items-center gap-1">
+                <button class="text-[var(--text-muted)] hover:text-[var(--primary)] p-2 copy-button" data-content="${result.content}">
+                  <i class="ri-clipboard-line"></i>
+                </button>
+                <button class="text-[var(--text-muted)] hover:text-[var(--primary)] p-2">
+                  <i class="ri-share-line"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <h3 class="text-lg font-medium mb-2">
+                ${result.title || "AI Response"}
+              </h3>
+              
+              <div class="text-[var(--text-muted)] whitespace-pre-line">
+                ${result.content}
+              </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-[var(--border)] flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <button class="text-[var(--text-muted)] hover:text-[var(--primary)] p-1">
+                  <i class="ri-thumb-up-line"></i>
+                </button>
+                <button class="text-[var(--text-muted)] hover:text-[var(--secondary)] p-1">
+                  <i class="ri-thumb-down-line"></i>
+                </button>
+              </div>
+              
+              ${result.responseTime ? `
+                <div class="text-xs text-[var(--text-muted)]">
+                  Response time: ${(result.responseTime / 1000).toFixed(2)}s
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+      
+      // Add event listeners for result cards
+      document.querySelectorAll('[data-result-id]').forEach(card => {
+        card.addEventListener('click', () => {
+          const resultId = parseInt(card.getAttribute('data-result-id'));
+          trackResultClick(resultId);
+        });
+      });
+      
+      // Add event listeners for copy buttons
+      document.querySelectorAll('.copy-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const content = button.getAttribute('data-content');
+          navigator.clipboard.writeText(content);
+          button.innerHTML = '<i class="ri-check-line"></i>';
+          setTimeout(() => {
+            button.innerHTML = '<i class="ri-clipboard-line"></i>';
+          }, 2000);
+        });
+      });
+    }
+    
+    // Update model filters
+    function updateModelFilters() {
+      if (!searchResults) return;
+      
+      // Get unique model IDs
+      const modelIds = [...new Set(searchResults.results.map(result => result.modelId))];
+      
+      // Update filters
+      modelFilters.innerHTML = `
+        <button class="btn btn-outline ${!selectedModel ? 'border-[var(--primary)] text-[var(--text)]' : ''}" data-model-id="all">
+          All Models
+        </button>
+      `;
+      
+      modelIds.forEach(modelId => {
+        const model = getModelInfo(modelId);
+        const isSelected = selectedModel === modelId;
+        
+        modelFilters.innerHTML += `
+          <button class="btn btn-outline flex items-center gap-1 ${isSelected ? 'border-[var(--primary)] text-[var(--text)]' : ''}" data-model-id="${modelId}">
+            <i class="${model.icon}"></i>
+            <span>${model.name}</span>
+          </button>
+        `;
+      });
+      
+      // Add event listeners
+      document.querySelectorAll('[data-model-id]').forEach(button => {
+        button.addEventListener('click', () => {
+          const modelId = button.getAttribute('data-model-id');
+          selectedModel = modelId === 'all' ? null : modelId;
+          updateModelFilters();
+          showResults();
+        });
+      });
+    }
+    
+    // Update results stats
+    function updateResultsStats() {
+      if (!searchResults) return;
+      
+      const uniqueModels = new Set(searchResults.results.map(result => result.modelId)).size;
+      
+      resultsStats.innerHTML = `
+        About <span class="font-medium">${searchResults.results.length} results</span> from ${uniqueModels} AI models 
+        (${formatSearchTime(searchResults.totalTime)} seconds)
+      `;
+    }
+    
+    // Search function
+    async function performSearch(query) {
+      if (!query.trim()) return;
+      
+      currentQuery = query;
+      
+      // Update UI
+      homePage.classList.add('hidden');
+      resultsPage.classList.remove('hidden');
+      searchInput.value = query;
+      
+      // Add header search if needed
+      if (!headerSearch.innerHTML) {
+        headerSearch.innerHTML = `
+          <div class="search-bar py-2 px-4">
+            <i class="ri-search-line text-[var(--text-muted)] mr-3"></i>
+            <input type="text" id="header-search-input" class="search-input" placeholder="Search again...">
+          </div>
+        `;
+        
+        const headerSearchInput = document.getElementById('header-search-input');
+        headerSearchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && headerSearchInput.value.trim()) {
+            performSearch(headerSearchInput.value);
+          }
+        });
+      }
+      
+      // Show loading
+      showLoadingSkeleton();
+      
+      try {
+        // Call API
+        const response = await fetch('/api/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ query })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        
+        // Parse results
+        searchResults = await response.json();
+        
+        // Update UI
+        updateModelFilters();
+        updateResultsStats();
+        showResults();
+        
+      } catch (error) {
+        console.error('Search error:', error);
+        resultsContainer.innerHTML = `
+          <div class="p-6 text-center border border-[var(--border)] rounded-lg">
+            <h3 class="text-lg font-medium mb-2 text-[var(--secondary)]">Error Fetching Results</h3>
+            <p class="text-[var(--text-muted)] mb-4">
+              ${error.message || 'An unknown error occurred'}
+            </p>
+            <button id="retry-button" class="btn btn-primary">Try Again</button>
+          </div>
+        `;
+        
+        loadingSkeleton.classList.add('hidden');
+        resultsContainer.classList.remove('hidden');
+        
+        document.getElementById('retry-button').addEventListener('click', () => {
+          performSearch(currentQuery);
+        });
+      }
+    }
+    
+    // Track result click
+    async function trackResultClick(resultId) {
+      try {
+        await fetch('/api/track-click', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ resultId })
+        });
+      } catch (error) {
+        console.error('Error tracking click:', error);
+      }
+    }
+    
+    // Initialize
+    function init() {
+      // Populate suggestions
+      const randomSuggestions = getRandomSuggestions();
+      
+      suggestionsContainer.innerHTML = '';
+      randomSuggestions.forEach(suggestion => {
+        suggestionsContainer.innerHTML += `
+          <button class="text-xs bg-[var(--card)] px-3 py-1.5 rounded-full text-[var(--text-muted)] hover:bg-[#262637]" data-suggestion="${suggestion}">
+            Try: "${suggestion}"
+          </button>
+        `;
+      });
+      
+      // Add event listeners
+      document.querySelectorAll('[data-suggestion]').forEach(button => {
+        button.addEventListener('click', () => {
+          const suggestion = button.getAttribute('data-suggestion');
+          performSearch(suggestion);
+        });
+      });
+      
+      // Search button
+      searchButton.addEventListener('click', () => {
+        performSearch(searchInput.value);
+      });
+      
+      // Search input (Enter key)
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          performSearch(searchInput.value);
+        }
+      });
+      
+      // Home button
+      homeButton.addEventListener('click', () => {
+        homePage.classList.remove('hidden');
+        resultsPage.classList.add('hidden');
+        searchInput.value = '';
+        currentQuery = '';
+      });
+    }
+    
+    // Start the app
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

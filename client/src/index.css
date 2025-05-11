@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+  --popover: 240 10% 4%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 12%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --primary: 267 100% 66%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 339 90% 66%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 172 83% 51%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 84%;
+  --radius: 0.5rem;
+  
+  /* Model colors */
+  --model-gpt: 160 90% 40%;
+  --model-claude: 270 60% 50%;
+  --model-llama: 25 90% 50%;
+  --model-mistral: 210 80% 50%;
+  
+  /* Chart colors */
+  --chart-1: var(--model-gpt);
+  --chart-2: var(--model-claude);
+  --chart-3: var(--model-llama);
+  --chart-4: var(--model-mistral);
+  --chart-5: 339 90% 66%;
+}
+
+.dark {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+  --popover: 240 10% 4%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 12%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --primary: 267 100% 66%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 339 90% 66%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 172 83% 51%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 84%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Animations */
+.search-results-appear {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card:hover {
+  @apply border-primary;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+/* Content font */
+.result-content {
+  @apply font-[Roboto,sans-serif];
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
