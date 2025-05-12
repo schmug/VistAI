@@ -1,9 +1,10 @@
-import type { Express, Request, Response } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import express, { Request, Response, NextFunction } from 'express';
+import { storage } from './storage';
 import { insertClickSchema, insertSearchSchema } from "@shared/schema";
-import { z } from "zod";
-// WebSocket removed to avoid connection errors
+import { z } from 'zod';
+import { createServer } from 'http';
+import { serveStatic } from './vite';
+import path from 'path';
 
 // OpenRouter API handling
 async function queryOpenRouter(prompt: string, modelId: string) {
@@ -19,7 +20,7 @@ async function queryOpenRouter(prompt: string, modelId: string) {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${API_KEY}`,
-        "HTTP-Referer": "https://aisearch.replit.app", // Adjust based on your app's domain
+        "HTTP-Referer": "https://aisearch.replit.app",
         "X-Title": "AI Search Engine"
       },
       body: JSON.stringify({
@@ -67,30 +68,29 @@ function extractTitle(content: string = ""): string {
   return words + (words.length < content.length ? "..." : "");
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  const httpServer = createServer(app);
+export async function startStaticServer() {
+  const app = express();
+  const PORT = process.env.PORT || 5000;
   
-  // Disable WebSockets to avoid persistent errors
-  // We'll implement a polling approach instead
+  // Parse JSON requests
+  app.use(express.json());
   
-  // Create a mock broadcast function that does nothing
-  const broadcastUpdate = (type: string, data: any) => {
-    console.log(`[WebSocketDisabled] Would broadcast update: ${type}`);
-    // No actual broadcasting since WebSockets are disabled
-  };
-
-  // API routes
-  app.use("/api", async (req, res, next) => {
-    // Basic CORS headers for API routes
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    
-    if (req.method === "OPTIONS") {
-      return res.status(200).end();
-    }
-    
-    next();
+  // Serve static files from public directory
+  app.use(express.static(path.join(process.cwd(), 'server', 'public')));
+  
+  // Basic error handler
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+  });
+  
+  // API status endpoint
+  app.get('/api/status', (_req: Request, res: Response) => {
+    res.json({
+      status: 'ok',
+      apiKey: Boolean(process.env.OPENROUTER_API_KEY),
+      time: new Date().toISOString()
+    });
   });
   
   // Search endpoint
@@ -155,14 +155,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const click = await storage.trackClick(clickData);
       
-      // Get updated stats for the response
+      // Get updated stats
       const updatedStats = await storage.getModelStats();
       
-      // Return stats directly in the response instead of broadcasting
       res.json({ 
         success: true, 
         click,
-        stats: updatedStats // Include the stats in the response
+        stats: updatedStats
       });
       
     } catch (error) {
@@ -218,6 +217,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error retrieving top models" });
     }
   });
-
-  return httpServer;
+  
+  // Redirect root to the simple version
+  app.get('/', (_req: Request, res: Response) => {
+    res.redirect('/simple/');
+  });
+  
+  // Start the server
+  const server = createServer(app);
+  server.listen(PORT, () => {
+    console.log(`Static API server running on port ${PORT}`);
+    console.log(`OpenRouter API key configured: ${Boolean(process.env.OPENROUTER_API_KEY)}`);
+  });
+  
+  return server;
 }
