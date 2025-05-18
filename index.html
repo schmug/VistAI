@@ -292,7 +292,7 @@
     function createResultCard(result) {
       const modelName = result.modelName || result.modelId.split('/').pop();
       let modelClass = 'mistral';
-      
+
       if (modelName.toLowerCase().includes('gpt')) {
         modelClass = 'gpt';
       } else if (modelName.toLowerCase().includes('claude')) {
@@ -300,19 +300,39 @@
       } else if (modelName.toLowerCase().includes('llama')) {
         modelClass = 'llama';
       }
-      
-      return `
-        <div class="card">
-          <div class="card-header">
-            <span class="model-badge ${modelClass}">${modelName}</span>
-          </div>
-          <h3 class="card-title">${result.title || 'AI Response'}</h3>
-          <div class="card-content">${result.content}</div>
-          <div class="card-footer">
-            <span>Response time: ${(result.responseTime / 1000).toFixed(2)}s</span>
-          </div>
-        </div>
-      `;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card';
+
+      const header = document.createElement('div');
+      header.className = 'card-header';
+
+      const badge = document.createElement('span');
+      badge.className = `model-badge ${modelClass}`;
+      badge.textContent = modelName;
+      header.appendChild(badge);
+
+      const title = document.createElement('h3');
+      title.className = 'card-title';
+      title.textContent = result.title || 'AI Response';
+
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      content.textContent = result.content;
+
+      const footer = document.createElement('div');
+      footer.className = 'card-footer';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.textContent = `Response time: ${(result.responseTime / 1000).toFixed(2)}s`;
+      footer.appendChild(timeSpan);
+
+      wrapper.appendChild(header);
+      wrapper.appendChild(title);
+      wrapper.appendChild(content);
+      wrapper.appendChild(footer);
+
+      return wrapper;
     }
     
     // Perform search
@@ -350,16 +370,18 @@
         const data = await response.json();
         
         // Display results
-        let resultsHTML = `
-          <h2 class="results-title">Search Results</h2>
-        `;
-        
+        resultsContainer.innerHTML = '';
+
+        const heading = document.createElement('h2');
+        heading.className = 'results-title';
+        heading.textContent = 'Search Results';
+        resultsContainer.appendChild(heading);
+
         // Create result cards
         data.results.forEach(result => {
-          resultsHTML += createResultCard(result);
+          const card = createResultCard(result);
+          resultsContainer.appendChild(card);
         });
-        
-        resultsContainer.innerHTML = resultsHTML;
         
       } catch (error) {
         // Display error
