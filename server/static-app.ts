@@ -146,7 +146,7 @@ async function queryOpenRouter(prompt: string, modelId: string) {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${API_KEY}`,
-        "HTTP-Referer": "https://aisearch.replit.app", // Adjust based on your app's domain
+        "HTTP-Referer": "https://vistai.replit.app", // Adjust based on your app's domain
         "X-Title": "AI Search Engine"
       },
       body: JSON.stringify({

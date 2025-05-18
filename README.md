@@ -1,6 +1,6 @@
-# AISearch - Multi-LLM Search Platform
+# VistAI - Multi-LLM Search Platform
 
-AISearch is a platform that aggregates responses from various language models via OpenRouter, providing a unified and intuitive search experience.
+VistAI is a platform that aggregates responses from various language models via OpenRouter, providing a unified and intuitive search experience.
 
 ## ⚠️ IMPORTANT: How to Run the Application
 

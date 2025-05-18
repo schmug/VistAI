@@ -35,7 +35,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
             onClick={() => onNavigate("home")}
             className="flex items-center gap-2"
           >
-            <h1 className="text-xl font-bold text-primary">AISearch</h1>
+            <h1 className="text-xl font-bold text-primary">VistAI</h1>
             <span className="text-xs bg-card px-2 py-0.5 rounded-full text-muted-foreground">Beta</span>
           </button>
         </div>

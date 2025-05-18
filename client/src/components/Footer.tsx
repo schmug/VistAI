@@ -9,7 +9,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-muted-foreground text-sm">
             <p>
-              © {new Date().getFullYear()} AISearch • 
+              © {new Date().getFullYear()} VistAI • 
               <button className="hover:text-primary ml-1">Terms</button> • 
               <button className="hover:text-primary ml-1">Privacy</button>
             </p>

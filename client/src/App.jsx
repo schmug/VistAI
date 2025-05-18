@@ -61,7 +61,7 @@ function MainApp() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="container mx-auto px-4 py-3 flex items-center">
-          <h1 className="text-xl font-bold text-primary mr-4">AISearch</h1>
+          <h1 className="text-xl font-bold text-primary mr-4">VistAI</h1>
           
           {hasSearched && (
             <form onSubmit={handleSearch} className="flex-1 max-w-xl">
