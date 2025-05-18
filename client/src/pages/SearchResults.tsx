@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { searchAI, ModelResponse } from "@/lib/openrouter";
+import { searchAIStream, ModelResponse, SearchStreamEvent } from "@/lib/openrouter";
 import { formatSearchTime } from "@/lib/utils";
 import ResultCard from "@/components/ResultCard";
 import ModelFilterPills from "@/components/ModelFilterPills";
@@ -14,26 +13,47 @@ interface SearchResultsProps {
 
 export default function SearchResults({ query, onSearch }: SearchResultsProps) {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  
-  // Search query
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['/api/search', query],
-    queryFn: async () => {
-      if (!query) return null;
-      return await searchAI(query);
-    },
-    enabled: Boolean(query),
-  });
+  const [results, setResults] = useState<ModelResponse[]>([]);
+  const [search, setSearch] = useState<{ id: number; query: string; createdAt: Date } | null>(null);
+  const [totalTime, setTotalTime] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!query) return;
+
+    setSelectedModel(null);
+    setResults([]);
+    setSearch(null);
+    setTotalTime(0);
+    setError(null);
+    setIsLoading(true);
+
+    searchAIStream(query, (evt: SearchStreamEvent) => {
+      if (evt.type === "search") {
+        setSearch(evt.data);
+      } else if (evt.type === "result") {
+        setResults((prev) => [...prev, evt.data]);
+      } else if (evt.type === "done") {
+        setTotalTime(evt.data.totalTime);
+        setIsLoading(false);
+      } else if (evt.type === "error") {
+        setError(new Error(evt.data?.message || "Stream error"));
+        setIsLoading(false);
+      }
+    }).catch((err) => {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      setIsLoading(false);
+    });
+  }, [query]);
   
   // Filter results by selected model
-  const filteredResults = selectedModel && data?.results
-    ? data.results.filter(result => result.modelId.includes(selectedModel))
-    : data?.results;
-  
+  const filteredResults = selectedModel
+    ? results.filter((result) => result.modelId.includes(selectedModel))
+    : results;
+
   // Get unique model IDs for filter pills
-  const modelIds = data?.results 
-    ? [...new Set(data.results.map(result => result.modelId))]
-    : [];
+  const modelIds = [...new Set(results.map((result) => result.modelId))];
   
   return (
     <div className="search-results-appear mt-4 md:mt-6">
@@ -43,7 +63,7 @@ export default function SearchResults({ query, onSearch }: SearchResultsProps) {
       </div>
       
       {/* Model Filter Pills */}
-      {!isLoading && data && (
+      {!isLoading && results.length > 0 && (
         <ModelFilterPills
           selectedModel={selectedModel}
           onSelectModel={setSelectedModel}
@@ -52,10 +72,10 @@ export default function SearchResults({ query, onSearch }: SearchResultsProps) {
       )}
       
       {/* Result Stats */}
-      {!isLoading && data && (
+      {!isLoading && results.length > 0 && (
         <div className="text-muted-foreground text-sm mb-4">
-          About <span className="font-medium">{data.results.length} results</span> from {data.results.length} AI models 
-          ({formatSearchTime(data.totalTime)} seconds)
+          About <span className="font-medium">{results.length} results</span> from {results.length} AI models
+          ({formatSearchTime(totalTime)} seconds)
         </div>
       )}
       
@@ -69,9 +89,9 @@ export default function SearchResults({ query, onSearch }: SearchResultsProps) {
             <p className="text-muted-foreground">
               {error instanceof Error ? error.message : "An unknown error occurred"}
             </p>
-            <button 
+            <button
               className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-              onClick={() => refetch()}
+              onClick={() => onSearch(query)}
             >
               Try Again
             </button>

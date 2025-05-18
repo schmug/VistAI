@@ -39,6 +39,73 @@ export async function searchAI(query: string): Promise<SearchResponse> {
   return data;
 }
 
+export interface SearchStreamEvent {
+  type: "search" | "result" | "done" | "error";
+  data: any;
+}
+
+export async function searchAIStream(
+  query: string,
+  onEvent: (event: SearchStreamEvent) => void,
+): Promise<SearchResponse> {
+  const response = await apiRequest(
+    "POST",
+    "/api/search",
+    { query },
+    { headers: { Accept: "text/event-stream" } },
+  );
+
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.startsWith("text/event-stream")) {
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalData: SearchResponse | null = null;
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let idx;
+      while ((idx = buffer.indexOf("\n\n")) >= 0) {
+        const chunk = buffer.slice(0, idx).trim();
+        buffer = buffer.slice(idx + 2);
+        if (!chunk) continue;
+
+        const lines = chunk.split("\n");
+        let event = "message";
+        let data = "";
+        for (const line of lines) {
+          if (line.startsWith("event:")) {
+            event = line.slice(6).trim();
+          } else if (line.startsWith("data:")) {
+            data += line.slice(5).trim();
+          }
+        }
+
+        if (data) {
+          const parsed = JSON.parse(data);
+          onEvent({ type: event as any, data: parsed });
+          if (event === "done") {
+            finalData = parsed;
+          }
+        }
+      }
+    }
+
+    if (finalData) return finalData;
+    throw new Error("Stream ended unexpectedly");
+  } else {
+    const data: SearchResponse = await response.json();
+    onEvent({ type: "search", data: data.search });
+    data.results.forEach((r) => onEvent({ type: "result", data: r }));
+    onEvent({ type: "done", data });
+    return data;
+  }
+}
+
 // Track when a user clicks on a result
 export async function trackResultClick(resultId: number, userId?: number): Promise<void> {
   await apiRequest("POST", "/api/track-click", { 

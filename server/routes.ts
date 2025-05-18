@@ -95,56 +95,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Search endpoint
   app.post("/api/search", async (req: Request, res: Response) => {
+    const useSSE = req.headers.accept === "text/event-stream";
+
+    if (useSSE) {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      });
+    }
+
     try {
       const { query } = insertSearchSchema.parse(req.body);
-      
-      // Create search record
+
       const search = await storage.createSearch({ query });
-      
-      // Define models to query (these would be your OpenRouter models)
+
       const models = [
         "openai/gpt-4",
-        "anthropic/claude-2", 
+        "anthropic/claude-2",
         "meta-llama/llama-2-70b-chat",
-        "mistralai/mistral-7b-instruct"
+        "mistralai/mistral-7b-instruct",
       ];
-      
-      // Track model usage
+
       for (const modelId of models) {
         await storage.incrementModelSearches(modelId);
       }
-      
-      // Query models
-      const resultPromises = models.map(async (modelId) => {
+
+      if (useSSE) {
+        res.write(`event: search\n`);
+        res.write(`data:${JSON.stringify(search)}\n\n`);
+      }
+
+      const results: any[] = [];
+      for (const modelId of models) {
         const modelResponse = await queryOpenRouter(query, modelId);
-        
-        // Store result
         const result = await storage.createResult({
           searchId: search.id,
           modelId,
           content: modelResponse.content,
           title: modelResponse.title,
-          responseTime: modelResponse.responseTime
+          responseTime: modelResponse.responseTime,
         });
-        
-        return { ...result, modelName: modelId.split('/').pop() };
-      });
-      
-      // Wait for all model responses
-      const results = await Promise.all(resultPromises);
-      
-      res.json({ 
-        search, 
+
+        const finalResult = { ...result, modelName: modelId.split("/").pop() };
+        results.push(finalResult);
+
+        if (useSSE) {
+          res.write(`event: result\n`);
+          res.write(`data:${JSON.stringify(finalResult)}\n\n`);
+        }
+      }
+
+      const payload = {
+        search,
         results,
-        totalTime: Math.max(...results.map(r => r.responseTime || 0))
-      });
-      
+        totalTime: Math.max(...results.map((r) => r.responseTime || 0)),
+      };
+
+      if (useSSE) {
+        res.write(`event: done\n`);
+        res.write(`data:${JSON.stringify(payload)}\n\n`);
+        res.end();
+      } else {
+        res.json(payload);
+      }
     } catch (error) {
       console.error("Search error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid search query", errors: error.errors });
       }
-      res.status(500).json({ message: "Error processing search" });
+      if (useSSE) {
+        res.write(`event: error\n`);
+        res.write(`data:${JSON.stringify({ message: "Error processing search" })}\n\n`);
+        res.end();
+      } else {
+        res.status(500).json({ message: "Error processing search" });
+      }
     }
   });
   
