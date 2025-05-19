@@ -258,6 +258,7 @@
     </footer>
   </div>
   
+
   <div id="api-status" class="api-status">API Status: Checking...</div>
   
   <script>
@@ -266,11 +267,14 @@
     const searchButton = document.getElementById('search-button');
     const resultsContainer = document.getElementById('results');
     const apiStatus = document.getElementById('api-status');
+
+    // Base URL for API requests; can be configured via window.API_BASE_URL
+    const API_BASE = window.API_BASE_URL ?? '';
     
     // Check API status
     async function checkApiStatus() {
       try {
-        const response = await fetch('/api/status');
+        const response = await fetch(`${API_BASE}/api/status`);
         if (response.ok) {
           const data = await response.json();
           apiStatus.textContent = `API Status: ${data.apiKey ? 'Connected' : 'Not configured'}`;
@@ -353,7 +357,7 @@
       
       try {
         // Make search request
-        const response = await fetch('/api/search', {
+        const response = await fetch(`${API_BASE}/api/search`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
