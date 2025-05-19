@@ -9,8 +9,15 @@ Due to compatibility issues with Replit's environment, please use our **minimal 
 ```bash
 ./start.sh
 ```
-
+This script launches the minimal server and is the canonical way to run AISearch.
 Then open the web preview URL or visit http://localhost:5000/ in your browser.
+
+For development of the full Express/Vite server you may still run:
+
+```bash
+npm run dev
+```
+However, this mode is not officially supported in the Replit environment.
 
 ## Features
 
