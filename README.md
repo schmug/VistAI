@@ -60,3 +60,13 @@ Future enhancements could include:
 - User accounts and personalized model rankings
 - Adding more AI models to the comparison
 - Implementing revenue sharing based on user preferences
+
+## Deploying to Cloudflare
+
+1. Deploy the static frontend using **Cloudflare Pages**. When configuring the Pages deployment, set an environment variable `API_BASE_URL` to the public URL of your Worker (for example `https://vistai-worker.yourdomain.workers.dev`). The frontend reads this value at runtime and prefixes all API requests with it.
+
+Set the build command to `npm run build` so the Vite CLI is available.
+
+2. Deploy the API using **Cloudflare Workers** with `wrangler`. A sample `wrangler.toml` is included in this repository.
+
+Once both are deployed the site will automatically call the Worker endpoints via the configured base URL.
