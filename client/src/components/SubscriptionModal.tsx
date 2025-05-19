@@ -23,7 +23,7 @@ export default function SubscriptionModal({
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-foreground">Upgrade Your Experience</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Subscribe to AISearch Pro and support your favorite AI models. We share revenue with the models you use most frequently.
+            Subscribe to VistAI Pro and support your favorite AI models. We share revenue with the models you use most frequently.
           </DialogDescription>
         </DialogHeader>
         

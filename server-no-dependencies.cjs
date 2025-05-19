@@ -57,7 +57,7 @@ const server = http.createServer((req, res) => {
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${API_KEY}`,
-                    "HTTP-Referer": "https://aisearch.replit.app",
+                    "HTTP-Referer": "https://vistai.replit.app",
                     "X-Title": "AI Search Engine"
                   },
                   body: JSON.stringify({
@@ -191,7 +191,7 @@ const server = http.createServer((req, res) => {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>AISearch</title>
+          <title>VistAI</title>
           <style>
             body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
             h1 { color: #9333EA; }
@@ -202,7 +202,7 @@ const server = http.createServer((req, res) => {
           </style>
         </head>
         <body>
-          <h1>AISearch</h1>
+          <h1>VistAI</h1>
           <p>Search across multiple AI models</p>
           
           <div>

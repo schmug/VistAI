@@ -9,7 +9,7 @@ const HTML = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AISearch</title>
+  <title>VistAI</title>
   <style>
     body { 
       font-family: system-ui, -apple-system, sans-serif; 
@@ -139,7 +139,7 @@ const HTML = `
   <div id="results" class="results"></div>
   
   <div class="footer">
-    &copy; 2025 AISearch • Powered by OpenRouter
+    &copy; 2025 VistAI • Powered by OpenRouter
   </div>
   
   <div id="status" class="status"></div>
@@ -263,7 +263,7 @@ http.createServer(async (req, res) => {
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${API_KEY}`,
-                    "HTTP-Referer": "https://aisearch.replit.app",
+                    "HTTP-Referer": "https://vistai.replit.app",
                     "X-Title": "AI Search Engine"
                   },
                   body: JSON.stringify({
