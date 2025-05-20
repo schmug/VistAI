@@ -85,4 +85,6 @@ Future enhancements could include:
 
 2. Deploy the API using **Cloudflare Workers** with `wrangler`. A sample `wrangler.toml` is included in this repository.
 
+3. Set your OpenRouter API key as a secret for the Worker. Run `wrangler secret put OPENROUTER_API_KEY` or add the variable under **Settings > Variables** in the Cloudflare dashboard so the Worker can authenticate with OpenRouter.
+
 Once both are deployed the site will automatically call the Worker endpoints via the configured base URL.
