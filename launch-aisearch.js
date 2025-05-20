@@ -21,7 +21,7 @@ const htmlContent = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AISearch - Compare AI Model Responses</title>
+  <title>VistAI - Compare AI Model Responses</title>
   <meta name="description" content="Search across multiple AI models to compare responses">
   
   <style>
@@ -261,7 +261,7 @@ const htmlContent = `<!DOCTYPE html>
     </div>
     
     <footer class="footer">
-      <p>&copy; 2025 AISearch • Powered by OpenRouter API</p>
+      <p>&copy; 2025 VistAI • Powered by OpenRouter API</p>
       <p style="margin-top: 5px; font-size: 12px;">Results are provided by various AI models and may vary in accuracy and content</p>
     </footer>
   </div>
@@ -475,7 +475,7 @@ const server = http.createServer(async (req, res) => {
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${API_KEY}`,
-                    "HTTP-Referer": "https://aisearch.replit.app",
+                    "HTTP-Referer": "https://vistai.replit.app",
                     "X-Title": "AI Search Engine"
                   },
                   body: JSON.stringify({

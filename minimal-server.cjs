@@ -14,7 +14,7 @@ const MINIMAL_HTML = `
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AISearch</title>
+    <title>VistAI</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -86,7 +86,7 @@ const MINIMAL_HTML = `
     </style>
   </head>
   <body>
-    <h1>AISearch</h1>
+    <h1>VistAI</h1>
     <p>Compare responses from multiple AI models</p>
     
     <div class="search-container">
@@ -212,7 +212,7 @@ http.createServer(async (req, res) => {
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${API_KEY}`,
-                    "HTTP-Referer": "https://aisearch.replit.app",
+                    "HTTP-Referer": "https://vistai.replit.app",
                     "X-Title": "AI Search Engine"
                   },
                   body: JSON.stringify({

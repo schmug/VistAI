@@ -195,7 +195,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Subscribe to AISearch Pro and support your favorite AI models. We share revenue with the models you use most frequently.
+                Subscribe to VistAI Pro and support your favorite AI models. We share revenue with the models you use most frequently.
               </p>
               <p className="text-xs text-muted-foreground">
                 Starting at $9.99/month

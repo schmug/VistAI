@@ -51,7 +51,7 @@ export default function SimplePage() {
               onClick={() => setSearchPerformed(false)}
               className="flex items-center gap-2"
             >
-              <h1 className="text-xl font-bold text-primary">AISearch</h1>
+              <h1 className="text-xl font-bold text-primary">VistAI</h1>
               <span className="text-xs bg-card px-2 py-0.5 rounded-full text-muted-foreground">Beta</span>
             </button>
           </div>
@@ -253,7 +253,7 @@ export default function SimplePage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-muted-foreground text-sm">
               <p>
-                © {new Date().getFullYear()} AISearch • 
+                © {new Date().getFullYear()} VistAI • 
                 <button className="hover:text-primary ml-1">Terms</button> • 
                 <button className="hover:text-primary ml-1">Privacy</button>
               </p>
