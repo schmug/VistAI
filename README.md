@@ -70,9 +70,18 @@ Future enhancements could include:
 
 ## Deploying to Cloudflare
 
-1. Deploy the static frontend using **Cloudflare Pages**. When configuring the Pages deployment, set an environment variable `API_BASE_URL` to the public URL of your Worker (for example `https://vistai-worker.yourdomain.workers.dev`). The frontend reads this value at runtime and prefixes all API requests with it.
+1. Deploy the static frontend using **Cloudflare Pages**.
 
-Set the build command to `npm run build` so the Vite CLI is available.
+   - Set the build command to `npm run build` and the output directory to `dist/public` so Vite places the production assets where Pages expects them.
+   - Provide the Worker URL to the frontend by defining `API_BASE_URL` as an environment variable **or** adding a snippet before the bundled script:
+
+     ```html
+     <script>
+       window.API_BASE_URL = "https://vistai-worker.yourdomain.workers.dev";
+     </script>
+     ```
+
+     The application reads `window.API_BASE_URL` at runtime and prefixes all API requests with this value.
 
 2. Deploy the API using **Cloudflare Workers** with `wrangler`. A sample `wrangler.toml` is included in this repository.
 
