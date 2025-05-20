@@ -260,7 +260,9 @@
   
 
   <div id="api-status" class="api-status">API Status: Checking...</div>
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.4/dist/purify.min.js"></script>
+
   <script>
     // DOM elements
     const searchInput = document.getElementById('search-input');
@@ -322,7 +324,8 @@
 
       const content = document.createElement('div');
       content.className = 'card-content';
-      content.textContent = result.content;
+      // Sanitize any HTML to avoid XSS issues
+      content.innerHTML = DOMPurify.sanitize(result.content);
 
       const footer = document.createElement('div');
       footer.className = 'card-footer';
