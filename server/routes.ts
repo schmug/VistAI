@@ -50,7 +50,7 @@ async function queryOpenRouter(prompt: string, modelId: string) {
 }
 
 // Helper to extract a title from response content
-function extractTitle(content: string = ""): string {
+export function extractTitle(content: string = ""): string {
   if (!content) return "AI Response";
   
   // Look for common title patterns in AI responses
