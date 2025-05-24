@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
+import { Link, useLocation } from "wouter";
 
-interface HeaderProps {
-  currentPage: string;
-  onNavigate: (page: string, query?: string) => void;
-}
-
-export default function Header({ currentPage, onNavigate }: HeaderProps) {
+export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const isHomePage = currentPage === "home";
+  const [location, navigate] = useLocation();
+  const isHomePage = location === "/";
   
   // Detect scroll for styling
   useEffect(() => {
@@ -31,34 +28,31 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
     )}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => onNavigate("home")}
-            className="flex items-center gap-2"
-          >
+          <Link href="/" className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-primary">VistAI</h1>
             <span className="text-xs bg-card px-2 py-0.5 rounded-full text-muted-foreground">Beta</span>
-          </button>
+          </Link>
         </div>
         
         <div className="flex items-center gap-4">
           {/* Compact search bar for non-home pages */}
           {!isHomePage && (
             <div className="hidden md:block w-[400px]">
-              <SearchBar 
-                compact={true} 
-                onSearch={(query) => onNavigate("search", query)}
+              <SearchBar
+                compact={true}
+                onSearch={(query) => navigate(`/search?q=${encodeURIComponent(query)}`)}
               />
             </div>
           )}
           
           <nav className="flex items-center gap-3">
-            <button 
-              onClick={() => onNavigate("dashboard")}
+            <Link
+              href="/dashboard"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"
             >
               <i className="ri-dashboard-line text-xl"></i>
               <span className="sr-only">Dashboard</span>
-            </button>
+            </Link>
             
             <button 
               className="ml-2 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors"

@@ -5,13 +5,12 @@ import ResultCard from "@/components/ResultCard";
 import ModelFilterPills from "@/components/ModelFilterPills";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import SearchBar from "@/components/SearchBar";
+import { useLocation } from "wouter";
 
-interface SearchResultsProps {
-  query: string;
-  onSearch: (query: string) => void;
-}
-
-export default function SearchResults({ query, onSearch }: SearchResultsProps) {
+export default function SearchResults() {
+  const [location, navigate] = useLocation();
+  const params = new URLSearchParams(location.split("?")[1] || "");
+  const query = params.get("q") || "";
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [results, setResults] = useState<ModelResponse[]>([]);
   const [search, setSearch] = useState<{ id: number; query: string; createdAt: Date } | null>(null);
@@ -55,11 +54,15 @@ export default function SearchResults({ query, onSearch }: SearchResultsProps) {
   // Get unique model IDs for filter pills
   const modelIds = [...new Set(results.map((result) => result.modelId))];
   
+  const handleSearch = (q: string) => {
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
+
   return (
     <div className="search-results-appear mt-4 md:mt-6">
       {/* Mobile search bar (only visible on small screens) */}
       <div className="md:hidden mb-6">
-        <SearchBar initialQuery={query} compact onSearch={onSearch} />
+        <SearchBar initialQuery={query} compact onSearch={handleSearch} />
       </div>
       
       {/* Model Filter Pills */}
@@ -91,7 +94,7 @@ export default function SearchResults({ query, onSearch }: SearchResultsProps) {
             </p>
             <button
               className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-              onClick={() => onSearch(query)}
+              onClick={() => handleSearch(query)}
             >
               Try Again
             </button>
