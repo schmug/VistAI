@@ -624,5 +624,9 @@ const server = http.createServer(async (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`AI Search Engine running at http://localhost:${PORT}/`);
-  console.log(`OpenRouter API key configured: ${!!API_KEY}`);
+  const hasKey = !!API_KEY;
+  console.log(`OpenRouter API key configured: ${hasKey}`);
+  if (!hasKey) {
+    console.warn('OPENROUTER_API_KEY is not set - real model queries will return an error payload');
+  }
 });

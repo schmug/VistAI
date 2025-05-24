@@ -107,11 +107,23 @@ export async function searchAIStream(
 }
 
 // Track when a user clicks on a result
-export async function trackResultClick(resultId: number, userId?: number): Promise<void> {
-  await apiRequest("POST", "/api/track-click", { 
+export interface TrackClickResponse {
+  success: boolean;
+  click: unknown;
+  stats: ModelStats[];
+}
+
+export async function trackResultClick(
+  resultId: number,
+  userId?: number,
+): Promise<ModelStats[]> {
+  const res = await apiRequest("POST", "/api/track-click", {
     resultId,
-    userId
+    userId,
   });
+
+  const data: TrackClickResponse = await res.json();
+  return data.stats;
 }
 
 // Get model performance statistics

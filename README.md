@@ -35,6 +35,16 @@ If you encounter any issues:
 3. If needed, kill existing processes with `pkill node`
 4. Restart the standalone server with `./start.sh`
 
+## Environment Variables
+
+Set the `OPENROUTER_API_KEY` variable with your OpenRouter API key before starting a server:
+
+```bash
+export OPENROUTER_API_KEY=your-key
+./start.sh
+```
+If the variable is missing, the application logs a warning and every model query returns a structured error payload.
+
 ## Project Structure
 
 - `minimal-server.cjs`: A completely standalone implementation that works in Replit
@@ -73,7 +83,8 @@ Future enhancements could include:
 1. Deploy the static frontend using **Cloudflare Pages**.
 
    - Set the build command to `npm run build` and the output directory to `dist/public` so Vite places the production assets where Pages expects them.
-   - **Ensure the `GITHUB_PAGES` environment variable is *not* set.** It is only
+
+- **Ensure the `GITHUB_PAGES` environment variable is *not* set.** It is only
      used for GitHub Pages builds and will change the base path to `/VistAI/`,
      causing Cloudflare Pages to 404.
    - Provide the Worker URL to the frontend by defining `API_BASE_URL` as an environment variable **or** adding a snippet before the bundled script so the static site knows where the Worker lives:

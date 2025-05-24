@@ -1,10 +1,14 @@
-import { 
+import {
   User, InsertUser, users,
   Search, InsertSearch, searches,
   Result, InsertResult, results,
   Click, InsertClick, clicks,
   ModelStat, InsertModelStat, modelStats
 } from "@shared/schema";
+import * as schema from "@shared/schema";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import { eq, desc } from "drizzle-orm";
 
 // Interface for our storage methods
 export interface IStorage {
@@ -222,4 +226,117 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DrizzleStorage implements IStorage {
+  private db;
+
+  constructor() {
+    const url = process.env.DATABASE_URL;
+    if (!url) {
+      throw new Error("DATABASE_URL is not defined");
+    }
+    const client = neon(url);
+    this.db = drizzle(client, { schema });
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    return this.db.query.users.findFirst({ where: eq(users.id, id) }) || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return this.db.query.users.findFirst({ where: eq(users.username, username) }) || undefined;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [created] = await this.db.insert(users).values(user).returning();
+    return created;
+  }
+
+  // Search methods
+  async createSearch(search: InsertSearch): Promise<Search> {
+    const [created] = await this.db.insert(searches).values(search).returning();
+    return created;
+  }
+
+  async getSearchById(id: number): Promise<Search | undefined> {
+    return this.db.query.searches.findFirst({ where: eq(searches.id, id) }) || undefined;
+  }
+
+  async getRecentSearches(limit: number = 10): Promise<Search[]> {
+    return this.db
+      .select()
+      .from(searches)
+      .orderBy(desc(searches.createdAt))
+      .limit(limit);
+  }
+
+  // Result methods
+  async createResult(result: InsertResult): Promise<Result> {
+    const [created] = await this.db.insert(results).values(result).returning();
+    return created;
+  }
+
+  async getResultById(id: number): Promise<Result | undefined> {
+    return this.db.query.results.findFirst({ where: eq(results.id, id) }) || undefined;
+  }
+
+  async getResultsBySearchId(searchId: number): Promise<Result[]> {
+    return this.db.select().from(results).where(eq(results.searchId, searchId));
+  }
+
+  // Click tracking
+  async trackClick(click: InsertClick): Promise<Click> {
+    const [created] = await this.db.insert(clicks).values(click).returning();
+    const result = await this.getResultById(click.resultId);
+    if (result) {
+      await this.incrementModelClicks(result.modelId);
+    }
+    return created;
+  }
+
+  async getClicksByResultId(resultId: number): Promise<Click[]> {
+    return this.db.select().from(clicks).where(eq(clicks.resultId, resultId));
+  }
+
+  // Model analytics
+  async getModelStats(): Promise<ModelStat[]> {
+    return this.db.select().from(modelStats);
+  }
+
+  async incrementModelClicks(modelId: string): Promise<void> {
+    const existing = await this.db.query.modelStats.findFirst({ where: eq(modelStats.modelId, modelId) });
+    if (existing) {
+      await this.db
+        .update(modelStats)
+        .set({ clickCount: existing.clickCount + 1, updatedAt: new Date() })
+        .where(eq(modelStats.modelId, modelId));
+    } else {
+      await this.db.insert(modelStats).values({ modelId, clickCount: 1, searchCount: 0, updatedAt: new Date() });
+    }
+  }
+
+  async incrementModelSearches(modelId: string): Promise<void> {
+    const existing = await this.db.query.modelStats.findFirst({ where: eq(modelStats.modelId, modelId) });
+    if (existing) {
+      await this.db
+        .update(modelStats)
+        .set({ searchCount: existing.searchCount + 1, updatedAt: new Date() })
+        .where(eq(modelStats.modelId, modelId));
+    } else {
+      await this.db.insert(modelStats).values({ modelId, clickCount: 0, searchCount: 1, updatedAt: new Date() });
+    }
+  }
+
+  async getTopModels(limit: number = 5): Promise<ModelStat[]> {
+    return this.db
+      .select()
+      .from(modelStats)
+      .orderBy(desc(modelStats.clickCount))
+      .limit(limit);
+  }
+}
+
+export const storage: IStorage =
+  process.env.NODE_ENV === "production" && process.env.DATABASE_URL
+    ? new DrizzleStorage()
+    : new MemStorage();

@@ -9,9 +9,14 @@ import { z } from "zod";
 async function queryOpenRouter(prompt: string, modelId: string) {
   try {
     const API_KEY = process.env.OPENROUTER_API_KEY;
-    
+
     if (!API_KEY) {
-      throw new Error("OpenRouter API key is not configured");
+      return {
+        content: `OpenRouter API key not configured`,
+        title: `Error from ${modelId}`,
+        responseTime: 0,
+        error: 'OPENROUTER_API_KEY_MISSING'
+      };
     }
     
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -44,13 +49,14 @@ async function queryOpenRouter(prompt: string, modelId: string) {
     return {
       content: `Error getting response from ${modelId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       title: `Error from ${modelId}`,
-      responseTime: 0
+      responseTime: 0,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 }
 
 // Helper to extract a title from response content
-function extractTitle(content: string = ""): string {
+export function extractTitle(content: string = ""): string {
   if (!content) return "AI Response";
   
   // Look for common title patterns in AI responses
@@ -127,29 +133,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const results: any[] = [];
-      for (const modelId of models) {
-        const modelResponse = await queryOpenRouter(query, modelId);
-        const result = await storage.createResult({
-          searchId: search.id,
-          modelId,
-          content: modelResponse.content,
-          title: modelResponse.title,
-          responseTime: modelResponse.responseTime,
-        });
+      const tasks = models.map((modelId) =>
+        (async () => {
+          try {
+            const modelResponse = await queryOpenRouter(query, modelId);
+            const result = await storage.createResult({
+              searchId: search.id,
+              modelId,
+              content: modelResponse.content,
+              title: modelResponse.title,
+              responseTime: modelResponse.responseTime,
+            });
 
-        const finalResult = { ...result, modelName: modelId.split("/").pop() };
-        results.push(finalResult);
+            const finalResult = { ...result, modelName: modelId.split("/").pop() };
+            if (useSSE) {
+              res.write(`event: result\n`);
+              res.write(`data:${JSON.stringify(finalResult)}\n\n`);
+            }
+            return finalResult;
+          } catch (err) {
+            console.error("Model search error:", err);
+            return undefined;
+          }
+        })()
+      );
 
-        if (useSSE) {
-          res.write(`event: result\n`);
-          res.write(`data:${JSON.stringify(finalResult)}\n\n`);
+      const settled = await Promise.allSettled(tasks);
+      for (const s of settled) {
+        if (s.status === "fulfilled" && s.value) {
+          results.push(s.value);
         }
       }
 
       const payload = {
         search,
         results,
-        totalTime: Math.max(...results.map((r) => r.responseTime || 0)),
+        totalTime: results.reduce(
+          (max, r) => Math.max(max, r.responseTime || 0),
+          0
+        ),
       };
 
       if (useSSE) {
