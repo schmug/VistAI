@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -14,12 +15,20 @@ interface ResultCardProps {
 
 export default function ResultCard({ result }: ResultCardProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
   
   // Track click on result
   const handleContentClick = () => {
     trackResultClick(result.id)
+      .then((stats) => {
+        queryClient.setQueryData(["/api/model-stats"], stats);
+        toast({
+          title: "Click recorded",
+          description: "Model statistics updated",
+        });
+      })
       .catch((error) => {
         console.error("Failed to track click:", error);
       });
