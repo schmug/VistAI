@@ -24,9 +24,14 @@ app.use('/static-assets', express.static(publicPath));
 async function queryOpenRouter(prompt, modelId) {
   try {
     const API_KEY = process.env.OPENROUTER_API_KEY;
-    
+
     if (!API_KEY) {
-      throw new Error("OpenRouter API key is not configured");
+      return {
+        content: `OpenRouter API key not configured`,
+        title: `Error from ${modelId}`,
+        responseTime: 0,
+        error: 'OPENROUTER_API_KEY_MISSING'
+      };
     }
     
     console.log(`Querying model ${modelId} for prompt: "${prompt.substring(0, 30)}..."`);
@@ -61,7 +66,8 @@ async function queryOpenRouter(prompt, modelId) {
     return {
       content: `Error getting response from ${modelId}: ${error.message || 'Unknown error'}`,
       title: `Error from ${modelId}`,
-      responseTime: 0
+      responseTime: 0,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 }
@@ -166,4 +172,9 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server time: ${new Date().toISOString()}`);
   console.log(`Serving static files from: ${publicPath}`);
   console.log(`View app at: http://localhost:${PORT}/`);
+  const hasKey = Boolean(process.env.OPENROUTER_API_KEY);
+  console.log(`OpenRouter API key configured: ${hasKey}`);
+  if (!hasKey) {
+    console.warn('OPENROUTER_API_KEY is not set - real model queries will return an error payload');
+  }
 });

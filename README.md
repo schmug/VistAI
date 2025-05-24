@@ -35,6 +35,16 @@ If you encounter any issues:
 3. If needed, kill existing processes with `pkill node`
 4. Restart the standalone server with `./start.sh`
 
+## Environment Variables
+
+Set the `OPENROUTER_API_KEY` variable with your OpenRouter API key before starting a server:
+
+```bash
+export OPENROUTER_API_KEY=your-key
+./start.sh
+```
+If the variable is missing, the application logs a warning and every model query returns a structured error payload.
+
 ## Project Structure
 
 - `minimal-server.cjs`: A completely standalone implementation that works in Replit

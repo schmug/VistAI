@@ -99,5 +99,10 @@ app.get(['/static', '/static-app', '/fallback'], (req, res) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    const hasKey = Boolean(process.env.OPENROUTER_API_KEY);
+    console.log(`OpenRouter API key configured: ${hasKey}`);
+    if (!hasKey) {
+      console.warn('OPENROUTER_API_KEY is not set - real model queries will return an error payload');
+    }
   });
 })();

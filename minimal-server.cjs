@@ -329,7 +329,11 @@ http.createServer(async (req, res) => {
   
 }).listen(PORT, '0.0.0.0', () => {
   console.log(`Minimal server running on port ${PORT}`);
-  console.log(`OpenRouter API Key configured: ${!!API_KEY}`);
+  const hasKey = !!API_KEY;
+  console.log(`OpenRouter API Key configured: ${hasKey}`);
+  if (!hasKey) {
+    console.warn('OPENROUTER_API_KEY is not set - using mock responses');
+  }
   console.log(`Server time: ${new Date().toISOString()}`);
   console.log(`View app at: http://localhost:${PORT}/`);
 });
