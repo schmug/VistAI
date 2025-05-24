@@ -1,3 +1,5 @@
+let warnedMissingKey = false;
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -177,7 +179,18 @@ function createStorage() {
 
 async function queryOpenRouter(prompt, modelId, apiKey) {
   try {
-    if (!apiKey) throw new Error('OpenRouter API key is not configured');
+    if (!apiKey) {
+      if (!warnedMissingKey) {
+        console.warn('OPENROUTER_API_KEY is not set - returning error payload');
+        warnedMissingKey = true;
+      }
+      return {
+        content: `OpenRouter API key not configured`,
+        title: `Error from ${modelId}`,
+        responseTime: 0,
+        error: 'OPENROUTER_API_KEY_MISSING'
+      };
+    }
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -202,7 +215,12 @@ async function queryOpenRouter(prompt, modelId, apiKey) {
       responseTime: Math.round(data.usage?.total_ms || 0),
     };
   } catch (err) {
-    return { content: `Error getting response from ${modelId}: ${err.message}`, title: `Error from ${modelId}`, responseTime: 0 };
+    return {
+      content: `Error getting response from ${modelId}: ${err.message}`,
+      title: `Error from ${modelId}`,
+      responseTime: 0,
+      error: err instanceof Error ? err.message : String(err)
+    };
   }
 }
 

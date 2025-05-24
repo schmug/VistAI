@@ -9,9 +9,14 @@ import { z } from "zod";
 async function queryOpenRouter(prompt: string, modelId: string) {
   try {
     const API_KEY = process.env.OPENROUTER_API_KEY;
-    
+
     if (!API_KEY) {
-      throw new Error("OpenRouter API key is not configured");
+      return {
+        content: `OpenRouter API key not configured`,
+        title: `Error from ${modelId}`,
+        responseTime: 0,
+        error: 'OPENROUTER_API_KEY_MISSING'
+      };
     }
     
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -44,7 +49,8 @@ async function queryOpenRouter(prompt: string, modelId: string) {
     return {
       content: `Error getting response from ${modelId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       title: `Error from ${modelId}`,
-      responseTime: 0
+      responseTime: 0,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 }
