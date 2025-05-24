@@ -83,8 +83,11 @@ Future enhancements could include:
 1. Deploy the static frontend using **Cloudflare Pages**.
 
    - Set the build command to `npm run build` and the output directory to `dist/public` so Vite places the production assets where Pages expects them.
-   - **Do not set** the `GITHUB_PAGES` environment variable when building for Cloudflare Pages. Leaving it enabled changes Vite's `base` path to `/VistAI/`, which will break asset and API URLs.
-   - Provide the Worker URL to the frontend by defining `API_BASE_URL` as an environment variable **or** adding a snippet before the bundled script. The static site uses this value to reach the Worker:
+
+- **Ensure the `GITHUB_PAGES` environment variable is *not* set.** It is only
+     used for GitHub Pages builds and will change the base path to `/VistAI/`,
+     causing Cloudflare Pages to 404.
+   - Provide the Worker URL to the frontend by defining `API_BASE_URL` as an environment variable **or** adding a snippet before the bundled script so the static site knows where the Worker lives:
 
      ```html
      <script>
@@ -92,7 +95,10 @@ Future enhancements could include:
      </script>
      ```
 
-    The application reads `window.API_BASE_URL` at runtime and prefixes all API requests with this value. If `GITHUB_PAGES` is enabled or `API_BASE_URL` points to the wrong location, the frontend will request assets and API routes from incorrect paths and you will see 404 errors.
+  The application reads `window.API_BASE_URL` at runtime and prefixes all API
+  requests with this value. If `API_BASE_URL` or `GITHUB_PAGES` are misconfigured
+  the site will load assets from the wrong path and every page will return a
+  404.
 
 2. Deploy the API using **Cloudflare Workers** with `wrangler`. A sample `wrangler.toml` is included in this repository.
 
