@@ -127,29 +127,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const results: any[] = [];
-      for (const modelId of models) {
-        const modelResponse = await queryOpenRouter(query, modelId);
-        const result = await storage.createResult({
-          searchId: search.id,
-          modelId,
-          content: modelResponse.content,
-          title: modelResponse.title,
-          responseTime: modelResponse.responseTime,
-        });
+      const tasks = models.map((modelId) =>
+        (async () => {
+          try {
+            const modelResponse = await queryOpenRouter(query, modelId);
+            const result = await storage.createResult({
+              searchId: search.id,
+              modelId,
+              content: modelResponse.content,
+              title: modelResponse.title,
+              responseTime: modelResponse.responseTime,
+            });
 
-        const finalResult = { ...result, modelName: modelId.split("/").pop() };
-        results.push(finalResult);
+            const finalResult = { ...result, modelName: modelId.split("/").pop() };
+            if (useSSE) {
+              res.write(`event: result\n`);
+              res.write(`data:${JSON.stringify(finalResult)}\n\n`);
+            }
+            return finalResult;
+          } catch (err) {
+            console.error("Model search error:", err);
+            return undefined;
+          }
+        })()
+      );
 
-        if (useSSE) {
-          res.write(`event: result\n`);
-          res.write(`data:${JSON.stringify(finalResult)}\n\n`);
+      const settled = await Promise.allSettled(tasks);
+      for (const s of settled) {
+        if (s.status === "fulfilled" && s.value) {
+          results.push(s.value);
         }
       }
 
       const payload = {
         search,
         results,
-        totalTime: Math.max(...results.map((r) => r.responseTime || 0)),
+        totalTime: results.reduce(
+          (max, r) => Math.max(max, r.responseTime || 0),
+          0
+        ),
       };
 
       if (useSSE) {
