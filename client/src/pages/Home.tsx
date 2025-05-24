@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { getRandomSuggestions } from "@/lib/utils";
 import SearchBar from "@/components/SearchBar";
+import { Link, useLocation } from "wouter";
 
-interface HomeProps {
-  onSearch: (query: string) => void;
-}
-
-export default function Home({ onSearch }: HomeProps) {
+export default function Home() {
+  const [, navigate] = useLocation();
   const [suggestions] = useState(() => getRandomSuggestions(3));
+
+  const handleSearch = (query: string) => {
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
   
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center">
@@ -21,14 +23,14 @@ export default function Home({ onSearch }: HomeProps) {
       </div>
 
       <div className="w-full max-w-2xl mx-auto">
-        <SearchBar onSearch={onSearch} />
+        <SearchBar onSearch={handleSearch} />
 
         <div className="flex flex-wrap justify-center gap-2 mt-5">
           {suggestions.map((suggestion, index) => (
             <button 
               key={index} 
               className="text-xs bg-card px-3 py-1.5 rounded-full text-muted-foreground cursor-pointer hover:bg-card/80 transition-colors"
-              onClick={() => onSearch(suggestion)}
+              onClick={() => handleSearch(suggestion)}
             >
               Try: "{suggestion}"
             </button>
@@ -37,8 +39,8 @@ export default function Home({ onSearch }: HomeProps) {
 
         <div className="mt-16 text-center">
           <p className="text-muted-foreground text-sm">
-            Powered by <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenRouter</a> • 
-            <button onClick={() => onSearch("dashboard")} className="text-muted-foreground hover:text-foreground ml-1">Dashboard</button> • 
+            Powered by <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenRouter</a> •
+            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground ml-1">Dashboard</Link> •
             <button className="text-muted-foreground hover:text-foreground ml-1">Settings</button>
           </p>
         </div>

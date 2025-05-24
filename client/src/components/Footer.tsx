@@ -1,8 +1,6 @@
-interface FooterProps {
-  onNavigate: (page: string, query?: string) => void;
-}
+import { Link } from "wouter";
 
-export default function Footer({ onNavigate }: FooterProps) {
+export default function Footer() {
   return (
     <footer className="border-t border-border py-6 mt-auto">
       <div className="container mx-auto px-4">
@@ -16,8 +14,8 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
           
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <button onClick={() => onNavigate("home")} className="hover:text-primary">Home</button>
-            <button onClick={() => onNavigate("dashboard")} className="hover:text-primary">Dashboard</button>
+            <Link href="/" className="hover:text-primary">Home</Link>
+            <Link href="/dashboard" className="hover:text-primary">Dashboard</Link>
             <button className="hover:text-primary">API</button>
             <button className="hover:text-primary">Pricing</button>
             <button className="hover:text-primary">Contact</button>
