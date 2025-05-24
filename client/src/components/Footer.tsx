@@ -18,8 +18,8 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <button onClick={() => onNavigate("home")} className="hover:text-primary">Home</button>
             <button onClick={() => onNavigate("dashboard")} className="hover:text-primary">Dashboard</button>
-            <button className="hover:text-primary">API</button>
-            <button className="hover:text-primary">Pricing</button>
+            <span className="text-muted-foreground" title="Coming soon">API (coming soon)</span>
+            <span className="text-muted-foreground" title="Coming soon">Pricing (coming soon)</span>
             <button className="hover:text-primary">Contact</button>
           </div>
         </div>

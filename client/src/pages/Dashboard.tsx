@@ -5,10 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
 import { getModelInfo } from "@/lib/utils";
-import SubscriptionModal from "@/components/SubscriptionModal";
 
 export default function Dashboard() {
-  const [showModal, setShowModal] = useState(false);
   
   // Get model statistics
   const { data: modelStats, isLoading, error } = useQuery({
@@ -184,39 +182,7 @@ export default function Dashboard() {
         </Card>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Subscription</CardTitle>
-          <CardDescription>
-            Support your favorite AI models with a subscription
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                Subscribe to VistAI Pro and support your favorite AI models. We share revenue with the models you use most frequently.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Starting at $9.99/month
-              </p>
-            </div>
-            <button 
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              onClick={() => setShowModal(true)}
-            >
-              Subscribe
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Subscription Modal */}
-      <SubscriptionModal 
-        open={showModal} 
-        onOpenChange={setShowModal} 
-        topModels={modelStats?.sort((a, b) => b.clickCount - a.clickCount).slice(0, 3)}
-      />
+      {/* Subscription feature coming soon */}
     </div>
   );
 }

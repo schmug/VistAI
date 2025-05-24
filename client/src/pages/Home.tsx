@@ -39,7 +39,7 @@ export default function Home({ onSearch }: HomeProps) {
           <p className="text-muted-foreground text-sm">
             Powered by <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenRouter</a> • 
             <button onClick={() => onSearch("dashboard")} className="text-muted-foreground hover:text-foreground ml-1">Dashboard</button> • 
-            <button className="text-muted-foreground hover:text-foreground ml-1">Settings</button>
+            <span className="text-muted-foreground ml-1" title="Coming soon">Settings (coming soon)</span>
           </p>
         </div>
       </div>
