@@ -3,6 +3,11 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+// Import Material Web button variants so the custom elements are defined.
+import "@material/web/button/filled-button.js"
+import "@material/web/button/outlined-button.js"
+import "@material/web/button/text-button.js"
+import "@material/web/button/elevated-button.js"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -33,21 +38,59 @@ const buttonVariants = cva(
   }
 )
 
+export type MaterialVariant =
+  | "filled"
+  | "outlined"
+  | "text"
+  | "elevated"
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /**
+   * Material button variant to render.
+   * Defaults to `filled`.
+   */
+  materialVariant?: MaterialVariant
   asChild?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  (
+    {
+      className,
+      variant,
+      size,
+      materialVariant = "filled",
+      asChild = false,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const Tag = (() => {
+      switch (materialVariant) {
+        case "outlined":
+          return "md-outlined-button"
+        case "text":
+          return "md-text-button"
+        case "elevated":
+          return "md-elevated-button"
+        default:
+          return "md-filled-button"
+      }
+    })()
+
+    const Comp: any = asChild ? Slot : Tag
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
+        ref={ref as any}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     )
   }
 )
