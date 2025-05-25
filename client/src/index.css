@@ -3,25 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: 240 10% 4%;
-  --foreground: 0 0% 98%;
-  --muted: 240 4% 16%;
-  --muted-foreground: 240 5% 65%;
-  --popover: 240 10% 4%;
-  --popover-foreground: 0 0% 98%;
-  --card: 240 10% 12%;
-  --card-foreground: 0 0% 98%;
-  --border: 240 4% 16%;
-  --input: 240 4% 16%;
-  --primary: 267 100% 66%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 339 90% 66%;
-  --secondary-foreground: 0 0% 100%;
-  --accent: 172 83% 51%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --ring: 240 5% 84%;
+  --md-sys-color-primary: 267 100% 66%;
+  --md-sys-color-on-primary: 0 0% 100%;
+  --md-sys-color-secondary: 339 90% 66%;
+  --md-sys-color-on-secondary: 0 0% 100%;
+  --md-sys-color-tertiary: 172 83% 51%;
+  --md-sys-color-on-tertiary: 0 0% 100%;
+  --md-sys-color-error: 0 84% 60%;
+  --md-sys-color-on-error: 0 0% 98%;
+  --md-sys-color-background: 240 10% 4%;
+  --md-sys-color-on-background: 0 0% 98%;
+  --md-sys-color-surface: 240 10% 4%;
+  --md-sys-color-on-surface: 0 0% 98%;
+  --md-sys-color-surface-variant: 240 4% 16%;
+  --md-sys-color-on-surface-variant: 240 5% 65%;
+  --md-sys-color-outline: 240 4% 16%;
   --radius: 0.5rem;
   
   /* Model colors */
@@ -39,25 +35,21 @@
 }
 
 .dark {
-  --background: 240 10% 4%;
-  --foreground: 0 0% 98%;
-  --muted: 240 4% 16%;
-  --muted-foreground: 240 5% 65%;
-  --popover: 240 10% 4%;
-  --popover-foreground: 0 0% 98%;
-  --card: 240 10% 12%;
-  --card-foreground: 0 0% 98%;
-  --border: 240 4% 16%;
-  --input: 240 4% 16%;
-  --primary: 267 100% 66%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 339 90% 66%;
-  --secondary-foreground: 0 0% 100%;
-  --accent: 172 83% 51%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --ring: 240 5% 84%;
+  --md-sys-color-primary: 267 100% 66%;
+  --md-sys-color-on-primary: 0 0% 100%;
+  --md-sys-color-secondary: 339 90% 66%;
+  --md-sys-color-on-secondary: 0 0% 100%;
+  --md-sys-color-tertiary: 172 83% 51%;
+  --md-sys-color-on-tertiary: 0 0% 100%;
+  --md-sys-color-error: 0 84% 60%;
+  --md-sys-color-on-error: 0 0% 98%;
+  --md-sys-color-background: 240 10% 4%;
+  --md-sys-color-on-background: 0 0% 98%;
+  --md-sys-color-surface: 240 10% 4%;
+  --md-sys-color-on-surface: 0 0% 98%;
+  --md-sys-color-surface-variant: 240 4% 16%;
+  --md-sys-color-on-surface-variant: 240 5% 65%;
+  --md-sys-color-outline: 240 4% 16%;
 }
 
 @layer base {
