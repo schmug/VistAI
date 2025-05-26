@@ -44,6 +44,7 @@ export default {
           return jsonResponse({ message: 'Invalid search query' }, headers, 400);
         }
 
+        const accept = request.headers.get('Accept') || '';
         const search = await createSearch(env.DB, { query });
         const models = [
           'openai/gpt-4',
@@ -56,14 +57,14 @@ export default {
           await incrementModelSearches(env.DB, m);
         }
 
-        const modelResponses = await Promise.all(
-          models.map(async (modelId) => {
-            const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
-            return { modelId, modelResponse };
-          })
-        );
+        if (accept.includes('text/event-stream')) {
+          return streamSearchResponse({ query, search, models, env, headers });
+        }
 
-        const results = modelResponses.map(({ modelId, modelResponse }) => {
+        const results = [];
+        for (const modelId of models) {
+          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+
           const result = env.storage.createResult({
             searchId: search.id,
             modelId,
@@ -136,6 +137,55 @@ export default {
       'Vary': 'Origin',
     };
   }
+
+function streamSearchResponse({ query, search, models, env, headers }) {
+  const sseHeaders = {
+    ...headers,
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  };
+  const encoder = new TextEncoder();
+  const results = [];
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event, data) => {
+        controller.enqueue(encoder.encode(`event: ${event}\n`));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+      };
+
+      try {
+        send('search', search);
+        for (const modelId of models) {
+          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+          const result = env.storage.createResult({
+            searchId: search.id,
+            modelId,
+            content: modelResponse.content,
+            title: modelResponse.title,
+            responseTime: modelResponse.responseTime,
+          });
+          const withName = { ...result, modelName: modelId.split('/').pop() };
+          results.push(withName);
+          send('result', withName);
+        }
+
+        send('done', {
+          search,
+          results,
+          totalTime: Math.max(...results.map(r => r.responseTime || 0)),
+        });
+      } catch (err) {
+        send('error', { message: err instanceof Error ? err.message : String(err) });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, { headers: sseHeaders });
+}
 
 function createStorage() {
   let searchId = 1;
