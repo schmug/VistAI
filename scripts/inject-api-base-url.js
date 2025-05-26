@@ -16,7 +16,7 @@ if (!fs.existsSync(indexPath)) {
 }
 
 const html = fs.readFileSync(indexPath, 'utf8');
-const snippet = `<script>window.API_BASE_URL = "${apiBaseUrl}";</script>`;
+const snippet = '<script>window.API_BASE_URL = "<%= process.env.API_BASE_URL %>";</script>';
 
 let output;
 if (html.includes('</head>')) {
@@ -26,4 +26,4 @@ if (html.includes('</head>')) {
 }
 
 fs.writeFileSync(indexPath, output);
-console.log('Injected API_BASE_URL snippet into index.html');
+console.log('Appended API_BASE_URL placeholder snippet into index.html');

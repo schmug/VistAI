@@ -16,6 +16,12 @@ Build the static frontend with:
 npm run build
 ```
 
+If `API_BASE_URL` is set when running the build command a post-build script will append
+```
+<script>window.API_BASE_URL = "<%= process.env.API_BASE_URL %>";</script>
+```
+to `dist/public/index.html`.
+
 Open `dist/public/index.html` in your browser to test locally.
 
 ## Features
@@ -67,11 +73,11 @@ Future enhancements could include:
 
    - Set the build command to `npm run build` and the output directory to `dist/public`.
    - **Do not set** the `GITHUB_PAGES` environment variable when building for Cloudflare Pages. Leaving it enabled changes Vite's `base` path to `/VistAI/`, which will break asset and API URLs.
-   - Provide the Worker URL via the `API_BASE_URL` environment variable. When this variable is set the build script automatically injects the following snippet into `dist/public/index.html`:
+  - Provide the Worker URL via the `API_BASE_URL` environment variable. When this variable is set the build script automatically appends the following snippet into `dist/public/index.html`:
 
-     ```html
-     <script>window.API_BASE_URL = "https://vistai-worker.yourdomain.workers.dev";</script>
-     ```
+    ```html
+    <script>window.API_BASE_URL = "<%= process.env.API_BASE_URL %>";</script>
+    ```
 
      The application reads `window.API_BASE_URL` at runtime and prefixes all API requests with this value. If `GITHUB_PAGES` is enabled or `API_BASE_URL` points to the wrong location, the frontend will request assets and API routes from incorrect paths and you will see 404 errors.
 
