@@ -34,6 +34,9 @@ Open `dist/public/index.html` in your browser to test locally.
 ## Environment Variables
 
 Set `OPENROUTER_API_KEY` as a secret when deploying the Cloudflare worker.
+Use `ACCESS_CONTROL_ALLOW_ORIGIN` to control which origins may access the Worker
+APIs. Provide `*` to allow any origin or a comma separated list of allowed
+origins.
 
 ## Project Structure
 
