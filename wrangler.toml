@@ -8,3 +8,9 @@ compatibility_date = "2025-05-26"
 
 [observability]
 enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vistai"
+# Set your database ID in the Cloudflare dashboard
+database_id = "xxxxxx"
