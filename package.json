@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vite build && node scripts/inject-api-base-url.js",
     "check": "tsc",
-    "test": "npm run check"
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
