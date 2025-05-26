@@ -11,7 +11,10 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-  options?: { headers?: Record<string, string> },
+  options?: {
+    headers?: Record<string, string>
+    skipErrorHandling?: boolean
+  },
 ): Promise<Response> {
   const base = typeof window !== "undefined" && (window as any).API_BASE_URL;
   const finalUrl = base && url.startsWith("/")
@@ -31,7 +34,9 @@ export async function apiRequest(
     credentials: useCredentials ? "include" : "omit",
   });
 
-  await throwIfResNotOk(res);
+  if (!options?.skipErrorHandling) {
+    await throwIfResNotOk(res);
+  }
   return res;
 }
 
