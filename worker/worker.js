@@ -244,3 +244,5 @@ function extractTitle(content = '') {
   const words = content.split(/\s+/).slice(0, 5).join(' ');
   return words + (words.length < content.length ? '...' : '');
 }
+
+export { createStorage, extractTitle };
