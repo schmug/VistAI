@@ -133,6 +133,7 @@ function createStorage() {
   let searchId = 1;
   let resultId = 1;
   let clickId = 1;
+  let modelStatId = 1;
   const searches = new Map();
   const results = new Map();
   const modelStats = new Map();
@@ -144,7 +145,7 @@ function createStorage() {
     'mistralai/mistral-7b-instruct',
   ];
   defaultModels.forEach((m) => {
-    modelStats.set(m, { id: searchId++, modelId: m, clickCount: 0, searchCount: 0, updatedAt: new Date() });
+    modelStats.set(m, { id: modelStatId++, modelId: m, clickCount: 0, searchCount: 0, updatedAt: new Date() });
   });
 
   return {
