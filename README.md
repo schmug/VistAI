@@ -67,15 +67,13 @@ Future enhancements could include:
 
    - Set the build command to `npm run build` and the output directory to `dist/public`.
    - **Do not set** the `GITHUB_PAGES` environment variable when building for Cloudflare Pages. Leaving it enabled changes Vite's `base` path to `/VistAI/`, which will break asset and API URLs.
-   - When deploying Pages, provide the Worker URL by setting `API_BASE_URL` as an environment variable **or** adding a snippet before the bundled script:
+   - Provide the Worker URL via the `API_BASE_URL` environment variable. When this variable is set the build script automatically injects the following snippet into `dist/public/index.html`:
 
      ```html
-     <script>
-       window.API_BASE_URL = "https://vistai-worker.yourdomain.workers.dev";
-     </script>
+     <script>window.API_BASE_URL = "https://vistai-worker.yourdomain.workers.dev";</script>
      ```
 
-    The application reads `window.API_BASE_URL` at runtime and prefixes all API requests with this value. If `GITHUB_PAGES` is enabled or `API_BASE_URL` points to the wrong location, the frontend will request assets and API routes from incorrect paths and you will see 404 errors.
+     The application reads `window.API_BASE_URL` at runtime and prefixes all API requests with this value. If `GITHUB_PAGES` is enabled or `API_BASE_URL` points to the wrong location, the frontend will request assets and API routes from incorrect paths and you will see 404 errors.
 
 2. Deploy the API using **Cloudflare Workers** with `wrangler`. The Worker's configuration is defined in `wrangler.toml`.
 
