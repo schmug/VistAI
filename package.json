@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "vite build",
-    "check": "tsc"
+    "check": "tsc",
+    "test": "npm run check"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
