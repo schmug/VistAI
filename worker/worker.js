@@ -16,6 +16,11 @@ export default {
       return new Response(null, { headers });
     }
 
+    // Root endpoint hint
+    if (pathname === '/' && request.method === 'GET') {
+      return jsonResponse({ message: 'Use /api/search or /api/status' }, headers);
+    }
+
     // In-memory storage persisted across requests while worker is warm
     env.storage = env.storage || createStorage();
 
