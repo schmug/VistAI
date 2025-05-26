@@ -18,6 +18,9 @@ export async function apiRequest(
     ? base.replace(/\/$/, "") + url
     : url;
 
+  const useCredentials =
+    !base || finalUrl.startsWith(window.location.origin);
+
   const res = await fetch(finalUrl, {
     method,
     headers: {
@@ -25,7 +28,7 @@ export async function apiRequest(
       ...(options?.headers || {}),
     },
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: useCredentials ? "include" : "omit",
   });
 
   await throwIfResNotOk(res);
@@ -38,8 +41,18 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
+    const base =
+      typeof window !== "undefined" && (window as any).API_BASE_URL;
+    const url = queryKey[0] as string;
+    const finalUrl = base && url.startsWith("/")
+      ? base.replace(/\/$/, "") + url
+      : url;
+
+    const useCredentials =
+      !base || finalUrl.startsWith(window.location.origin);
+
+    const res = await fetch(finalUrl, {
+      credentials: useCredentials ? "include" : "omit",
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
