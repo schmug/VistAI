@@ -38,6 +38,18 @@ Use `ACCESS_CONTROL_ALLOW_ORIGIN` to control which origins may access the Worker
 APIs. Provide `*` to allow any origin or a comma separated list of allowed
 origins.
 
+## D1 Database
+
+Search analytics are persisted in a Cloudflare D1 database. The worker expects a binding named `DB` which is configured in `wrangler.toml`. Replace the sample `database_id` with the ID of your database from the Cloudflare dashboard and apply the migrations:
+
+```bash
+# create the database if you haven't already
+wrangler d1 create vistai
+wrangler d1 migrations apply vistai
+```
+
+The schema for the initial migration lives in `worker/migrations/0001_init.sql`.
+
 ## Project Structure
 
 - `client/`: React frontend components and pages

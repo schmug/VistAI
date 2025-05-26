@@ -1,3 +1,13 @@
+import {
+  createSearch,
+  createResult,
+  trackClick,
+  incrementModelSearches,
+  getModelStats,
+  getModelStatsWithPercent,
+  getTopModelsWithPercent,
+} from './db.js';
+
 let warnedMissingKey = false;
 
 export default {
@@ -17,8 +27,6 @@ export default {
       return jsonResponse({ message: 'Use /api/search or /api/status' }, headers);
     }
 
-    // In-memory storage persisted across requests while worker is warm
-    env.storage = env.storage || createStorage();
 
     try {
       if (pathname === '/api/status' && request.method === 'GET') {
@@ -36,7 +44,7 @@ export default {
           return jsonResponse({ message: 'Invalid search query' }, headers, 400);
         }
 
-        const search = env.storage.createSearch({ query });
+        const search = await createSearch(env.DB, { query });
         const models = [
           'openai/gpt-4',
           'anthropic/claude-2',
@@ -45,7 +53,7 @@ export default {
         ];
 
         for (const m of models) {
-          env.storage.incrementModelSearches(m);
+          await incrementModelSearches(env.DB, m);
         }
 
         const modelResponses = await Promise.all(
@@ -79,19 +87,19 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
-        const click = env.storage.trackClick({ resultId });
-        const stats = env.storage.getModelStats();
+        const click = await trackClick(env.DB, { resultId });
+        const stats = await getModelStats(env.DB);
         return jsonResponse({ success: true, click, stats }, headers);
       }
 
       if (pathname === '/api/model-stats' && request.method === 'GET') {
-        const stats = env.storage.getModelStatsWithPercent();
+        const stats = await getModelStatsWithPercent(env.DB);
         return jsonResponse(stats, headers);
       }
 
       if (pathname === '/api/top-models' && request.method === 'GET') {
         const limit = parseInt(searchParams.get('limit') || '5', 10);
-        const stats = env.storage.getTopModelsWithPercent(limit);
+        const stats = await getTopModelsWithPercent(env.DB, limit);
         return jsonResponse(stats, headers);
       }
 
