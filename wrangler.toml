@@ -4,7 +4,7 @@ compatibility_date = "2025-05-26"
 
 [vars]
 # OPENROUTER_API_KEY should be set in the Cloudflare dashboard or via wrangler
-# API_BASE_URL should be set in Cloudflare dashboard or via wranlger
+# API_BASE_URL should be set in Cloudflare dashboard or via wrangler
 
 [observability]
 enabled = true
