@@ -52,9 +52,14 @@ export default {
           env.storage.incrementModelSearches(m);
         }
 
-        const results = [];
-        for (const modelId of models) {
-          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+        const modelResponses = await Promise.all(
+          models.map(async (modelId) => {
+            const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+            return { modelId, modelResponse };
+          })
+        );
+
+        const results = modelResponses.map(({ modelId, modelResponse }) => {
           const result = env.storage.createResult({
             searchId: search.id,
             modelId,
@@ -62,8 +67,8 @@ export default {
             title: modelResponse.title,
             responseTime: modelResponse.responseTime,
           });
-          results.push({ ...result, modelName: modelId.split('/').pop() });
-        }
+          return { ...result, modelName: modelId.split('/').pop() };
+        });
 
         return jsonResponse({
           search,
