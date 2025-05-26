@@ -13,7 +13,12 @@ export async function apiRequest(
   data?: unknown | undefined,
   options?: { headers?: Record<string, string> },
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const base = typeof window !== "undefined" && (window as any).API_BASE_URL;
+  const finalUrl = base && url.startsWith("/")
+    ? base.replace(/\/$/, "") + url
+    : url;
+
+  const res = await fetch(finalUrl, {
     method,
     headers: {
       ...(data ? { "Content-Type": "application/json" } : {}),
