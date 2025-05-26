@@ -11,7 +11,10 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-  options?: { headers?: Record<string, string> },
+  options?: {
+    headers?: Record<string, string>
+    skipErrorHandling?: boolean
+  },
 ): Promise<Response> {
   const base = typeof window !== "undefined" && (window as any).API_BASE_URL;
   const finalUrl = base && url.startsWith("/")
@@ -28,7 +31,9 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
+  if (!options?.skipErrorHandling) {
+    await throwIfResNotOk(res);
+  }
   return res;
 }
 
@@ -38,9 +43,12 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    const res = await apiRequest(
+      "GET",
+      queryKey[0] as string,
+      undefined,
+      { skipErrorHandling: true },
+    );
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;
