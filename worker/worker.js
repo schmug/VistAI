@@ -5,12 +5,8 @@ export default {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
 
-    // Basic CORS support
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
+    // Basic CORS support with configurable origins
+    const headers = createCorsHeaders(request, env);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers });
@@ -99,14 +95,34 @@ export default {
       return jsonResponse({ message: 'Internal Error' }, headers, 500);
     }
   }
-};
+  };
 
-function jsonResponse(data, headers, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...headers },
-  });
-}
+  function jsonResponse(data, headers, status = 200) {
+    return new Response(JSON.stringify(data), {
+      status,
+      headers: { 'Content-Type': 'application/json', ...headers },
+    });
+  }
+
+  function createCorsHeaders(request, env) {
+    const cfg = env.ACCESS_CONTROL_ALLOW_ORIGIN || '*';
+    const allowed = cfg.split(',').map((o) => o.trim()).filter(Boolean);
+    const origin = request.headers.get('Origin') || '';
+    let allow = '*';
+    if (!allowed.includes('*')) {
+      if (origin && allowed.includes(origin)) {
+        allow = origin;
+      } else {
+        allow = allowed[0] || 'null';
+      }
+    }
+    return {
+      'Access-Control-Allow-Origin': allow,
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Vary': 'Origin',
+    };
+  }
 
 function createStorage() {
   let searchId = 1;
