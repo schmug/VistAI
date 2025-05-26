@@ -1,0 +1,34 @@
+name: Deploy Cloudflare Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: vistAI
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      - name: Publish Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: vistai-worker
+          directory: ./dist/public
