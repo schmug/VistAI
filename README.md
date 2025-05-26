@@ -88,3 +88,7 @@ Future enhancements could include:
 4. The repository includes a GitHub Actions workflow that automatically runs `wrangler deploy` whenever changes to the Worker are pushed to the `main` branch. Configure `CF_API_TOKEN` and `CF_ACCOUNT_ID` secrets in your repository settings to enable this automation.
 
 Once both are deployed the site will automatically call the Worker endpoints via the configured base URL.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
