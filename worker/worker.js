@@ -1,3 +1,13 @@
+import {
+  createSearch,
+  createResult,
+  trackClick,
+  incrementModelSearches,
+  getModelStats,
+  getModelStatsWithPercent,
+  getTopModelsWithPercent,
+} from './db.js';
+
 let warnedMissingKey = false;
 
 export default {
@@ -5,12 +15,8 @@ export default {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
 
-    // Basic CORS support
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
+    // Basic CORS support with configurable origins
+    const headers = createCorsHeaders(request, env);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers });
@@ -21,8 +27,6 @@ export default {
       return jsonResponse({ message: 'Use /api/search or /api/status' }, headers);
     }
 
-    // In-memory storage persisted across requests while worker is warm
-    env.storage = env.storage || createStorage();
 
     try {
       if (pathname === '/api/status' && request.method === 'GET') {
@@ -41,8 +45,7 @@ export default {
         }
 
         const accept = request.headers.get('Accept') || '';
-
-        const search = env.storage.createSearch({ query });
+        const search = await createSearch(env.DB, { query });
         const models = [
           'openai/gpt-4',
           'anthropic/claude-2',
@@ -51,7 +54,7 @@ export default {
         ];
 
         for (const m of models) {
-          env.storage.incrementModelSearches(m);
+          await incrementModelSearches(env.DB, m);
         }
 
         if (accept.includes('text/event-stream')) {
@@ -61,6 +64,7 @@ export default {
         const results = [];
         for (const modelId of models) {
           const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+
           const result = env.storage.createResult({
             searchId: search.id,
             modelId,
@@ -68,8 +72,8 @@ export default {
             title: modelResponse.title,
             responseTime: modelResponse.responseTime,
           });
-          results.push({ ...result, modelName: modelId.split('/').pop() });
-        }
+          return { ...result, modelName: modelId.split('/').pop() };
+        });
 
         return jsonResponse({
           search,
@@ -84,19 +88,19 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
-        const click = env.storage.trackClick({ resultId });
-        const stats = env.storage.getModelStats();
+        const click = await trackClick(env.DB, { resultId });
+        const stats = await getModelStats(env.DB);
         return jsonResponse({ success: true, click, stats }, headers);
       }
 
       if (pathname === '/api/model-stats' && request.method === 'GET') {
-        const stats = env.storage.getModelStatsWithPercent();
+        const stats = await getModelStatsWithPercent(env.DB);
         return jsonResponse(stats, headers);
       }
 
       if (pathname === '/api/top-models' && request.method === 'GET') {
         const limit = parseInt(searchParams.get('limit') || '5', 10);
-        const stats = env.storage.getTopModelsWithPercent(limit);
+        const stats = await getTopModelsWithPercent(env.DB, limit);
         return jsonResponse(stats, headers);
       }
 
@@ -105,14 +109,34 @@ export default {
       return jsonResponse({ message: 'Internal Error' }, headers, 500);
     }
   }
-};
+  };
 
-function jsonResponse(data, headers, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...headers },
-  });
-}
+  function jsonResponse(data, headers, status = 200) {
+    return new Response(JSON.stringify(data), {
+      status,
+      headers: { 'Content-Type': 'application/json', ...headers },
+    });
+  }
+
+  function createCorsHeaders(request, env) {
+    const cfg = env.ACCESS_CONTROL_ALLOW_ORIGIN || '*';
+    const allowed = cfg.split(',').map((o) => o.trim()).filter(Boolean);
+    const origin = request.headers.get('Origin') || '';
+    let allow = '*';
+    if (!allowed.includes('*')) {
+      if (origin && allowed.includes(origin)) {
+        allow = origin;
+      } else {
+        allow = allowed[0] || 'null';
+      }
+    }
+    return {
+      'Access-Control-Allow-Origin': allow,
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Vary': 'Origin',
+    };
+  }
 
 function streamSearchResponse({ query, search, models, env, headers }) {
   const sseHeaders = {
@@ -167,6 +191,7 @@ function createStorage() {
   let searchId = 1;
   let resultId = 1;
   let clickId = 1;
+  let modelStatId = 1;
   const searches = new Map();
   const results = new Map();
   const modelStats = new Map();
@@ -178,7 +203,7 @@ function createStorage() {
     'mistralai/mistral-7b-instruct',
   ];
   defaultModels.forEach((m) => {
-    modelStats.set(m, { id: searchId++, modelId: m, clickCount: 0, searchCount: 0, updatedAt: new Date() });
+    modelStats.set(m, { id: modelStatId++, modelId: m, clickCount: 0, searchCount: 0, updatedAt: new Date() });
   });
 
   return {
@@ -294,3 +319,5 @@ function extractTitle(content = '') {
   const words = content.split(/\s+/).slice(0, 5).join(' ');
   return words + (words.length < content.length ? '...' : '');
 }
+
+export { createStorage, extractTitle };

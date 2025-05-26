@@ -1,10 +1,17 @@
-name = "vistai-api"
+name = "vistai-worker"
 main = "worker/worker.js"
 compatibility_date = "2025-05-26"
 
 [vars]
 # OPENROUTER_API_KEY should be set in the Cloudflare dashboard or via wrangler
 # API_BASE_URL should be set in Cloudflare dashboard or via wrangler
+# ACCESS_CONTROL_ALLOW_ORIGIN controls allowed CORS origins
 
 [observability]
 enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vistai"
+# Replace with your D1 database ID
+database_id = "88697d9a-39f5-4698-9df0-5b8ff40ffb7a"
