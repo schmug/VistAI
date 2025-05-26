@@ -61,10 +61,18 @@ export default {
           return streamSearchResponse({ query, search, models, env, headers });
         }
 
-        const results = [];
-        for (const modelId of models) {
-          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+        const modelResponses = await Promise.all(
+          models.map(async (modelId) => {
+            const modelResponse = await queryOpenRouter(
+              query,
+              modelId,
+              env.OPENROUTER_API_KEY
+            );
+            return { modelId, modelResponse };
+          })
+        );
 
+        const results = modelResponses.map(({ modelId, modelResponse }) => {
           const result = env.storage.createResult({
             searchId: search.id,
             modelId,
@@ -157,8 +165,19 @@ function streamSearchResponse({ query, search, models, env, headers }) {
 
       try {
         send('search', search);
-        for (const modelId of models) {
-          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+
+        const modelResponses = await Promise.all(
+          models.map(async (modelId) => {
+            const modelResponse = await queryOpenRouter(
+              query,
+              modelId,
+              env.OPENROUTER_API_KEY
+            );
+            return { modelId, modelResponse };
+          })
+        );
+
+        for (const { modelId, modelResponse } of modelResponses) {
           const result = env.storage.createResult({
             searchId: search.id,
             modelId,
