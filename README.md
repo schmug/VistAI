@@ -35,6 +35,18 @@ Open `dist/public/index.html` in your browser to test locally.
 
 Set `OPENROUTER_API_KEY` as a secret when deploying the Cloudflare worker.
 
+## D1 Database
+
+Search analytics are persisted in a Cloudflare D1 database. The worker expects a binding named `DB` which is configured in `wrangler.toml`. Replace the sample `database_id` with the ID of your database from the Cloudflare dashboard and apply the migrations:
+
+```bash
+# create the database if you haven't already
+wrangler d1 create vistai
+wrangler d1 migrations apply vistai
+```
+
+The schema for the initial migration lives in `worker/migrations/0001_init.sql`.
+
 ## Project Structure
 
 - `client/`: React frontend components and pages

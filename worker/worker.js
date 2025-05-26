@@ -1,3 +1,13 @@
+import {
+  createSearch,
+  createResult,
+  trackClick,
+  incrementModelSearches,
+  getModelStats,
+  getModelStatsWithPercent,
+  getTopModelsWithPercent,
+} from './db.js';
+
 let warnedMissingKey = false;
 
 export default {
@@ -21,8 +31,6 @@ export default {
       return jsonResponse({ message: 'Use /api/search or /api/status' }, headers);
     }
 
-    // In-memory storage persisted across requests while worker is warm
-    env.storage = env.storage || createStorage();
 
     try {
       if (pathname === '/api/status' && request.method === 'GET') {
@@ -40,7 +48,7 @@ export default {
           return jsonResponse({ message: 'Invalid search query' }, headers, 400);
         }
 
-        const search = env.storage.createSearch({ query });
+        const search = await createSearch(env.DB, { query });
         const models = [
           'openai/gpt-4',
           'anthropic/claude-2',
@@ -49,13 +57,13 @@ export default {
         ];
 
         for (const m of models) {
-          env.storage.incrementModelSearches(m);
+          await incrementModelSearches(env.DB, m);
         }
 
         const results = [];
         for (const modelId of models) {
           const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
-          const result = env.storage.createResult({
+          const result = await createResult(env.DB, {
             searchId: search.id,
             modelId,
             content: modelResponse.content,
@@ -78,19 +86,19 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
-        const click = env.storage.trackClick({ resultId });
-        const stats = env.storage.getModelStats();
+        const click = await trackClick(env.DB, { resultId });
+        const stats = await getModelStats(env.DB);
         return jsonResponse({ success: true, click, stats }, headers);
       }
 
       if (pathname === '/api/model-stats' && request.method === 'GET') {
-        const stats = env.storage.getModelStatsWithPercent();
+        const stats = await getModelStatsWithPercent(env.DB);
         return jsonResponse(stats, headers);
       }
 
       if (pathname === '/api/top-models' && request.method === 'GET') {
         const limit = parseInt(searchParams.get('limit') || '5', 10);
-        const stats = env.storage.getTopModelsWithPercent(limit);
+        const stats = await getTopModelsWithPercent(env.DB, limit);
         return jsonResponse(stats, headers);
       }
 
@@ -106,80 +114,6 @@ function jsonResponse(data, headers, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json', ...headers },
   });
-}
-
-function createStorage() {
-  let searchId = 1;
-  let resultId = 1;
-  let clickId = 1;
-  const searches = new Map();
-  const results = new Map();
-  const modelStats = new Map();
-
-  const defaultModels = [
-    'openai/gpt-4',
-    'anthropic/claude-2',
-    'meta-llama/llama-2-70b-chat',
-    'mistralai/mistral-7b-instruct',
-  ];
-  defaultModels.forEach((m) => {
-    modelStats.set(m, { id: searchId++, modelId: m, clickCount: 0, searchCount: 0, updatedAt: new Date() });
-  });
-
-  return {
-    createSearch({ query }) {
-      const s = { id: searchId++, query, createdAt: new Date() };
-      searches.set(s.id, s);
-      return s;
-    },
-    createResult({ searchId, modelId, content, title, responseTime }) {
-      const r = { id: resultId++, searchId, modelId, content, title, responseTime, createdAt: new Date() };
-      results.set(r.id, r);
-      return r;
-    },
-    trackClick({ resultId }) {
-      const r = results.get(resultId);
-      if (r) {
-        const stat = modelStats.get(r.modelId);
-        if (stat) {
-          stat.clickCount += 1;
-          stat.updatedAt = new Date();
-        }
-      }
-      const c = { id: clickId++, resultId, createdAt: new Date() };
-      return c;
-    },
-    incrementModelSearches(modelId) {
-      const stat = modelStats.get(modelId);
-      if (stat) {
-        stat.searchCount += 1;
-        stat.updatedAt = new Date();
-      }
-    },
-    getModelStats() {
-      return Array.from(modelStats.values());
-    },
-    getModelStatsWithPercent() {
-      const stats = this.getModelStats();
-      const totalClicks = stats.reduce((sum, s) => sum + s.clickCount, 0);
-      return stats.map((s) => ({
-        ...s,
-        percentage: totalClicks > 0 ? Math.round((s.clickCount / totalClicks) * 100) : 0,
-        displayName: s.modelId.split('/').pop(),
-      }));
-    },
-    getTopModelsWithPercent(limit) {
-      const stats = this.getModelStats()
-        .sort((a, b) => b.clickCount - a.clickCount)
-        .slice(0, limit);
-      const totalClicks = stats.reduce((sum, s) => sum + s.clickCount, 0);
-      return stats.map((s) => ({
-        ...s,
-        percentage: totalClicks > 0 ? Math.round((s.clickCount / totalClicks) * 100) : 0,
-        displayName: s.modelId.split('/').pop(),
-      }));
-    },
-  };
 }
 
 async function queryOpenRouter(prompt, modelId, apiKey) {
