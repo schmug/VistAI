@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node scripts/inject-api-base-url.js",
     "check": "tsc",
     "test": "npm run check"
   },
