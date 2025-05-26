@@ -46,11 +46,9 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const url = queryKey[0] as string;
-
     const res = await apiRequest(
       "GET",
-      url,
+      queryKey[0] as string,
       undefined,
       { skipErrorHandling: true },
     );
