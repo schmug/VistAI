@@ -21,8 +21,8 @@ export async function apiRequest(
     ? base.replace(/\/$/, "") + url
     : url;
 
-  const useCredentials =
-    !base || finalUrl.startsWith(window.location.origin);
+  const finalOrigin = new URL(finalUrl, window.location.href).origin;
+  const useCredentials = finalOrigin === window.location.origin;
 
   const res = await fetch(finalUrl, {
     method,
