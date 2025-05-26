@@ -2,22 +2,21 @@
 
 VistAI is a platform that aggregates responses from various language models via OpenRouter, providing a unified and intuitive search experience.
 
-## ⚠️ IMPORTANT: How to Run the Application
+## How to Run
 
-Due to compatibility issues with Replit's environment, please use our **minimal standalone server**:
-
-```bash
-./start.sh
-```
-This script launches the minimal server and is the canonical way to run AISearch.
-Then open the web preview URL or visit http://localhost:5000/ in your browser.
-
-For development of the full Express/Vite server you may still run:
+Run the Cloudflare worker locally with:
 
 ```bash
-npm run dev
+npx wrangler dev
 ```
-However, this mode is not officially supported in the Replit environment.
+
+Build the static frontend with:
+
+```bash
+npm run build
+```
+
+Open `dist/public/index.html` in your browser to test locally.
 
 ## Features
 
@@ -26,31 +25,15 @@ However, this mode is not officially supported in the Replit environment.
 - **Responsive UI**: Dark-mode Google-inspired interface that works on all devices
 - **Performance Tracking**: See which models respond fastest and are chosen most often
 
-## Troubleshooting
-
-If you encounter any issues:
-
-1. Make sure you have the `OPENROUTER_API_KEY` environment variable set
-2. Check if the server is running with `ps aux | grep node`
-3. If needed, kill existing processes with `pkill node`
-4. Restart the standalone server with `./start.sh`
-
 ## Environment Variables
 
-Set the `OPENROUTER_API_KEY` variable with your OpenRouter API key before starting a server:
-
-```bash
-export OPENROUTER_API_KEY=your-key
-./start.sh
-```
-If the variable is missing, the application logs a warning and every model query returns a structured error payload.
+Set `OPENROUTER_API_KEY` as a secret when deploying the Cloudflare worker.
 
 ## Project Structure
 
-- `minimal-server.cjs`: A completely standalone implementation that works in Replit
-- `server/`: Backend Express API and server logic (standard implementation)
-- `client/`: React frontend components and pages (standard implementation)
-- `shared/`: Shared types and schemas between frontend and backend
+- `client/`: React frontend components and pages
+- `shared/`: Shared types and schemas
+- `worker/`: Cloudflare Worker implementation
 
 ## OpenRouter Integration
 
