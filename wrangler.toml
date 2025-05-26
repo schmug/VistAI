@@ -14,4 +14,4 @@ enabled = true
 binding = "DB"
 database_name = "vistai"
 # Replace with your D1 database ID
-database_id = "11111111-1111-1111-1111-111111111111"
+database_id = "88697d9a-39f5-4698-9df0-5b8ff40ffb7a"
