@@ -12,6 +12,12 @@ const openapiSpec = `openapi: 3.0.0
 info:
   title: VistAI API
   version: '1.0.0'
+components:
+  securitySchemes:
+    openrouter_api_key:
+      type: apiKey
+      in: header
+      name: openrouter_api_key
 paths:
   /api/status:
     get:
@@ -35,6 +41,8 @@ paths:
   /api/search:
     post:
       summary: Query models
+      security:
+        - openrouter_api_key: []
       requestBody:
         required: true
         content:
@@ -128,17 +136,34 @@ const swaggerHtml = `<!DOCTYPE html>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
 </head>
 <body>
+  <div style="margin:10px">
+    OpenRouter API Key:
+    <input id="or-key" type="text" style="width:300px" />
+    <button onclick="setKey()">Set</button>
+  </div>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
   <script>
   window.onload = () => {
-    SwaggerUIBundle({
+    const ui = SwaggerUIBundle({
       url: '/api/openapi.yaml',
       dom_id: '#swagger-ui',
       presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
       layout: 'StandaloneLayout'
     });
+    const stored = localStorage.getItem('openrouter_api_key');
+    if (stored) {
+      ui.preauthorizeApiKey('openrouter_api_key', stored);
+      document.getElementById('or-key').value = stored;
+    }
+    window.setKey = () => {
+      const k = document.getElementById('or-key').value;
+      if (k) {
+        localStorage.setItem('openrouter_api_key', k);
+        ui.preauthorizeApiKey('openrouter_api_key', k);
+      }
+    };
   };
   </script>
 </body>
@@ -178,7 +203,10 @@ export default {
     if (!env.DB) {
       return jsonResponse({ message: 'Database binding DB is not configured' }, headers, 500);
     }
-    if (!env.OPENROUTER_API_KEY) {
+
+    const requestApiKey = request.headers.get('openrouter_api_key');
+    const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
+    if (!apiKey) {
       return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
     }
 
@@ -186,7 +214,7 @@ export default {
       if (pathname === '/api/status' && request.method === 'GET') {
         return jsonResponse({
           status: 'ok',
-          apiKey: Boolean(env.OPENROUTER_API_KEY),
+          apiKey: Boolean(apiKey),
           db: Boolean(env.DB),
           time: new Date().toISOString(),
         }, headers);
@@ -213,7 +241,7 @@ export default {
         }
 
         if (accept.includes('text/event-stream')) {
-          return streamSearchResponse({ query, search, models, env, headers });
+          return streamSearchResponse({ query, search, models, env, headers, apiKey });
         }
 
         const results = [];
@@ -221,7 +249,7 @@ export default {
           const modelResponse = await queryOpenRouter(
             query,
             modelId,
-            env.OPENROUTER_API_KEY
+            apiKey
           );
 
           const result = await createResult(env.DB, {
@@ -292,12 +320,12 @@ export default {
     return {
       'Access-Control-Allow-Origin': allow,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, openrouter_api_key',
       'Vary': 'Origin',
     };
   }
 
-function streamSearchResponse({ query, search, models, env, headers }) {
+function streamSearchResponse({ query, search, models, env, headers, apiKey }) {
   const sseHeaders = {
     ...headers,
     'Content-Type': 'text/event-stream',
@@ -317,7 +345,7 @@ function streamSearchResponse({ query, search, models, env, headers }) {
       try {
         send('search', search);
         for (const modelId of models) {
-          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+          const modelResponse = await queryOpenRouter(query, modelId, apiKey);
           const result = await createResult(env.DB, {
             searchId: search.id,
             modelId,
