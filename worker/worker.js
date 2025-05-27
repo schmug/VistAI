@@ -28,6 +28,8 @@ paths:
                     type: string
                   apiKey:
                     type: boolean
+                  db:
+                    type: boolean
                   time:
                     type: string
   /api/search:
@@ -173,11 +175,19 @@ export default {
       });
     }
 
+    if (!env.DB) {
+      return jsonResponse({ message: 'Database binding DB is not configured' }, headers, 500);
+    }
+    if (!env.OPENROUTER_API_KEY) {
+      return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
+    }
+
     try {
       if (pathname === '/api/status' && request.method === 'GET') {
         return jsonResponse({
           status: 'ok',
           apiKey: Boolean(env.OPENROUTER_API_KEY),
+          db: Boolean(env.DB),
           time: new Date().toISOString(),
         }, headers);
       }
