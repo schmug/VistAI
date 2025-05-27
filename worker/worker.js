@@ -8,6 +8,140 @@ import {
   getTopModelsWithPercent,
 } from './db.js';
 
+const openapiSpec = `openapi: 3.0.0
+info:
+  title: VistAI API
+  version: '1.0.0'
+paths:
+  /api/status:
+    get:
+      summary: Get API status
+      responses:
+        '200':
+          description: Status information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  apiKey:
+                    type: boolean
+                  time:
+                    type: string
+  /api/search:
+    post:
+      summary: Query models
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  search:
+                    type: object
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  totalTime:
+                    type: integer
+  /api/track-click:
+    post:
+      summary: Track a user click on a result
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resultId:
+                  type: integer
+      responses:
+        '200':
+          description: Click tracked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  click:
+                    type: object
+                  stats:
+                    type: array
+                    items:
+                      type: object
+  /api/model-stats:
+    get:
+      summary: Get statistics for each model
+      responses:
+        '200':
+          description: Model stats with percentages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /api/top-models:
+    get:
+      summary: Get top models by click count
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Top models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+`;
+
+const swaggerHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>VistAI API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+  <script>
+  window.onload = () => {
+    SwaggerUIBundle({
+      url: '/api/openapi.yaml',
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+      layout: 'StandaloneLayout'
+    });
+  };
+  </script>
+</body>
+</html>`;
+
 let warnedMissingKey = false;
 
 export default {
@@ -27,6 +161,17 @@ export default {
       return jsonResponse({ message: 'Use /api/search or /api/status' }, headers);
     }
 
+    // Swagger UI and OpenAPI spec
+    if (pathname === '/docs' && request.method === 'GET') {
+      return new Response(swaggerHtml, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8', ...headers },
+      });
+    }
+    if (pathname === '/api/openapi.yaml' && request.method === 'GET') {
+      return new Response(openapiSpec, {
+        headers: { 'Content-Type': 'application/yaml', ...headers },
+      });
+    }
 
     try {
       if (pathname === '/api/status' && request.method === 'GET') {

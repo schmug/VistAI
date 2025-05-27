@@ -56,6 +56,12 @@ The schema for the initial migration lives in `worker/migrations/0001_init.sql`.
 - `shared/`: Shared types and schemas
 - `worker/`: Cloudflare Worker implementation
 
+## API Documentation
+
+Interactive API docs are available when the worker is running. Visit
+`/docs` in your browser to view a Swagger UI powered by the OpenAPI
+specification exposed at `/api/openapi.yaml`.
+
 ## OpenRouter Integration
 
 This application integrates with OpenRouter to query various AI models including:
