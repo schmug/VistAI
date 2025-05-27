@@ -175,6 +175,12 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
+    const requestApiKey = request.headers.get('openrouter_api_key');
+    const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
+
+    if (!apiKey) {
+      return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
+    }
 
     // Basic CORS support with configurable origins
     const headers = createCorsHeaders(request, env);
@@ -202,13 +208,6 @@ export default {
 
     if (!env.DB) {
       return jsonResponse({ message: 'Database binding DB is not configured' }, headers, 500);
-    }
-
-    const requestApiKey = request.headers.get('openrouter_api_key');
-    //const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
-    const apiKey = await env.OPENROUTER_API_KEY.get()
-    if (!apiKey) {
-      return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
     }
 
     try {
