@@ -229,12 +229,23 @@ export default {
 
         const accept = request.headers.get('Accept') || '';
         const search = await createSearch(env.DB, { query });
-        const models = [
-          'openai/gpt-4',
-          'anthropic/claude-2',
-          'meta-llama/llama-2-70b-chat',
-          'mistralai/mistral-7b-instruct',
-        ];
+        let models;
+        try {
+          const top = await fetchTopModels(apiKey, 4);
+          const trending = await fetchTrendingModel(apiKey);
+          models = [...top];
+          if (trending && !models.includes(trending)) {
+            models.push(trending);
+          }
+        } catch (err) {
+          console.warn('Failed to fetch models from OpenRouter', err);
+          models = [
+            'openai/gpt-4',
+            'anthropic/claude-2',
+            'meta-llama/llama-2-70b-chat',
+            'mistralai/mistral-7b-instruct',
+          ];
+        }
 
         for (const m of models) {
           await incrementModelSearches(env.DB, m);
@@ -434,3 +445,25 @@ function extractTitle(content = '') {
 }
 
 export { extractTitle };
+
+async function fetchTopModels(apiKey, limit = 4) {
+  const resp = await fetch(`https://openrouter.ai/api/v1/models/top?limit=${limit}`, {
+    headers: { Authorization: `Bearer ${apiKey}` }
+  });
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch top models: ${resp.status}`);
+  }
+  const data = await resp.json();
+  return (data.data || []).map((m) => m.id);
+}
+
+async function fetchTrendingModel(apiKey) {
+  const resp = await fetch('https://openrouter.ai/api/v1/models/trending?limit=1', {
+    headers: { Authorization: `Bearer ${apiKey}` }
+  });
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch trending model: ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.data && data.data[0] ? data.data[0].id : '';
+}
