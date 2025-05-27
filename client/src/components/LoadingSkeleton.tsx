@@ -1,8 +1,16 @@
 import { Card } from "@/components/ui/card";
 
+/**
+ * Displays placeholder cards while search results load.
+ */
+
 export default function LoadingSkeleton() {
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <i className="ri-loader-4-line animate-spin"></i>
+        <span>Searching...</span>
+      </div>
       {Array.from({ length: 4 }).map((_, index) => (
         <Card key={index} className="bg-card border-border p-5">
           {/* Model Badge Skeleton */}
