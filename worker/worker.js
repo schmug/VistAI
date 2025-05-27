@@ -63,7 +63,11 @@ export default {
 
         const results = [];
         for (const modelId of models) {
-          const modelResponse = await queryOpenRouter(query, modelId, env.OPENROUTER_API_KEY);
+          const modelResponse = await queryOpenRouter(
+            query,
+            modelId,
+            env.OPENROUTER_API_KEY
+          );
 
           const result = env.storage.createResult({
             searchId: search.id,
@@ -72,8 +76,8 @@ export default {
             title: modelResponse.title,
             responseTime: modelResponse.responseTime,
           });
-          return { ...result, modelName: modelId.split('/').pop() };
-        });
+          results.push({ ...result, modelName: modelId.split('/').pop() });
+        }
 
         return jsonResponse({
           search,
