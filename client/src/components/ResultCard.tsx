@@ -4,6 +4,11 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import ModelBadge from "./ModelBadge";
 import { trackResultClick } from "@/lib/openrouter";
@@ -13,11 +18,23 @@ interface ResultCardProps {
   result: ModelResponse;
 }
 
+/**
+ * Card displaying a single model's response.
+ * The content is collapsed until expanded, which records a click.
+ */
 export default function ResultCard({ result }: ResultCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
+  const [open, setOpen] = useState(false);
+  const preview = result.content.split(/\n/)[0];
+  const truncated = preview.length > 120 ? preview.slice(0, 120) + "..." : preview;
+
+  const handleOpenChange = (value: boolean) => {
+    setOpen(value);
+    if (value) handleContentClick();
+  };
   
   // Track click on result
   const handleContentClick = () => {
@@ -75,20 +92,18 @@ export default function ResultCard({ result }: ResultCardProps) {
   };
   
   return (
-    <Card 
-      className="result-card bg-card border-border hover:shadow-md transition-all"
-      onClick={handleContentClick}
-    >
+    <Collapsible open={open} onOpenChange={handleOpenChange}>
+      <Card className="result-card bg-card border-border hover:shadow-md transition-all">
       <CardHeader className="p-5 pb-2">
         <div className="flex justify-between items-center">
           <ModelBadge modelId={result.modelId} />
-          
+
           <div className="flex items-center gap-1">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     className="text-muted-foreground hover:text-primary"
                     onClick={(e) => {
@@ -109,8 +124,8 @@ export default function ResultCard({ result }: ResultCardProps) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     className="text-muted-foreground hover:text-primary"
                     onClick={(e) => {
@@ -127,24 +142,38 @@ export default function ResultCard({ result }: ResultCardProps) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-primary"
+              >
+                <i className={open ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
+                <span className="sr-only">Toggle result</span>
+              </Button>
+            </CollapsibleTrigger>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-5 pt-3">
         <div className="result-content">
           <h3 className="text-lg font-medium mb-2 text-foreground">
             {result.title || "AI Response"}
           </h3>
-          
-          <div className="text-muted-foreground whitespace-pre-line">
-            {result.content}
-          </div>
+          {open ? (
+            <div className="text-muted-foreground whitespace-pre-line">
+              {result.content}
+            </div>
+          ) : (
+            <div className="text-muted-foreground">{truncated}</div>
+          )}
         </div>
       </CardContent>
-      
-      <CardFooter className="p-5 pt-2">
-        <Separator className="mb-4" />
+
+      <CollapsibleContent>
+        <CardFooter className="p-5 pt-2">
+          <Separator className="mb-4" />
         
         <div className="w-full flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -182,6 +211,8 @@ export default function ResultCard({ result }: ResultCardProps) {
           )}
         </div>
       </CardFooter>
-    </Card>
+      </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }
