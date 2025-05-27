@@ -42,7 +42,7 @@ paths:
     post:
       summary: Query models
       security:
-        - openrouter_api_key: []
+        - _api_key: []
       requestBody:
         required: true
         content:
@@ -206,7 +206,7 @@ export default {
 
     const requestApiKey = request.headers.get('openrouter_api_key');
     //const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
-    const apikey = await env.OPENROUTER_API_KEY.get()
+    const apiKey = await env.OPENROUTER_API_KEY.get()
     if (!apiKey) {
       return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
     }
