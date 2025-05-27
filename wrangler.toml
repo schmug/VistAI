@@ -6,6 +6,10 @@ compatibility_date = "2025-05-26"
 # OPENROUTER_API_KEY should be set in the Cloudflare dashboard or via wrangler
 # API_BASE_URL should be set in Cloudflare dashboard or via wrangler
 # ACCESS_CONTROL_ALLOW_ORIGIN controls allowed CORS origins
+# https://developers.cloudflare.com/secrets-store/integrations/workers/
+secrets_store_secrets = [
+  { binding = "OPENROUTER_API_KEY", store_id= "3ae45c355bc742238784351f929bc706", secret_name = "OPENROUTER_API_KEY" }
+]
 
 [observability]
 enabled = true
