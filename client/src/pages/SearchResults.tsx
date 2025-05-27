@@ -6,10 +6,12 @@ import ModelFilterPills from "@/components/ModelFilterPills";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import SearchBar from "@/components/SearchBar";
 import { useLocation } from "wouter";
+import { useLocationSearch } from "@/hooks/use-full-location";
 
 export default function SearchResults() {
-  const [location, navigate] = useLocation();
-  const params = new URLSearchParams(location.split("?")[1] || "");
+  const [, navigate] = useLocation();
+  const searchString = useLocationSearch();
+  const params = new URLSearchParams(searchString);
   const query = params.get("q") || "";
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [results, setResults] = useState<ModelResponse[]>([]);
