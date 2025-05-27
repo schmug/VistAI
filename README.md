@@ -106,6 +106,8 @@ Future enhancements could include:
 
 3. Set your OpenRouter API key as a secret for the Worker. Run `wrangler secret put OPENROUTER_API_KEY` or add the variable under **Settings > Variables** in the Cloudflare dashboard so the Worker can authenticate with OpenRouter.
 
+   The Worker checks that both this API key and the `DB` database binding are configured before handling any request. If either is missing it responds with HTTP 500 and a descriptive error.
+
 4. The repository includes a GitHub Actions workflow that automatically runs `wrangler deploy` whenever changes to the Worker are pushed to the `main` branch. Configure `CF_API_TOKEN` and `CF_ACCOUNT_ID` secrets in your repository settings to enable this automation.
 
 Once both are deployed the site will automatically call the Worker endpoints via the configured base URL.
