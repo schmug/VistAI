@@ -1,17 +1,21 @@
 import { Card } from "@/components/ui/card";
 
+interface LoadingSkeletonProps {
+  /** Number of placeholder cards to display */
+  count?: number;
+}
+
 /**
  * Displays placeholder cards while search results load.
  */
-
-export default function LoadingSkeleton() {
+export default function LoadingSkeleton({ count = 4 }: LoadingSkeletonProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <i className="ri-loader-4-line animate-spin"></i>
         <span>Searching...</span>
       </div>
-      {Array.from({ length: 4 }).map((_, index) => (
+      {Array.from({ length: count }).map((_, index) => (
         <Card key={index} className="bg-card border-border p-5">
           {/* Model Badge Skeleton */}
           <div className="flex justify-between items-center mb-4">
@@ -46,6 +50,12 @@ export default function LoadingSkeleton() {
               <div className="w-8 h-8 rounded-full skeleton"></div>
             </div>
             <div className="w-32 h-4 rounded skeleton"></div>
+          </div>
+
+          {/* Loading Indicator */}
+          <div className="mt-4 flex items-center gap-2 justify-center text-muted-foreground text-sm">
+            <i className="ri-loader-4-line animate-spin"></i>
+            <span>Waiting for response...</span>
           </div>
         </Card>
       ))}
