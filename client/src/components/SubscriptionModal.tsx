@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ModelStats } from "@/lib/openrouter";
+import { getModelInfo } from "@/lib/utils";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -35,20 +36,20 @@ export default function SubscriptionModal({
             <h4 className="font-medium text-foreground mb-2">Your Top Models</h4>
             <div className="space-y-2">
               {topModels.length > 0 ? (
-                topModels.slice(0, 3).map((model) => (
-                  <div key={model.id} className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full bg-${model.displayName}-bg flex items-center justify-center`}>
-                        <i className={`ri-${model.displayName === 'gpt-4' ? 'openai-fill' : 
-                                        model.displayName === 'claude-2' ? 'code-box-line' : 
-                                        model.displayName === 'llama-2-70b-chat' ? 'fire-line' : 
-                                        'wind-line'} text-${model.displayName}-color text-xs`}></i>
+                topModels.slice(0, 3).map((model) => {
+                  const info = getModelInfo(model.displayName);
+                  return (
+                    <div key={model.id} className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full ${info.bg} flex items-center justify-center`}>
+                          <i className={`${info.icon} ${info.color} text-xs`}></i>
+                        </div>
+                        <span className="text-muted-foreground text-sm">{model.displayName}</span>
                       </div>
-                      <span className="text-muted-foreground text-sm">{model.displayName}</span>
+                      <span className="text-muted-foreground text-sm">{model.percentage}%</span>
                     </div>
-                    <span className="text-muted-foreground text-sm">{model.percentage}%</span>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-sm text-muted-foreground">
                   Start searching to see your model preferences
