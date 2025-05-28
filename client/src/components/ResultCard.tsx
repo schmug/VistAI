@@ -4,11 +4,7 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import ModelBadge from "./ModelBadge";
 import { trackResultClick } from "@/lib/openrouter";
@@ -31,7 +27,8 @@ export default function ResultCard({ result }: ResultCardProps) {
   const preview = result.snippet || result.content.split(/\n/)[0];
   const truncated = preview.length > 120 ? preview.slice(0, 120) + "..." : preview;
 
-  const handleOpenChange = (value: boolean) => {
+  const toggleOpen = () => {
+    const value = !open;
     setOpen(value);
     if (value) handleContentClick();
   };
@@ -92,8 +89,11 @@ export default function ResultCard({ result }: ResultCardProps) {
   };
   
   return (
-    <Collapsible open={open} onOpenChange={handleOpenChange}>
-      <Card className="result-card bg-card border-border hover:shadow-md transition-all">
+    <Collapsible open={open}>
+      <Card
+        className="result-card bg-card border-border hover:shadow-md transition-all"
+        onClick={toggleOpen}
+      >
       <CardHeader className="p-5 pb-2">
         <div className="flex justify-between items-center">
           <ModelBadge modelId={result.modelId} />
@@ -142,16 +142,18 @@ export default function ResultCard({ result }: ResultCardProps) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-primary"
-              >
-                <i className={open ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
-                <span className="sr-only">Toggle result</span>
-              </Button>
-            </CollapsibleTrigger>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleOpen();
+              }}
+            >
+              <i className={open ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
+              <span className="sr-only">Toggle result</span>
+            </Button>
           </div>
         </div>
       </CardHeader>
