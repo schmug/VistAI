@@ -5,6 +5,7 @@ export interface ModelResponse {
   id: number;
   searchId: number;
   modelId: string;
+  snippet?: string;
   content: string;
   title?: string;
   responseTime?: number;

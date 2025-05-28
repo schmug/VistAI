@@ -28,7 +28,7 @@ export default function ResultCard({ result }: ResultCardProps) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
   const [open, setOpen] = useState(false);
-  const preview = result.content.split(/\n/)[0];
+  const preview = result.snippet || result.content.split(/\n/)[0];
   const truncated = preview.length > 120 ? preview.slice(0, 120) + "..." : preview;
 
   const handleOpenChange = (value: boolean) => {

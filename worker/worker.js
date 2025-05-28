@@ -66,6 +66,21 @@ paths:
                     type: array
                     items:
                       type: object
+                      properties:
+                        id:
+                          type: integer
+                        searchId:
+                          type: integer
+                        modelId:
+                          type: string
+                        snippet:
+                          type: string
+                        content:
+                          type: string
+                        title:
+                          type: string
+                        responseTime:
+                          type: integer
                   totalTime:
                     type: integer
   /api/track-click:
@@ -284,7 +299,11 @@ export default {
             title: modelResponse.title,
             responseTime: modelResponse.responseTime,
           });
-          results.push({ ...result, modelName: modelId.split('/').pop() });
+          results.push({
+            ...result,
+            snippet: modelResponse.snippet,
+            modelName: modelId.split('/').pop(),
+          });
         }
 
         return jsonResponse({
@@ -378,7 +397,11 @@ function streamSearchResponse({ query, search, models, env, headers, apiKey }) {
             title: modelResponse.title,
             responseTime: modelResponse.responseTime,
           });
-          const withName = { ...result, modelName: modelId.split('/').pop() };
+          const withName = {
+            ...result,
+            snippet: modelResponse.snippet,
+            modelName: modelId.split('/').pop(),
+          };
           results.push(withName);
           send('result', withName);
         }
@@ -400,6 +423,10 @@ function streamSearchResponse({ query, search, models, env, headers, apiKey }) {
 }
 
 
+/**
+ * Send a prompt to OpenRouter with instructions to include a summary.
+ * Returns the summary snippet, the main content and timing info.
+ */
 async function queryOpenRouter(prompt, modelId, apiKey) {
   try {
     if (!apiKey) {
@@ -424,7 +451,14 @@ async function queryOpenRouter(prompt, modelId, apiKey) {
       },
       body: JSON.stringify({
         model: modelId,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Return a short one sentence summary wrapped in <summary></summary> tags before the full answer.',
+          },
+          { role: 'user', content: prompt },
+        ],
       }),
     });
     if (!resp.ok) {
@@ -432,14 +466,18 @@ async function queryOpenRouter(prompt, modelId, apiKey) {
       throw new Error(`OpenRouter API error: ${resp.status} - ${txt}`);
     }
     const data = await resp.json();
+    const raw = data.choices[0]?.message?.content || 'No response from model';
+    const { snippet, body } = extractSnippet(raw);
     return {
-      content: data.choices[0]?.message?.content || 'No response from model',
-      title: extractTitle(data.choices[0]?.message?.content),
+      content: body,
+      snippet,
+      title: extractTitle(body),
       responseTime: Math.round(data.usage?.total_ms || 0),
     };
   } catch (err) {
     return {
       content: `Error getting response from ${modelId}: ${err.message}`,
+      snippet: '',
       title: `Error from ${modelId}`,
       responseTime: 0,
       error: err instanceof Error ? err.message : String(err)
@@ -462,6 +500,20 @@ function extractTitle(content = '') {
 }
 
 export { extractTitle };
+
+/**
+ * Extract <summary> snippet from model output.
+ * Returns the snippet and the remaining body text.
+ */
+function extractSnippet(content = '') {
+  const match = content.match(/<summary>(.*?)<\/summary>\s*(.*)/s);
+  if (match) {
+    return { snippet: match[1].trim(), body: match[2].trim() };
+  }
+  return { snippet: '', body: content };
+}
+
+export { extractSnippet };
 
 async function fetchTopModels(apiKey, limit = 4) {
   const resp = await fetch(`https://openrouter.ai/api/v1/models/top?limit=${limit}`, {
