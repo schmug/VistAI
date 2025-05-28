@@ -1,22 +1,30 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/** Utility functions used across the client application. */
+
+/**
+ * Combine class names with Tailwind merge.
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format search time
+/**
+ * Convert milliseconds to a seconds string with two decimals.
+ */
 export function formatSearchTime(ms: number): string {
   return (ms / 1000).toFixed(2);
 }
 
-// Get abbreviated model name from model ID
+/**
+ * Get the last segment from a model ID.
+ */
 export function getModelNameFromId(modelId: string): string {
   const parts = modelId.split('/');
   return parts[parts.length - 1];
 }
 
-// Get model display info by ID
 export const models = {
   "gpt-4": {
     name: "GPT-4",
@@ -52,7 +60,9 @@ export const models = {
   }
 };
 
-// Get model info from modelId
+/**
+ * Retrieve display information for a given model ID.
+ */
 export function getModelInfo(modelId: string) {
   const shortName = getModelNameFromId(modelId);
   return models[shortName as keyof typeof models] || {
@@ -65,7 +75,7 @@ export function getModelInfo(modelId: string) {
   };
 }
 
-// Generate suggestion examples
+/** Example search suggestions used on the home page. */
 export const searchSuggestions = [
   "Explain quantum computing",
   "Create a workout plan",
@@ -74,7 +84,9 @@ export const searchSuggestions = [
   "Recipe for vegan chocolate cake"
 ];
 
-// Get random search suggestions
+/**
+ * Select a random subset of suggestions.
+ */
 export function getRandomSuggestions(count: number = 3): string[] {
   const shuffled = [...searchSuggestions].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);

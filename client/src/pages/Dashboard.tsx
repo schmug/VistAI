@@ -7,6 +7,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTo
 import { getModelInfo } from "@/lib/utils";
 import SubscriptionModal from "@/components/SubscriptionModal";
 
+/**
+ * Dashboard page showing model statistics and subscription options.
+ */
 export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   

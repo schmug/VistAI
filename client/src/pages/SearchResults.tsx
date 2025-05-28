@@ -8,6 +8,9 @@ import SearchBar from "@/components/SearchBar";
 import { useLocation } from "wouter";
 import { useLocationSearch } from "@/hooks/use-full-location";
 
+/**
+ * Page displaying streaming search results from multiple models.
+ */
 export default function SearchResults() {
   const [, navigate] = useLocation();
   const searchString = useLocationSearch();

@@ -1,3 +1,6 @@
+/**
+ * Insert a new search row and return the created record.
+ */
 export async function createSearch(db, { query }) {
   const now = new Date().toISOString();
   const { results } = await db
@@ -9,6 +12,9 @@ export async function createSearch(db, { query }) {
   return results[0];
 }
 
+/**
+ * Insert a model response associated with a search.
+ */
 export async function createResult(db, { searchId, modelId, content, title, responseTime }) {
   const now = new Date().toISOString();
   const { results } = await db
@@ -20,6 +26,9 @@ export async function createResult(db, { searchId, modelId, content, title, resp
   return results[0];
 }
 
+/**
+ * Record a user click on a result and update model stats.
+ */
 export async function trackClick(db, { resultId }) {
   const now = new Date().toISOString();
   const { results } = await db
@@ -37,6 +46,9 @@ export async function trackClick(db, { resultId }) {
   return results[0];
 }
 
+/**
+ * Increment the search count for a model, inserting if missing.
+ */
 export async function incrementModelSearches(db, modelId) {
   const now = new Date().toISOString();
   await db
@@ -53,6 +65,9 @@ export async function incrementModelSearches(db, modelId) {
     .run();
 }
 
+/**
+ * Retrieve click and search counts for all models.
+ */
 export async function getModelStats(db) {
   const { results } = await db
     .prepare(
@@ -62,6 +77,9 @@ export async function getModelStats(db) {
   return results;
 }
 
+/**
+ * Retrieve model stats with click percentage of total clicks.
+ */
 export async function getModelStatsWithPercent(db) {
   const stats = await getModelStats(db);
   const totalClicks = stats.reduce((sum, s) => sum + (s.clickCount || 0), 0);
@@ -72,6 +90,9 @@ export async function getModelStatsWithPercent(db) {
   }));
 }
 
+/**
+ * Get the top models sorted by clicks and include percentage values.
+ */
 export async function getTopModelsWithPercent(db, limit) {
   const { results } = await db
     .prepare(

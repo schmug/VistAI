@@ -2,6 +2,8 @@ import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+/** Database schema definitions shared by the worker and app. */
+
 // Base user schema (keeping the existing one)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),

@@ -3,6 +3,9 @@ import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { Link, useLocation } from "wouter";
 
+/**
+ * Sticky page header containing navigation and the search bar.
+ */
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [location, navigate] = useLocation();

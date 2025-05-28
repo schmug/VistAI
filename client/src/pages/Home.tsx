@@ -3,6 +3,9 @@ import { getRandomSuggestions } from "@/lib/utils";
 import SearchBar from "@/components/SearchBar";
 import { Link, useLocation } from "wouter";
 
+/**
+ * Landing page with search bar and example suggestions.
+ */
 export default function Home() {
   const [, navigate] = useLocation();
   const [suggestions] = useState(() => getRandomSuggestions(3));
