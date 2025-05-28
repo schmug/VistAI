@@ -107,7 +107,10 @@ export default function SearchResults() {
             <ResultCard key={result.id} result={result} />
           ))}
           {isLoading && (
-            <LoadingSkeleton count={Math.max(4 - filteredResults.length, 1)} />
+            <LoadingSkeleton
+              count={Math.max(4 - filteredResults.length, 1)}
+              blink={results.length > 0}
+            />
           )}
           {!isLoading && filteredResults.length === 0 && (
             <div className="p-6 text-center">
