@@ -27,7 +27,7 @@ export function getModelNameFromId(modelId: string): string {
 
 export const models = {
   "gemini-2.0-flash-001": {
-    name: "Gemini Flash",
+    name: "Gemini 2.0 Flash",
     icon: "ri-gemini-line",
     color: "text-[hsl(var(--model-llama))]",
     bg: "bg-[hsl(var(--model-llama)_/_0.2)]",
@@ -35,7 +35,7 @@ export const models = {
     hoverBorder: "hover:border-[hsl(var(--model-llama)_/_0.5)]",
   },
   "gpt-4o-mini": {
-    name: "GPT-4o",
+    name: "GPT-4o-mini",
     icon: "ri-openai-fill",
     color: "text-[hsl(var(--model-gpt))]",
     bg: "bg-[hsl(var(--model-gpt)_/_0.2)]",
@@ -43,7 +43,7 @@ export const models = {
     hoverBorder: "hover:border-[hsl(var(--model-gpt)_/_0.5)]",
   },
   "claude-3.7-sonnet": {
-    name: "Claude 3 Sonnet",
+    name: "Claude 3.7 Sonnet",
     icon: "ri-code-box-line",
     color: "text-[hsl(var(--model-claude))]",
     bg: "bg-[hsl(var(--model-claude)_/_0.2)]",
@@ -51,7 +51,7 @@ export const models = {
     hoverBorder: "hover:border-[hsl(var(--model-claude)_/_0.5)]",
   },
   "gemini-2.5-pro-preview": {
-    name: "Gemini Pro",
+    name: "Gemini 2.5 Pro Preview",
     icon: "ri-gemini-line",
     color: "text-[hsl(var(--model-mistral))]",
     bg: "bg-[hsl(var(--model-mistral)_/_0.2)]",
@@ -59,7 +59,7 @@ export const models = {
     hoverBorder: "hover:border-[hsl(var(--model-mistral)_/_0.5)]",
   },
   "deepseek-chat-v3-0324:free": {
-    name: "DeepSeek",
+    name: "DeepSeek chat v3 0324",
     icon: "ri-search-2-line",
     color: "text-[hsl(var(--model-mistral))]",
     bg: "bg-[hsl(var(--model-mistral)_/_0.2)]",
