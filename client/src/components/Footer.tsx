@@ -1,5 +1,8 @@
 import { Link } from "wouter";
 
+/**
+ * Site footer with navigation links and OpenRouter attribution.
+ */
 export default function Footer() {
   return (
     <footer className="border-t border-border py-6 mt-auto">

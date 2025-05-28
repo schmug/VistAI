@@ -8,6 +8,9 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 
+/**
+ * Container component that renders toast notifications.
+ */
 export function Toaster() {
   const { toasts } = useToast()
 

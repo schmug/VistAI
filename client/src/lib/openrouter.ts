@@ -32,7 +32,9 @@ export interface ModelStats {
   displayName: string;
 }
 
-// Search across multiple AI models
+/**
+ * Perform a standard search request across multiple AI models.
+ */
 export async function searchAI(query: string): Promise<SearchResponse> {
   const response = await apiRequest("POST", "/api/search", { query });
   const data = await response.json();
@@ -44,6 +46,9 @@ export interface SearchStreamEvent {
   data: any;
 }
 
+/**
+ * Perform a streaming search request and emit events as results arrive.
+ */
 export async function searchAIStream(
   query: string,
   onEvent: (event: SearchStreamEvent) => void,
@@ -113,6 +118,9 @@ export interface TrackClickResponse {
   stats: ModelStats[];
 }
 
+/**
+ * Record a user click for a result and return updated model stats.
+ */
 export async function trackResultClick(
   resultId: number,
   userId?: number,
@@ -126,14 +134,18 @@ export async function trackResultClick(
   return data.stats;
 }
 
-// Get model performance statistics
+/**
+ * Fetch model performance statistics from the API.
+ */
 export async function getModelStats(): Promise<ModelStats[]> {
   const response = await apiRequest("GET", "/api/model-stats");
   const data = await response.json();
   return data;
 }
 
-// Get top performing models
+/**
+ * Fetch the top performing models limited by the given number.
+ */
 export async function getTopModels(limit: number = 5): Promise<ModelStats[]> {
   const response = await apiRequest("GET", `/api/top-models?limit=${limit}`);
   const data = await response.json();

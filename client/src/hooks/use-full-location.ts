@@ -13,5 +13,8 @@ export const useFullLocation: BaseLocationHook = () => {
   return [location, navigate];
 };
 
+/**
+ * Hook that returns just the query string portion of the current URL.
+ */
 export const useLocationSearch: BaseSearchHook = () =>
   useLocationProperty(() => window.location.search);

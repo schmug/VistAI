@@ -7,6 +7,9 @@ interface ModelBadgeProps {
   showName?: boolean;
 }
 
+/**
+ * Display information about a model using its ID.
+ */
 export default function ModelBadge({ modelId, size = "md", showName = true }: ModelBadgeProps) {
   const model = getModelInfo(modelId);
   const modelName = getModelNameFromId(modelId);

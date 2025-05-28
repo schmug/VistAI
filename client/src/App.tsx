@@ -7,6 +7,9 @@ import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 import "./index.css";
 
+/**
+ * Root application component configuring routes and layout.
+ */
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">

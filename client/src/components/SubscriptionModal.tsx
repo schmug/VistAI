@@ -10,10 +10,13 @@ interface SubscriptionModalProps {
   topModels?: ModelStats[];
 }
 
-export default function SubscriptionModal({ 
-  open, 
+/**
+ * Modal dialog offering subscription plans and displaying model stats.
+ */
+export default function SubscriptionModal({
+  open,
   onOpenChange,
-  topModels = [] 
+  topModels = []
 }: SubscriptionModalProps) {
   const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
   

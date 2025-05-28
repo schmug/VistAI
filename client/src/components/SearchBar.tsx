@@ -9,6 +9,9 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
 }
 
+/**
+ * Search input with optional compact display used throughout the app.
+ */
 export default function SearchBar({ initialQuery = "", compact = false, onSearch }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
   const inputRef = useRef<HTMLInputElement>(null);

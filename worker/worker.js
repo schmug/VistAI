@@ -171,6 +171,9 @@ const swaggerHtml = `<!DOCTYPE html>
 
 let warnedMissingKey = false;
 
+/**
+ * Cloudflare Worker entry with an HTTP fetch handler.
+ */
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -443,6 +446,9 @@ async function queryOpenRouter(prompt, modelId, apiKey) {
   }
 }
 
+/**
+ * Attempt to extract a short title from model content.
+ */
 function extractTitle(content = '') {
   const match = content.match(/^#\s+(.*?)$|^Title:\s*(.*?)$|^(.*?)[\n\r]/m);
   if (match) {

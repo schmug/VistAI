@@ -8,10 +8,13 @@ interface ModelFilterPillsProps {
   models: string[];
 }
 
-export default function ModelFilterPills({ 
-  selectedModel, 
+/**
+ * Render clickable pills for filtering results by model.
+ */
+export default function ModelFilterPills({
+  selectedModel,
   onSelectModel,
-  models 
+  models
 }: ModelFilterPillsProps) {
   return (
     <div className="mb-6 flex flex-wrap gap-2">

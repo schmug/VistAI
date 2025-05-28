@@ -7,6 +7,9 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+/**
+ * Perform a fetch request to the API with optional JSON body.
+ */
 export async function apiRequest(
   method: string,
   url: string,
@@ -41,6 +44,9 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
+/**
+ * Create a default query function for React Query requests.
+ */
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
@@ -61,6 +67,7 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+/** Shared QueryClient instance for the app. */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
