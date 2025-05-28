@@ -8,6 +8,17 @@ import {
   getTopModelsWithPercent,
 } from './db.js';
 
+/**
+ * Fallback model list used when dynamic fetch fails.
+ */
+export const FALLBACK_MODELS = [
+  'google/gemini-2.0-flash-001',
+  'openai/gpt-4o-mini',
+  'anthropic/claude-3.7-sonnet',
+  'google/gemini-2.5-pro-preview',
+  'deepseek/deepseek-chat-v3-0324:free',
+];
+
 const openapiSpec = `openapi: 3.0.0
 info:
   title: VistAI API
@@ -260,19 +271,13 @@ export default {
           console.warn('Failed to fetch models from OpenRouter', err);
           try {
             const stats = await getTopModelsWithPercent(env.DB, 4);
-            models = stats.map((s) => s.modelId);
+            const filtered = stats
+              .map((s) => s.modelId)
+              .filter((m) => FALLBACK_MODELS.includes(m));
+            models = filtered.length > 0 ? filtered : [...FALLBACK_MODELS];
           } catch (dbErr) {
             console.warn('Failed to fetch models from DB', dbErr);
-            models = [];
-          }
-          if (!models || models.length === 0) {
-            models = [
-              'google/gemini-2.0-flash-001',
-              'openai/gpt-4o-mini',
-              'anthropic/claude-3.7-sonnet',
-              'google/gemini-2.5-pro-preview',
-              'deepseek/deepseek-chat-v3-0324:free',
-            ];
+            models = [...FALLBACK_MODELS];
           }
         }
 
