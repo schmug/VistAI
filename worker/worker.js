@@ -248,10 +248,11 @@ export default {
           }
           if (!models || models.length === 0) {
             models = [
-              'openai/gpt-4',
-              'anthropic/claude-2',
-              'meta-llama/llama-2-70b-chat',
-              'mistralai/mistral-7b-instruct',
+              'google/gemini-2.0-flash-001',
+              'openai/gpt-4o-mini',
+              'anthropic/claude-3.7-sonnet',
+              'google/gemini-2.5-pro-preview',
+              'deepseek/deepseek-chat-v3-0324:free',
             ];
           }
         }
