@@ -42,7 +42,7 @@ paths:
     post:
       summary: Query models
       security:
-        - _api_key: []
+        - openrouter_api_key: []
       requestBody:
         required: true
         content:
@@ -175,15 +175,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
+
+    // Basic CORS support with configurable origins
+    const headers = createCorsHeaders(request, env);
+
     const requestApiKey = request.headers.get('openrouter_api_key');
     const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
 
     if (!apiKey) {
       return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
     }
-
-    // Basic CORS support with configurable origins
-    const headers = createCorsHeaders(request, env);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers });
