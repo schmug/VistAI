@@ -26,33 +26,41 @@ export function getModelNameFromId(modelId: string): string {
 }
 
 export const models = {
-  "gpt-4": {
-    name: "GPT-4",
+  "gemini-2.0-flash-001": {
+    name: "Gemini Flash",
+    icon: "ri-gemini-line",
+    color: "text-[hsl(var(--model-llama))]",
+    bg: "bg-[hsl(var(--model-llama)_/_0.2)]",
+    border: "border-[hsl(var(--model-llama)_/_0.2)]",
+    hoverBorder: "hover:border-[hsl(var(--model-llama)_/_0.5)]",
+  },
+  "gpt-4o-mini": {
+    name: "GPT-4o",
     icon: "ri-openai-fill",
     color: "text-[hsl(var(--model-gpt))]",
     bg: "bg-[hsl(var(--model-gpt)_/_0.2)]",
     border: "border-[hsl(var(--model-gpt)_/_0.2)]",
     hoverBorder: "hover:border-[hsl(var(--model-gpt)_/_0.5)]",
   },
-  "claude-2": {
-    name: "Claude 2",
+  "claude-3.7-sonnet": {
+    name: "Claude 3 Sonnet",
     icon: "ri-code-box-line",
     color: "text-[hsl(var(--model-claude))]",
     bg: "bg-[hsl(var(--model-claude)_/_0.2)]",
     border: "border-[hsl(var(--model-claude)_/_0.2)]",
     hoverBorder: "hover:border-[hsl(var(--model-claude)_/_0.5)]",
   },
-  "llama-2-70b-chat": {
-    name: "Llama 2",
-    icon: "ri-fire-line",
-    color: "text-[hsl(var(--model-llama))]",
-    bg: "bg-[hsl(var(--model-llama)_/_0.2)]",
-    border: "border-[hsl(var(--model-llama)_/_0.2)]",
-    hoverBorder: "hover:border-[hsl(var(--model-llama)_/_0.5)]",
+  "gemini-2.5-pro-preview": {
+    name: "Gemini Pro",
+    icon: "ri-gemini-line",
+    color: "text-[hsl(var(--model-mistral))]",
+    bg: "bg-[hsl(var(--model-mistral)_/_0.2)]",
+    border: "border-[hsl(var(--model-mistral)_/_0.2)]",
+    hoverBorder: "hover:border-[hsl(var(--model-mistral)_/_0.5)]",
   },
-  "mistral-7b-instruct": {
-    name: "Mistral",
-    icon: "ri-wind-line",
+  "deepseek-chat-v3-0324:free": {
+    name: "DeepSeek",
+    icon: "ri-search-2-line",
     color: "text-[hsl(var(--model-mistral))]",
     bg: "bg-[hsl(var(--model-mistral)_/_0.2)]",
     border: "border-[hsl(var(--model-mistral)_/_0.2)]",
