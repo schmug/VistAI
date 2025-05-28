@@ -56,6 +56,17 @@ The schema for the initial migration lives in `worker/migrations/0001_init.sql`.
 - `shared/`: Shared types and schemas
 - `worker/`: Cloudflare Worker implementation
 
+## Testing and Type Checking
+
+Install dependencies including development packages before running the
+test suite and TypeScript compilation:
+
+```bash
+npm ci
+npm test
+npm run check
+```
+
 ## API Documentation
 
 Interactive API docs are available when the worker is running. Visit
