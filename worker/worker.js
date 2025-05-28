@@ -239,12 +239,21 @@ export default {
           }
         } catch (err) {
           console.warn('Failed to fetch models from OpenRouter', err);
-          models = [
-            'openai/gpt-4',
-            'anthropic/claude-2',
-            'meta-llama/llama-2-70b-chat',
-            'mistralai/mistral-7b-instruct',
-          ];
+          try {
+            const stats = await getTopModelsWithPercent(env.DB, 4);
+            models = stats.map((s) => s.modelId);
+          } catch (dbErr) {
+            console.warn('Failed to fetch models from DB', dbErr);
+            models = [];
+          }
+          if (!models || models.length === 0) {
+            models = [
+              'openai/gpt-4',
+              'anthropic/claude-2',
+              'meta-llama/llama-2-70b-chat',
+              'mistralai/mistral-7b-instruct',
+            ];
+          }
         }
 
         for (const m of models) {
