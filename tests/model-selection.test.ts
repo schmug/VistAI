@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import worker from '../worker/worker.js';
+import worker, { FALLBACK_MODELS } from '../worker/worker.js';
 import { FakeD1Database } from './fake-db.js';
 
 test('uses DB top models when OpenRouter fails', async () => {
   const now = new Date().toISOString();
   const db = new FakeD1Database({
-    'model/A': { clickCount: 5, searchCount: 10, updatedAt: now },
-    'model/B': { clickCount: 3, searchCount: 8, updatedAt: now },
+    [FALLBACK_MODELS[0]]: { clickCount: 5, searchCount: 10, updatedAt: now },
+    [FALLBACK_MODELS[1]]: { clickCount: 3, searchCount: 8, updatedAt: now },
   });
 
   const originalFetch = global.fetch;
@@ -36,6 +36,9 @@ test('uses DB top models when OpenRouter fails', async () => {
 
   const res = await worker.fetch(req, { DB: db, OPENROUTER_API_KEY: 'key' });
   const data = await res.json();
-  assert.deepStrictEqual(data.results.map((r: any) => r.modelId), ['model/A', 'model/B']);
+  assert.deepStrictEqual(
+    data.results.map((r: any) => r.modelId),
+    [FALLBACK_MODELS[0], FALLBACK_MODELS[1]]
+  );
   global.fetch = originalFetch;
 });
