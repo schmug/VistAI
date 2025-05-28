@@ -68,7 +68,7 @@ export default function SearchResults() {
       </div>
       
       {/* Model Filter Pills */}
-      {!isLoading && results.length > 0 && (
+      {results.length > 0 && (
         <ModelFilterPills
           selectedModel={selectedModel}
           onSelectModel={setSelectedModel}
@@ -85,37 +85,39 @@ export default function SearchResults() {
       )}
       
       {/* Results or Loading State */}
-      <div className="grid grid-cols-1 gap-6">
-        {isLoading ? (
-          <LoadingSkeleton />
-        ) : error ? (
-          <div className="p-6 text-center">
-            <h3 className="text-lg font-medium text-secondary mb-2">Error Fetching Results</h3>
-            <p className="text-muted-foreground">
-              {error instanceof Error ? error.message : "An unknown error occurred"}
-            </p>
-            <button
-              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-              onClick={() => handleSearch(query)}
-            >
-              Try Again
-            </button>
-          </div>
-        ) : filteredResults && filteredResults.length > 0 ? (
-          filteredResults.map((result: ModelResponse) => (
+      {error ? (
+        <div className="p-6 text-center">
+          <h3 className="text-lg font-medium text-secondary mb-2">Error Fetching Results</h3>
+          <p className="text-muted-foreground">
+            {error instanceof Error ? error.message : "An unknown error occurred"}
+          </p>
+          <button
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+            onClick={() => handleSearch(query)}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
+          {filteredResults.map((result: ModelResponse) => (
             <ResultCard key={result.id} result={result} />
-          ))
-        ) : (
-          <div className="p-6 text-center">
-            <h3 className="text-lg font-medium text-foreground mb-2">No Results Found</h3>
-            <p className="text-muted-foreground">
-              {selectedModel 
-                ? `No results from the selected model. Try another model or remove the filter.`
-                : `We couldn't find any results for your query. Try a different search term.`}
-            </p>
-          </div>
-        )}
-      </div>
+          ))}
+          {isLoading && (
+            <LoadingSkeleton count={Math.max(4 - filteredResults.length, 1)} />
+          )}
+          {!isLoading && filteredResults.length === 0 && (
+            <div className="p-6 text-center">
+              <h3 className="text-lg font-medium text-foreground mb-2">No Results Found</h3>
+              <p className="text-muted-foreground">
+                {selectedModel
+                  ? `No results from the selected model. Try another model or remove the filter.`
+                  : `We couldn't find any results for your query. Try a different search term.`}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
