@@ -2,6 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+/**
+ * During the build step this script injects a global `API_BASE_URL` variable
+ * into the generated `index.html` file. The variable value is read from the
+ * `API_BASE_URL` environment variable.
+ */
+
 const apiBaseUrl = process.env.API_BASE_URL;
 if (!apiBaseUrl) {
   process.exit(0);

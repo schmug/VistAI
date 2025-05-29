@@ -67,6 +67,11 @@ npm test
 npm run check
 ```
 
+## Development Best Practices
+
+See [docs/best-practices.md](docs/best-practices.md) for code style guidelines and
+commit etiquette.
+
 ## API Documentation
 
 Interactive API docs are available when the worker is running. Visit
