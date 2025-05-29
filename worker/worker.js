@@ -122,6 +122,19 @@ paths:
                     type: array
                     items:
                       type: object
+                      properties:
+                        modelId:
+                          type: string
+                        clickCount:
+                          type: integer
+                        searchCount:
+                          type: integer
+                        updatedAt:
+                          type: string
+                        percentage:
+                          type: integer
+                        displayName:
+                          type: string
   /api/model-stats:
     get:
       summary: Get statistics for each model
@@ -134,6 +147,19 @@ paths:
                 type: array
                 items:
                   type: object
+                  properties:
+                    modelId:
+                      type: string
+                    clickCount:
+                      type: integer
+                    searchCount:
+                      type: integer
+                    updatedAt:
+                      type: string
+                    percentage:
+                      type: integer
+                    displayName:
+                      type: string
   /api/top-models:
     get:
       summary: Get top models by click count
@@ -152,6 +178,19 @@ paths:
                 type: array
                 items:
                   type: object
+                  properties:
+                    modelId:
+                      type: string
+                    clickCount:
+                      type: integer
+                    searchCount:
+                      type: integer
+                    updatedAt:
+                      type: string
+                    percentage:
+                      type: integer
+                    displayName:
+                      type: string
 `;
 
 const swaggerHtml = `<!DOCTYPE html>
@@ -324,10 +363,10 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
-        const click = await trackClick(env.DB, { resultId });
-        const stats = await getModelStats(env.DB);
-        return jsonResponse({ success: true, click, stats }, headers);
-      }
+          const click = await trackClick(env.DB, { resultId });
+          const stats = await getModelStatsWithPercent(env.DB);
+          return jsonResponse({ success: true, click, stats }, headers);
+        }
 
       if (pathname === '/api/model-stats' && request.method === 'GET') {
         const stats = await getModelStatsWithPercent(env.DB);
