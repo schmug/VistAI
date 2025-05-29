@@ -325,7 +325,7 @@ export default {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
         const click = await trackClick(env.DB, { resultId });
-        const stats = await getModelStats(env.DB);
+        const stats = await getModelStatsWithPercent(env.DB);
         return jsonResponse({ success: true, click, stats }, headers);
       }
 
