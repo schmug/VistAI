@@ -363,10 +363,11 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
-          const click = await trackClick(env.DB, { resultId });
-          const stats = await getModelStatsWithPercent(env.DB);
-          return jsonResponse({ success: true, click, stats }, headers);
-        }
+
+        const click = await trackClick(env.DB, { resultId });
+        const stats = await getModelStatsWithPercent(env.DB);
+        return jsonResponse({ success: true, click, stats }, headers);
+      }
 
       if (pathname === '/api/model-stats' && request.method === 'GET') {
         const stats = await getModelStatsWithPercent(env.DB);
