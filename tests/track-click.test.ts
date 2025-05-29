@@ -15,6 +15,14 @@ test('track-click updates model stats with percentages', async () => {
     'model/B': { clickCount: 1, searchCount: 1, updatedAt: now },
   });
 
+  const registerReq = new Request('http://localhost/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'u', password: 'p' }),
+  });
+  const registerRes = await worker.fetch(registerReq, { DB: db, OPENROUTER_API_KEY: 'key' });
+  const { token } = await registerRes.json();
+
   const search = await createSearch(db as any, { query: 'q' });
   await createResult(db as any, {
     searchId: search.id,
@@ -33,7 +41,7 @@ test('track-click updates model stats with percentages', async () => {
 
   const req = new Request('http://localhost/api/track-click', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ resultId: resultB.id }),
   });
 
@@ -41,6 +49,7 @@ test('track-click updates model stats with percentages', async () => {
   assert.strictEqual(res.status, 200);
   const data = await res.json();
   assert.ok(data.success);
+  assert.strictEqual(data.click.userId, 1);
 
   const a = data.stats.find((s: any) => s.modelId === 'model/A');
   const b = data.stats.find((s: any) => s.modelId === 'model/B');
@@ -54,3 +63,4 @@ test('track-click updates model stats with percentages', async () => {
   assert.strictEqual(a.displayName, 'A');
   assert.strictEqual(b.displayName, 'B');
 });
+

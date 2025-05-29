@@ -1,3 +1,31 @@
+import crypto from 'node:crypto';
+
+/** Hash a plain text password using SHA-256. */
+export function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+/** Create a user and return the new record. */
+export async function createUser(db, { username, password }) {
+  const hashed = hashPassword(password);
+  const { results } = await db
+    .prepare(
+      'INSERT INTO users (username, password) VALUES (?, ?) RETURNING id, username'
+    )
+    .bind(username, hashed)
+    .all();
+  return results[0];
+}
+
+/** Find a user by username. */
+export async function findUser(db, username) {
+  const { results } = await db
+    .prepare('SELECT id, username, password FROM users WHERE username = ?')
+    .bind(username)
+    .all();
+  return results[0];
+}
+
 /**
  * Insert a new search row and return the created record.
  */
@@ -29,13 +57,13 @@ export async function createResult(db, { searchId, modelId, content, title, resp
 /**
  * Record a user click on a result and update model stats.
  */
-export async function trackClick(db, { resultId }) {
+export async function trackClick(db, { resultId, userId }) {
   const now = new Date().toISOString();
   const { results } = await db
     .prepare(
-      'INSERT INTO clicks (result_id, created_at) VALUES (?, ?) RETURNING id, result_id as resultId, created_at as createdAt'
+      'INSERT INTO clicks (result_id, user_id, created_at) VALUES (?,?,?) RETURNING id, result_id as resultId, user_id as userId, created_at as createdAt'
     )
-    .bind(resultId, now)
+    .bind(resultId, userId, now)
     .all();
   await db
     .prepare(
