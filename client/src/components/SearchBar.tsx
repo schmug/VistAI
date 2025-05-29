@@ -1,7 +1,7 @@
 import { useState, FormEvent, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SearchBarProps {
   initialQuery?: string;
@@ -14,13 +14,21 @@ interface SearchBarProps {
  */
 export default function SearchBar({ initialQuery = "", compact = false, onSearch }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!compact && inputRef.current) {
       inputRef.current.focus();
     }
   }, [compact]);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }, [query]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -36,14 +44,20 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
       )}>
         <i className={cn("ri-search-line text-muted-foreground mr-3", compact ? "text-base" : "text-xl")}></i>
         
-        <Input
+        <Textarea
           ref={inputRef}
-          type="text"
+          rows={1}
           placeholder="Ask AI anything..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit(e as unknown as FormEvent);
+            }
+          }}
           className={cn(
-            "flex-1 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+            "flex-1 resize-none overflow-hidden border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
             compact ? "text-base" : "text-lg"
           )}
         />
