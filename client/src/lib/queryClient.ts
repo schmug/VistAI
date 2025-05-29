@@ -31,6 +31,9 @@ export async function apiRequest(
     method,
     headers: {
       ...(data ? { "Content-Type": "application/json" } : {}),
+      ...(typeof window !== "undefined" && window.localStorage?.getItem("token")
+        ? { Authorization: `Bearer ${window.localStorage.getItem("token")}` }
+        : {}),
       ...(options?.headers || {}),
     },
     body: data ? JSON.stringify(data) : undefined,
