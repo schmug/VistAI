@@ -39,7 +39,7 @@ export default function SubscriptionModal({
                 topModels.slice(0, 3).map((model) => {
                   const info = getModelInfo(model.displayName);
                   return (
-                    <div key={model.id} className="flex justify-between items-center">
+                    <div key={model.modelId} className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <div className={`w-4 h-4 rounded-full ${info.bg} flex items-center justify-center`}>
                           <i className={`${info.icon} ${info.color} text-xs`}></i>
