@@ -6,6 +6,9 @@ import {
   getModelStats,
   getModelStatsWithPercent,
   getTopModelsWithPercent,
+  createUser,
+  findUser,
+  hashPassword,
 } from './db.js';
 
 /**
@@ -18,6 +21,9 @@ export const FALLBACK_MODELS = [
   'google/gemini-2.5-pro-preview',
   'deepseek/deepseek-chat-v3-0324:free',
 ];
+
+// Simple in-memory token store mapping tokens to user IDs
+const tokenMap = new Map();
 
 const openapiSpec = `openapi: 3.0.0
 info:
@@ -49,6 +55,58 @@ paths:
                     type: boolean
                   time:
                     type: string
+  /api/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+  /api/login:
+    post:
+      summary: Login and obtain auth token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
   /api/search:
     post:
       summary: Query models
@@ -289,6 +347,33 @@ export default {
         }, headers);
       }
 
+      if (pathname === '/api/register' && request.method === 'POST') {
+        const body = await request.json();
+        const { username, password } = body;
+        if (!username || !password) {
+          return jsonResponse({ message: 'Invalid user data' }, headers, 400);
+        }
+        const user = await createUser(env.DB, { username, password });
+        const token = crypto.randomUUID();
+        tokenMap.set(token, user.id);
+        return jsonResponse({ token, user }, headers);
+      }
+
+      if (pathname === '/api/login' && request.method === 'POST') {
+        const body = await request.json();
+        const { username, password } = body;
+        if (!username || !password) {
+          return jsonResponse({ message: 'Invalid credentials' }, headers, 400);
+        }
+        const user = await findUser(env.DB, username);
+        if (!user || hashPassword(password) !== user.password) {
+          return jsonResponse({ message: 'Invalid credentials' }, headers, 401);
+        }
+        const token = crypto.randomUUID();
+        tokenMap.set(token, user.id);
+        return jsonResponse({ token, user: { id: user.id, username: user.username } }, headers);
+      }
+
       if (pathname === '/api/search' && request.method === 'POST') {
         const body = await request.json();
         const { query } = body;
@@ -363,8 +448,12 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
+        const auth = request.headers.get('Authorization') || '';
+        const m = auth.match(/^Bearer\s+(.*)$/);
+        const token = m ? m[1] : '';
+        const userId = tokenMap.get(token);
 
-        const click = await trackClick(env.DB, { resultId });
+        const click = await trackClick(env.DB, { resultId, userId });
         const stats = await getModelStatsWithPercent(env.DB);
         return jsonResponse({ success: true, click, stats }, headers);
       }

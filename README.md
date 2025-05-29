@@ -30,6 +30,7 @@ Open `dist/public/index.html` in your browser to test locally.
 - **Real-time Analytics**: Track which models users prefer through click metrics
 - **Responsive UI**: Material dark theme with high-contrast colors that works on all devices
 - **Performance Tracking**: See which models respond fastest and are chosen most often
+- **User Accounts**: Register and log in to track personal model preferences
 
 ## Environment Variables
 
