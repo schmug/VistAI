@@ -24,7 +24,6 @@ export interface SearchResponse {
 }
 
 export interface ModelStats {
-  id: number;
   modelId: string;
   clickCount: number;
   searchCount: number;
