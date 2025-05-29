@@ -1,6 +1,7 @@
 name = "vistai-worker"
 main = "worker/worker.js"
 compatibility_date = "2025-05-26"
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # OPENROUTER_API_KEY should be set in the Cloudflare dashboard or via wrangler
