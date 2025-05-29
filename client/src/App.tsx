@@ -4,6 +4,8 @@ import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
 import SearchResults from "@/pages/SearchResults";
 import Dashboard from "@/pages/Dashboard";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import NotFound from "@/pages/not-found";
 import "./index.css";
 
@@ -19,6 +21,8 @@ export default function App() {
           <Route path="/" component={Home} />
           <Route path="/search" component={SearchResults} />
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
           <Route component={NotFound} />
         </Switch>
       </main>
