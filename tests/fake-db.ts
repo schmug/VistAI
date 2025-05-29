@@ -2,10 +2,12 @@ export class FakeD1Database {
   searches: any[] = [];
   results: any[] = [];
   clicks: any[] = [];
+  users: any[] = [];
   modelStats: Record<string, {clickCount: number; searchCount: number; updatedAt: string}>;
   nextSearchId = 1;
   nextResultId = 1;
   nextClickId = 1;
+  nextUserId = 1;
   constructor(initialStats: Record<string, {clickCount: number; searchCount: number; updatedAt: string}> = {}) {
     this.modelStats = { ...initialStats };
   }
@@ -29,9 +31,18 @@ export class FakeD1Database {
           return { results: [row] };
         }
         if (q.startsWith('INSERT INTO clicks')) {
-          const row = { id: db.nextClickId++, resultId: a[0], createdAt: a[1] };
+          const row = { id: db.nextClickId++, resultId: a[0], userId: a[1], createdAt: a[2] };
           db.clicks.push(row);
           return { results: [row] };
+        }
+        if (q.startsWith('INSERT INTO users')) {
+          const row = { id: db.nextUserId++, username: a[0], password: a[1] };
+          db.users.push(row);
+          return { results: [ { id: row.id, username: row.username } ] };
+        }
+        if (q.startsWith('SELECT id, username, password FROM users')) {
+          const user = db.users.find(u => u.username === a[0]);
+          return { results: user ? [user] : [] };
         }
         if (q.startsWith('SELECT model_id as modelId') && q.includes('ORDER BY')) {
           const limit = a[0];
