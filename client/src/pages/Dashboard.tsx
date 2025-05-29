@@ -165,7 +165,7 @@ export default function Dashboard() {
                   .map((stat) => {
                     const model = getModelInfo(stat.displayName);
                     return (
-                      <div key={stat.id} className="space-y-2">
+                      <div key={stat.modelId} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <i className={`${model.icon} ${model.color}`}></i>
