@@ -99,3 +99,40 @@ export function getRandomSuggestions(count: number = 3): string[] {
   const shuffled = [...searchSuggestions].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
+
+/** Key used to store query history in localStorage. */
+const QUERY_HISTORY_KEY = "queryHistory";
+
+/**
+ * Retrieve past search queries from localStorage.
+ */
+export function getQueryHistory(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const data = window.localStorage.getItem(QUERY_HISTORY_KEY);
+    return data ? (JSON.parse(data) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save a new query to localStorage, keeping only the most recent 10.
+ */
+export function saveQueryToHistory(query: string, limit = 10): void {
+  if (typeof window === "undefined") return;
+  const history = getQueryHistory().filter((q) => q !== query);
+  history.unshift(query);
+  window.localStorage.setItem(
+    QUERY_HISTORY_KEY,
+    JSON.stringify(history.slice(0, limit)),
+  );
+}
+
+/**
+ * Clear all stored search history.
+ */
+export function clearQueryHistory(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(QUERY_HISTORY_KEY);
+}

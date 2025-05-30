@@ -1,5 +1,5 @@
 import { useState, FormEvent, useRef, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { cn, getQueryHistory, clearQueryHistory } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -14,6 +14,8 @@ interface SearchBarProps {
  */
 export default function SearchBar({ initialQuery = "", compact = false, onSearch }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
+  const [history, setHistory] = useState<string[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -21,6 +23,15 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
       inputRef.current.focus();
     }
   }, [compact]);
+
+  const handleFocus = () => {
+    setHistory(getQueryHistory());
+    setShowHistory(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setShowHistory(false), 100);
+  };
 
   useEffect(() => {
     const el = inputRef.current;
@@ -50,6 +61,8 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
           placeholder="Ask AI anything..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -84,6 +97,37 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
             </Button>
           )}
         </div>
+        {showHistory && history.length > 0 && (
+          <div className="absolute left-0 top-full mt-2 w-full z-50 bg-card border border-border rounded-md shadow-lg">
+            {history.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setQuery(item);
+                  setShowHistory(false);
+                  onSearch(item);
+                }}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-muted"
+              >
+                {item}
+              </button>
+            ))}
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                clearQueryHistory();
+                setHistory([]);
+                setShowHistory(false);
+              }}
+              className="w-full text-left px-4 py-2 text-sm border-t hover:bg-muted"
+            >
+              Clear history
+            </button>
+          </div>
+        )}
       </div>
     </form>
   );
