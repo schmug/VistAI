@@ -639,8 +639,8 @@ async function queryOpenRouter(prompt, modelId, apiKey) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://aisearch.example',
-        'X-Title': 'AI Search Engine',
+        'HTTP-Referer': 'https://vistai.example',
+        'X-Title': 'VistAI Search Engine',
       },
       body: JSON.stringify({
         model: modelId,
