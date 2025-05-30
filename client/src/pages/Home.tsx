@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getRandomSuggestions } from "@/lib/utils";
 import SearchBar from "@/components/SearchBar";
 import { Link, useLocation } from "wouter";
@@ -8,7 +8,11 @@ import { Link, useLocation } from "wouter";
  */
 export default function Home() {
   const [, navigate] = useLocation();
-  const [suggestions] = useState(() => getRandomSuggestions(3));
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    getRandomSuggestions(3).then(setSuggestions);
+  }, []);
 
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}`);

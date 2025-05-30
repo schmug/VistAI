@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { searchAIStream, ModelResponse, SearchStreamEvent } from "@/lib/openrouter";
-import { formatSearchTime } from "@/lib/utils";
+import { formatSearchTime, addToSearchHistory } from "@/lib/utils";
 import ResultCard from "@/components/ResultCard";
 import ModelFilterPills from "@/components/ModelFilterPills";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
@@ -25,6 +25,8 @@ export default function SearchResults() {
 
   useEffect(() => {
     if (!query) return;
+
+    addToSearchHistory(query);
 
     setSelectedModel(null);
     setResults([]);
