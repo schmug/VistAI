@@ -5,6 +5,8 @@ import {
   incrementModelSearches,
   getModelStatsWithPercent,
   getTopModelsWithPercent,
+  getPopularQueries,
+  getRecentQueries,
   createUser,
   findUser,
   hashPassword,
@@ -248,6 +250,52 @@ paths:
                       type: integer
                     displayName:
                       type: string
+  /api/popular-queries:
+    get:
+      summary: Get most searched queries
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Popular queries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    query:
+                      type: string
+                    count:
+                      type: integer
+  /api/recent-queries:
+    get:
+      summary: Get recent search queries
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Recent queries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    query:
+                      type: string
+                    createdAt:
+                      type: string
 `;
 
 const swaggerHtml = `<!DOCTYPE html>
@@ -466,6 +514,18 @@ export default {
         const limit = parseInt(searchParams.get('limit') || '5', 10);
         const stats = await getTopModelsWithPercent(env.DB, limit);
         return jsonResponse(stats, headers);
+      }
+
+      if (pathname === '/api/popular-queries' && request.method === 'GET') {
+        const limit = parseInt(searchParams.get('limit') || '5', 10);
+        const queries = await getPopularQueries(env.DB, limit);
+        return jsonResponse(queries, headers);
+      }
+
+      if (pathname === '/api/recent-queries' && request.method === 'GET') {
+        const limit = parseInt(searchParams.get('limit') || '5', 10);
+        const queries = await getRecentQueries(env.DB, limit);
+        return jsonResponse(queries, headers);
       }
 
       return new Response('Not Found', { status: 404, headers });

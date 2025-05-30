@@ -52,6 +52,26 @@ export class FakeD1Database {
             .slice(0, limit);
           return { results: arr };
         }
+        if (q.startsWith('SELECT query, COUNT(*) as count FROM searches')) {
+          const limit = a[0];
+          const counts: Record<string, number> = {};
+          for (const s of db.searches) {
+            counts[s.query] = (counts[s.query] || 0) + 1;
+          }
+          const arr = Object.entries(counts)
+            .map(([query, count]) => ({ query, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, limit);
+          return { results: arr };
+        }
+        if (q.startsWith('SELECT query, created_at as createdAt FROM searches')) {
+          const limit = a[0];
+          const arr = [...db.searches]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, limit)
+            .map((s) => ({ query: s.query, createdAt: s.createdAt }));
+          return { results: arr };
+        }
         if (q.startsWith('SELECT model_id as modelId')) {
           const arr = Object.entries(db.modelStats)
             .map(([modelId, s]) => ({ modelId, clickCount: s.clickCount, searchCount: s.searchCount, updatedAt: s.updatedAt }));

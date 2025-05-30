@@ -83,20 +83,63 @@ export function getModelInfo(modelId: string) {
   };
 }
 
-/** Example search suggestions used on the home page. */
-export const searchSuggestions = [
+/** Default suggestions used when no history or API data is available. */
+const fallbackSuggestions = [
   "Explain quantum computing",
   "Create a workout plan",
   "Compare React vs Vue",
   "Summarize climate change solutions",
-  "Recipe for vegan chocolate cake"
+  "Recipe for vegan chocolate cake",
 ];
 
+/** Retrieve recent search history from localStorage. */
+export function getSearchHistory(limit = 5): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem("searchHistory");
+    const arr = JSON.parse(raw || "[]");
+    return Array.isArray(arr) ? arr.slice(-limit).reverse() : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Store a query in local search history. */
+export function addToSearchHistory(query: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const arr = getSearchHistory(20);
+    const newArr = [query, ...arr.filter((q) => q !== query)].slice(0, 20);
+    window.localStorage.setItem("searchHistory", JSON.stringify(newArr.reverse()));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/** Fetch popular queries from the backend API. */
+export async function fetchPopularQueries(limit = 5): Promise<string[]> {
+  try {
+    const res = await fetch(`/api/popular-queries?limit=${limit}`);
+    if (!res.ok) throw new Error("fail");
+    const data = await res.json();
+    return data.map((d: { query: string }) => d.query);
+  } catch {
+    return [];
+  }
+}
+
 /**
- * Select a random subset of suggestions.
+ * Select a random subset of suggestions using history or API data.
  */
-export function getRandomSuggestions(count: number = 3): string[] {
-  const shuffled = [...searchSuggestions].sort(() => 0.5 - Math.random());
+export async function getRandomSuggestions(count: number = 3): Promise<string[]> {
+  const history = getSearchHistory(count);
+  let pool: string[] = history;
+  if (pool.length < count) {
+    const fromApi = await fetchPopularQueries(count * 2);
+    pool = [...history, ...fromApi];
+  }
+  if (pool.length === 0) pool = [...fallbackSuggestions];
+  const shuffled = [...new Set(pool)].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
 

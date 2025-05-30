@@ -135,3 +135,29 @@ export async function getTopModelsWithPercent(db, limit) {
     displayName: s.modelId.split('/').pop(),
   }));
 }
+
+/**
+ * Get the most frequently searched queries.
+ */
+export async function getPopularQueries(db, limit) {
+  const { results } = await db
+    .prepare(
+      'SELECT query, COUNT(*) as count FROM searches GROUP BY query ORDER BY count DESC LIMIT ?'
+    )
+    .bind(limit)
+    .all();
+  return results.map((r) => ({ query: r.query, count: r.count }));
+}
+
+/**
+ * Get the most recent search queries.
+ */
+export async function getRecentQueries(db, limit) {
+  const { results } = await db
+    .prepare(
+      'SELECT query, created_at as createdAt FROM searches ORDER BY created_at DESC LIMIT ?'
+    )
+    .bind(limit)
+    .all();
+  return results;
+}
