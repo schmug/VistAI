@@ -43,7 +43,7 @@ export default function SearchResults() {
       } else if (evt.type === "done") {
         setTotalTime(evt.data.totalTime);
         setIsLoading(false);
-        saveQueryToHistory(query);
+        addQueryToHistory(query);
       } else if (evt.type === "error") {
         setError(new Error(evt.data?.message || "Stream error"));
         setIsLoading(false);
