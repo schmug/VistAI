@@ -44,7 +44,7 @@ export default function Home() {
           <p className="text-muted-foreground text-sm">
             Powered by <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenRouter</a> •
             <Link href="/dashboard" className="text-muted-foreground hover:text-foreground ml-1">Dashboard</Link> •
-            <button className="text-muted-foreground hover:text-foreground ml-1">Settings</button>
+            <Link href="/settings" className="text-muted-foreground hover:text-foreground ml-1">Settings</Link>
           </p>
         </div>
       </div>
