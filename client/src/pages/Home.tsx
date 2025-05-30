@@ -22,7 +22,7 @@ export default function Home() {
     <div className="min-h-[70vh] flex flex-col items-center justify-center">
       <div className="text-center mb-8">
         <h1 className="text-4xl md:text-5xl font-bold mb-2">
-          <span className="text-primary">AI</span><span className="text-foreground">Search</span>
+          <span className="text-primary">Vist</span><span className="text-foreground">AI</span>
         </h1>
         <p className="text-muted-foreground max-w-md mx-auto">
           Compare results from leading AI models in one search
