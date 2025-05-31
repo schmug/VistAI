@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AuthResponse {
   token: string;
+  user: { id: number; username: string };
 }
 
 /**
@@ -14,6 +16,7 @@ interface AuthResponse {
  */
 export default function Register() {
   const [, navigate] = useLocation();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,9 +27,7 @@ export default function Register() {
     try {
       const res = await apiRequest("POST", "/api/register", { username, password });
       const data: AuthResponse = await res.json();
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("token", data.token);
-      }
+      login(data.token, data.user);
       navigate("/");
     } catch (err: any) {
       setError(err.message || "Registration failed");

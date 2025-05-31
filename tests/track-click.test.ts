@@ -20,7 +20,7 @@ test('track-click updates model stats with percentages', async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: 'u', password: 'p' }),
   });
-  const registerRes = await worker.fetch(registerReq, { DB: db, OPENROUTER_API_KEY: 'key' });
+  const registerRes = await worker.fetch(registerReq, { DB: db, OPENROUTER_API_KEY: 'key', JWT_SECRET: 'secret' });
   const { token } = await registerRes.json();
 
   const search = await createSearch(db as any, { query: 'q' });
@@ -45,7 +45,7 @@ test('track-click updates model stats with percentages', async () => {
     body: JSON.stringify({ resultId: resultB.id }),
   });
 
-  const res = await worker.fetch(req, { DB: db, OPENROUTER_API_KEY: 'key' });
+  const res = await worker.fetch(req, { DB: db, OPENROUTER_API_KEY: 'key', JWT_SECRET: 'secret' });
   assert.strictEqual(res.status, 200);
   const data = await res.json();
   assert.ok(data.success);
