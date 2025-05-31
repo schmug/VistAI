@@ -31,6 +31,7 @@ Open `dist/public/index.html` in your browser to test locally.
 - **Responsive UI**: Material dark theme with high-contrast colors that works on all devices
 - **Performance Tracking**: See which models respond fastest and are chosen most often
 - **User Accounts**: Register and log in to track personal model preferences
+- **Voice Search**: Click the microphone to dictate your question
 
 ## Environment Variables
 
