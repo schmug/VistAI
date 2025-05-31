@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
 
 /**
  * Sticky page header containing navigation and the search bar.
@@ -57,12 +58,14 @@ export default function Header() {
               <span className="sr-only">Dashboard</span>
             </Link>
             
-            <button 
-              className="ml-2 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors"
+            <Button
+              variant="secondary"
+              size="icon"
+              className="ml-2 bg-primary/20 text-primary hover:bg-primary/30"
             >
               <i className="ri-user-line"></i>
               <span className="sr-only">Account</span>
-            </button>
+            </Button>
           </nav>
         </div>
       </div>

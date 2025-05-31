@@ -104,3 +104,23 @@
   50% { opacity: 0.3; }
 }
 
+/* Material Web theme overrides */
+md-filled-button {
+  --md-filled-button-container-color: hsl(var(--md-sys-color-primary));
+  --md-filled-button-label-text-color: hsl(var(--md-sys-color-on-primary));
+}
+md-filled-tonal-button {
+  --md-filled-tonal-button-container-color: hsl(var(--md-sys-color-secondary));
+  --md-filled-tonal-button-label-text-color: hsl(var(--md-sys-color-on-secondary));
+}
+md-outlined-button {
+  --md-outlined-button-label-text-color: hsl(var(--md-sys-color-primary));
+  --md-outlined-button-outline-color: hsl(var(--md-sys-color-primary));
+}
+md-text-button {
+  --md-text-button-label-text-color: hsl(var(--md-sys-color-primary));
+}
+md-elevated-button {
+  --md-elevated-button-container-color: hsl(var(--md-sys-color-surface));
+  --md-elevated-button-label-text-color: hsl(var(--md-sys-color-primary));
+}
