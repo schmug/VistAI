@@ -20,9 +20,9 @@ export default function Footer() {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-primary">Home</Link>
             <Link href="/dashboard" className="hover:text-primary">Dashboard</Link>
-            <Link href="/docs" className="hover:text-primary">API</Link>
-            <Button variant="link" className="h-auto p-0">Pricing</Button>
-            <Button variant="link" className="h-auto p-0">Contact</Button>
+            <a href="/docs" className="hover:text-primary">API</a>
+            <button className="hover:text-primary">Pricing</button>
+            <button className="hover:text-primary">Contact</button>
           </div>
         </div>
         
