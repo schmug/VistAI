@@ -100,32 +100,34 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
         {showHistory && history.length > 0 && (
           <div className="absolute left-0 top-full mt-2 w-full z-50 bg-card border border-border rounded-md shadow-lg">
             {history.map((item) => (
-              <button
+              <Button
                 key={item}
                 type="button"
+                variant="ghost"
+                className="w-full justify-start px-4 py-2 text-sm hover:bg-muted"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setQuery(item);
                   setShowHistory(false);
                   onSearch(item);
                 }}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-muted"
               >
                 {item}
-              </button>
+              </Button>
             ))}
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              className="w-full justify-start px-4 py-2 text-sm border-t hover:bg-muted"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
                 clearQueryHistory();
                 setHistory([]);
                 setShowHistory(false);
               }}
-              className="w-full text-left px-4 py-2 text-sm border-t hover:bg-muted"
             >
               Clear history
-            </button>
+            </Button>
           </div>
         )}
       </div>
