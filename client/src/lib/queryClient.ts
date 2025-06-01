@@ -34,6 +34,10 @@ export async function apiRequest(
       ...(typeof window !== "undefined" && window.localStorage?.getItem("token")
         ? { Authorization: `Bearer ${window.localStorage.getItem("token")}` }
         : {}),
+      ...(typeof window !== "undefined" &&
+      window.localStorage?.getItem("openrouter_api_key")
+        ? { "openrouter_api_key": String(window.localStorage.getItem("openrouter_api_key")) }
+        : {}),
       ...(options?.headers || {}),
     },
     body: data ? JSON.stringify(data) : undefined,
