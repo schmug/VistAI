@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import Logout from "@/pages/Logout";
 import NotFound from "@/pages/not-found";
 import "./index.css";
 
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/settings" component={Settings} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
+          <Route path="/logout" component={Logout} />
           <Route component={NotFound} />
         </Switch>
       </main>

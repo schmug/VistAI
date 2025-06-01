@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { Link, useLocation } from "wouter";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Sticky page header containing navigation and the search bar.
@@ -11,6 +19,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [location, navigate] = useLocation();
   const isHomePage = location === "/";
+  const { user, logout } = useAuth();
   
   // Detect scroll for styling
   useEffect(() => {
@@ -57,15 +66,41 @@ export default function Header() {
               <i className="ri-dashboard-line text-xl"></i>
               <span className="sr-only">Dashboard</span>
             </Link>
-            
-            <Button
-              variant="secondary"
-              size="icon"
-              className="ml-2 bg-primary/20 text-primary hover:bg-primary/30"
-            >
-              <i className="ri-user-line"></i>
-              <span className="sr-only">Account</span>
-            </Button>
+
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="ml-2 w-8 h-8 rounded-full bg-primary/20 text-primary hover:bg-primary/30 p-0">
+                    <i className="ri-user-line"></i>
+                    <span className="sr-only">Account</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>{user.username}</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => navigate('/settings')}>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => logout()}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-muted-foreground hover:text-foreground text-sm"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-muted-foreground hover:text-foreground text-sm"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </div>
