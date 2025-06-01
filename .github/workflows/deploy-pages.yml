@@ -2,7 +2,6 @@ name: Deploy Cloudflare Pages
 
 on:
   push:
-    branches: [ main ]
     paths:
       - 'client/**'
       - 'scripts/**'
@@ -30,5 +29,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: vistai-worker
+          projectName: vistai
           directory: ./dist/public
