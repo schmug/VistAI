@@ -425,7 +425,10 @@ export default {
           return jsonResponse({ message: 'Invalid user data' }, headers, 400);
         }
         const user = await createUser(env.DB, { username, password });
-        const secret = env.JWT_SECRET || 'secret';
+        const secret = env.JWT_SECRET;
+        if (!secret) {
+          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        }
         const token = signToken({ userId: user.id }, secret);
         return jsonResponse({ token, user }, headers);
       }
@@ -440,7 +443,10 @@ export default {
         if (!user || hashPassword(password) !== user.password) {
           return jsonResponse({ message: 'Invalid credentials' }, headers, 401);
         }
-        const secret = env.JWT_SECRET || 'secret';
+        const secret = env.JWT_SECRET;
+        if (!secret) {
+          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        }
         const token = signToken({ userId: user.id }, secret);
         return jsonResponse({ token, user: { id: user.id, username: user.username } }, headers);
       }
@@ -541,7 +547,10 @@ export default {
         const auth = request.headers.get('Authorization') || '';
         const m = auth.match(/^Bearer\s+(.*)$/);
         const token = m ? m[1] : '';
-        const secret = env.JWT_SECRET || 'secret';
+        const secret = env.JWT_SECRET;
+        if (!secret) {
+          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        }
         const payload = verifyToken(token, secret);
         const userId = payload ? payload.userId : undefined;
 
