@@ -493,8 +493,10 @@ export default {
         const search = await createSearch(env.DB, { query });
         let models;
         try {
-          const top = await fetchTopModels(apiKey, 4);
-          const trending = await fetchTrendingModel(apiKey);
+          const [top, trending] = await Promise.all([
+            fetchTopModels(apiKey, 4),
+            fetchTrendingModel(apiKey)
+          ]);
           models = [...top];
           if (trending && !models.includes(trending)) {
             models.push(trending);
@@ -513,22 +515,14 @@ export default {
           }
         }
 
-        for (const m of models) {
-          await incrementModelSearches(env.DB, m);
-        }
+        await Promise.all(models.map(m => incrementModelSearches(env.DB, m)));
 
         if (accept.includes('text/event-stream')) {
           return streamSearchResponse({ query, search, models, env, headers, apiKey });
         }
 
-        const results = [];
-        for (const modelId of models) {
-          const modelResponse = await queryOpenRouter(
-            query,
-            modelId,
-            apiKey
-          );
-
+        const modelPromises = models.map(async (modelId) => {
+          const modelResponse = await queryOpenRouter(query, modelId, apiKey);
           const result = await createResult(env.DB, {
             searchId: search.id,
             modelId,
@@ -536,12 +530,14 @@ export default {
             title: modelResponse.title,
             responseTime: modelResponse.responseTime,
           });
-          results.push({
+          return {
             ...result,
             snippet: modelResponse.snippet,
             modelName: modelId.split('/').pop(),
-          });
-        }
+          };
+        });
+
+        const results = await Promise.all(modelPromises);
 
         return jsonResponse({
           search,

@@ -14,14 +14,30 @@ export default function Home() {
   const [isTrending, setIsTrending] = useState(false);
 
   useEffect(() => {
-    fetchPopularQueries(5).then((qs) => {
-      if (qs.length > 0) {
-        setIsTrending(true);
-        setSuggestions(qs);
-      } else {
-        getRandomSuggestions(3).then(setSuggestions);
+    const loadSuggestions = async () => {
+      try {
+        const [popularResult, randomResult] = await Promise.allSettled([
+          fetchPopularQueries(5),
+          getRandomSuggestions(3)
+        ]);
+
+        const popular = popularResult.status === 'fulfilled' ? popularResult.value : [];
+        const random = randomResult.status === 'fulfilled' ? randomResult.value : [];
+
+        if (popular.length > 0) {
+          setIsTrending(true);
+          setSuggestions(popular);
+        } else {
+          setSuggestions(random);
+        }
+      } catch (error) {
+        console.error('Failed to load suggestions:', error);
+        // Fallback to empty suggestions
+        setSuggestions([]);
       }
-    });
+    };
+
+    loadSuggestions();
   }, []);
 
   const handleSearch = (query: string) => {
