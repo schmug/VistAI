@@ -89,15 +89,15 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className={cn(
-        "relative flex items-center bg-card border border-border hover:border-primary/50 focus-within:border-primary rounded-full transition-all shadow-lg",
+        "relative flex items-center glass-card search-bar-glow rounded-full transition-all",
         compact ? "px-4 py-2" : "px-5 py-3"
       )}>
-        <i className={cn("ri-search-line text-muted-foreground mr-3", compact ? "text-base" : "text-xl")}></i>
+        <i className={cn("ri-search-line text-primary/80 mr-3", compact ? "text-base" : "text-xl")}></i>
         
         <Textarea
           ref={inputRef}
           rows={1}
-          placeholder="Ask AI anything..."
+          placeholder="Search across multiple AI models..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={handleFocus}
@@ -121,7 +121,7 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
             <Button 
               type="submit" 
               size="icon" 
-              className="bg-primary hover:bg-primary/90 text-white rounded-full"
+              className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white rounded-full shadow-glow transition-all duration-300"
             >
               <i className="ri-search-line text-xl"></i>
               <span className="sr-only">Search</span>

@@ -26,7 +26,7 @@ const ModelBadge = memo(function ModelBadge({ modelId, size = "md", showName = t
     <div className="flex items-center gap-2">
       <div className={cn(
         model.bg,
-        "rounded-full flex items-center justify-center",
+        "rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110",
         sizeClasses[size]
       )}>
         <i className={cn(model.icon, model.color)}></i>
@@ -35,7 +35,7 @@ const ModelBadge = memo(function ModelBadge({ modelId, size = "md", showName = t
       {showName && (
         <span className={cn(
           model.color,
-          "font-medium",
+          "font-semibold tracking-tight",
           size === "sm" ? "text-xs" : size === "md" ? "text-sm" : "text-base"
         )}>
           {model.name}

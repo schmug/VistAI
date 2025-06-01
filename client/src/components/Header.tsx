@@ -35,14 +35,14 @@ export default function Header() {
   
   return (
     <header className={cn(
-      "sticky top-0 z-10 backdrop-blur-sm border-b border-border transition-all duration-200",
-      scrolled ? "bg-background/95" : "bg-background"
+      "sticky top-0 z-10 glass-header transition-all duration-300",
+      scrolled ? "shadow-lg" : ""
     )}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-primary">VistAI</h1>
-            <span className="text-xs bg-card px-2 py-0.5 rounded-full text-muted-foreground">Beta</span>
+            <h1 className="text-xl font-bold text-gradient-primary">VistAI</h1>
+            <span className="text-xs bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full text-primary/80 font-medium">Beta</span>
           </Link>
         </div>
         
@@ -61,7 +61,7 @@ export default function Header() {
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-lg hover:bg-primary/10"
               >
                 <i className="ri-dashboard-line text-xl"></i>
                 <span className="sr-only">Dashboard</span>
@@ -69,7 +69,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/dashboard-public"
-                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-lg hover:bg-primary/10"
               >
                 <i className="ri-dashboard-line text-xl"></i>
                 <span className="sr-only">Dashboard</span>
@@ -79,7 +79,7 @@ export default function Header() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="ml-2 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors">
+                  <button className="ml-2 w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary hover:from-primary/30 hover:to-secondary/30 transition-all duration-300 shadow-glow">
                     <i className="ri-user-line"></i>
                     <span className="sr-only">Account</span>
                   </button>
