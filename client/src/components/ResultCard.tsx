@@ -10,13 +10,42 @@ import ModelBadge from "./ModelBadge";
 import { trackResultClick } from "@/lib/openrouter";
 import { ModelResponse } from "@/lib/openrouter";
 
+/**
+ * Props for the ResultCard component
+ */
 interface ResultCardProps {
+  /** Model response data containing content, title, timing, etc. */
   result: ModelResponse;
 }
 
 /**
- * Card displaying a single model's response.
- * The content is collapsed until expanded, which records a click.
+ * Card component that displays a single AI model's response with expandable content.
+ * 
+ * Features:
+ * - Collapsible content with expand/collapse functionality
+ * - Click tracking for analytics (tracks when user expands content)
+ * - Copy to clipboard functionality
+ * - Share functionality
+ * - Model badge with response time display
+ * - Responsive design with mobile optimizations
+ * 
+ * The card initially shows a preview/snippet and expands to show full content
+ * when clicked. This expansion is tracked as a user engagement metric.
+ * 
+ * @example
+ * ```tsx
+ * <ResultCard 
+ *   result={{
+ *     id: 123,
+ *     modelId: "openai/gpt-4o-mini",
+ *     content: "Full AI response content...",
+ *     snippet: "Brief preview...",
+ *     title: "Response Title",
+ *     responseTime: 1250,
+ *     modelName: "GPT-4o Mini"
+ *   }} 
+ * />
+ * ```
  */
 export default function ResultCard({ result }: ResultCardProps) {
   const { toast } = useToast();

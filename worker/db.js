@@ -1,11 +1,45 @@
 import crypto from 'node:crypto';
 
-/** Hash a plain text password using SHA-256. */
+/**
+ * Hash a plain text password using SHA-256.
+ * 
+ * ⚠️ SECURITY WARNING: This implementation is not secure for production use.
+ * SHA-256 without salt is vulnerable to rainbow table attacks.
+ * 
+ * TODO: Replace with bcrypt for production deployment:
+ * ```js
+ * import bcrypt from 'bcrypt';
+ * export async function hashPassword(password) {
+ *   return await bcrypt.hash(password, 12);
+ * }
+ * ```
+ * 
+ * @param {string} password - Plain text password to hash
+ * @returns {string} SHA-256 hash of the password (hex encoded)
+ */
 export function hashPassword(password) {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
-/** Create a user and return the new record. */
+/**
+ * Create a new user account in the database.
+ * 
+ * @param {Object} db - D1 database instance
+ * @param {Object} userData - User data object
+ * @param {string} userData.username - Unique username (3-50 characters)
+ * @param {string} userData.password - Plain text password (will be hashed)
+ * @returns {Promise<Object>} Created user object with id and username
+ * @throws {Error} If username already exists or validation fails
+ * 
+ * @example
+ * ```js
+ * const user = await createUser(db, {
+ *   username: "testuser",
+ *   password: "securepassword123"
+ * });
+ * console.log(user); // { id: 1, username: "testuser" }
+ * ```
+ */
 export async function createUser(db, { username, password }) {
   const hashed = hashPassword(password);
   const { results } = await db
@@ -17,7 +51,21 @@ export async function createUser(db, { username, password }) {
   return results[0];
 }
 
-/** Find a user by username. */
+/**
+ * Find a user by username for authentication.
+ * 
+ * @param {Object} db - D1 database instance
+ * @param {string} username - Username to search for
+ * @returns {Promise<Object|undefined>} User object with password hash, or undefined if not found
+ * 
+ * @example
+ * ```js
+ * const user = await findUser(db, "testuser");
+ * if (user && hashPassword(inputPassword) === user.password) {
+ *   // Authentication successful
+ * }
+ * ```
+ */
 export async function findUser(db, username) {
   const { results } = await db
     .prepare('SELECT id, username, password FROM users WHERE username = ?')
@@ -26,7 +74,21 @@ export async function findUser(db, username) {
   return results[0];
 }
 
-/** Find a user by ID. */
+/**
+ * Find a user by their unique ID (used for token validation).
+ * 
+ * @param {Object} db - D1 database instance
+ * @param {number} id - User ID to search for
+ * @returns {Promise<Object|undefined>} User object without password, or undefined if not found
+ * 
+ * @example
+ * ```js
+ * const user = await findUserById(db, 123);
+ * if (user) {
+ *   console.log(`Welcome back, ${user.username}!`);
+ * }
+ * ```
+ */
 export async function findUserById(db, id) {
   const { results } = await db
     .prepare('SELECT id, username FROM users WHERE id = ?')
