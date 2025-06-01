@@ -4,19 +4,33 @@ compatibility_date = "2025-05-26"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-# OPENROUTER_API_KEY should be set in the Cloudflare dashboard or via wrangler
-# API_BASE_URL should be set in Cloudflare dashboard or via wrangler
-# ACCESS_CONTROL_ALLOW_ORIGIN controls allowed CORS origins
-# https://developers.cloudflare.com/secrets-store/integrations/workers/
-secrets_store_secrets = [
-  { binding = "OPENROUTER_API_KEY", store_id= "3ae45c355bc742238784351f929bc706", secret_name = "OPENROUTER_API_KEY" }
-]
+# Environment variables can be set in Cloudflare dashboard or via wrangler secret put
+# ACCESS_CONTROL_ALLOW_ORIGIN = "*"  # For development, restrict in production
+# JWT_SECRET = "your-secure-jwt-secret-here"  # Set via wrangler secret put JWT_SECRET
 
 [observability]
 enabled = true
 
+# Production configuration
+[env.production]
+name = "vistai-worker-prod"
+vars = { ACCESS_CONTROL_ALLOW_ORIGIN = "https://vistai.pages.dev" }
+
+# Optional: Development environment
+[env.development]  
+name = "vistai-worker-dev"
+vars = { ACCESS_CONTROL_ALLOW_ORIGIN = "*" }
+
 [[d1_databases]]
 binding = "DB"
 database_name = "vistai"
-# Replace with your D1 database ID
+# IMPORTANT: Replace with your actual D1 database ID from Cloudflare dashboard
+# Run: wrangler d1 create vistai
+# Then copy the database_id from the output
+database_id = "88697d9a-39f5-4698-9df0-5b8ff40ffb7a"
+
+# Production database (optional - use same DB or create separate one)
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "vistai-prod"
 database_id = "88697d9a-39f5-4698-9df0-5b8ff40ffb7a"

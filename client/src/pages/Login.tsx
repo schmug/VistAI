@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { parseError, AppError } from "@/lib/errorHandling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ErrorNotification } from "@/components/ErrorNotification";
 import { useLocation } from "wouter";
 
 /**
@@ -12,7 +14,7 @@ export default function Login() {
   const [, navigate] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AppError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
 
@@ -31,7 +33,7 @@ export default function Login() {
       await login(username, password);
       navigate("/");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(parseError(err));
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +64,6 @@ export default function Login() {
               minLength={6}
               disabled={isLoading}
             />
-            {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={isLoading || !username || !password}>
               {isLoading ? "Logging in..." : "Login"}
             </Button>
@@ -79,6 +80,16 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
+      
+      <ErrorNotification
+        error={error}
+        onDismiss={() => setError(null)}
+        onRetry={() => {
+          if (username && password) {
+            handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+          }
+        }}
+      />
     </div>
   );
 }

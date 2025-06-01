@@ -108,29 +108,18 @@ Future enhancements could include:
 - Adding more AI models to the comparison
 - Implementing revenue sharing based on user preferences
 
-## Deploying to Cloudflare
+## Deployment
 
-1. Deploy the static frontend using **Cloudflare Pages**.
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
-   - Set the build command to `npm run build` and the output directory to `dist/public`.
-   - **Do not set** the `GITHUB_PAGES` environment variable when building for Cloudflare Pages. Leaving it enabled changes Vite's `base` path to `/VistAI/`, which will break asset and API URLs.
-  - Provide the Worker URL via the `API_BASE_URL` environment variable. When this variable is set the build script automatically appends the following snippet into `dist/public/index.html`:
+### Quick Deploy
 
-    ```html
-    <script>window.API_BASE_URL = "<%= process.env.API_BASE_URL %>";</script>
-    ```
+1. **Database**: `wrangler d1 create vistai` and update database_id in `wrangler.toml`
+2. **Secrets**: `wrangler secret put OPENROUTER_API_KEY` and `wrangler secret put JWT_SECRET`  
+3. **Worker**: `wrangler deploy --env production`
+4. **Frontend**: Deploy to Cloudflare Pages with `API_BASE_URL` environment variable
 
-     The application reads `window.API_BASE_URL` at runtime and prefixes all API requests with this value. If `GITHUB_PAGES` is enabled or `API_BASE_URL` points to the wrong location, the frontend will request assets and API routes from incorrect paths and you will see 404 errors.
-
-2. Deploy the API using **Cloudflare Workers** with `wrangler`. The Worker's configuration is defined in `wrangler.toml`.
-
-3. Set your OpenRouter API key as a secret for the Worker. Run `wrangler secret put OPENROUTER_API_KEY` or add the variable under **Settings > Variables** in the Cloudflare dashboard so the Worker can authenticate with OpenRouter.
-
-   The Worker checks that both this API key and the `DB` database binding are configured before handling any request. If either is missing it responds with HTTP 500 and a descriptive error.
-
-4. The repository includes a GitHub Actions workflow that automatically runs `wrangler deploy` whenever changes to the Worker are pushed to the `main` branch. Configure `CF_API_TOKEN` and `CF_ACCOUNT_ID` secrets in your repository settings to enable this automation.
-
-Once both are deployed the site will automatically call the Worker endpoints via the configured base URL.
+The application supports environment-specific configurations for development and production deployments.
 
 ## License
 

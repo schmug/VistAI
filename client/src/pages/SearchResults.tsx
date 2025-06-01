@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { searchAIStream, ModelResponse, SearchStreamEvent } from "@/lib/openrouter";
 import { formatSearchTime, addToSearchHistory } from "@/lib/utils";
+import { parseError, AppError } from "@/lib/errorHandling";
 import ResultCard from "@/components/ResultCard";
 import ModelFilterPills from "@/components/ModelFilterPills";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import SearchBar from "@/components/SearchBar";
+import { ErrorNotification } from "@/components/ErrorNotification";
 import { useLocation } from "wouter";
 import { useLocationSearch } from "@/hooks/use-full-location";
 
@@ -21,12 +23,10 @@ export default function SearchResults() {
   const [search, setSearch] = useState<{ id: number; query: string; createdAt: Date } | null>(null);
   const [totalTime, setTotalTime] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<AppError | null>(null);
 
-  useEffect(() => {
+  const performSearch = async () => {
     if (!query) return;
-
-    addToSearchHistory(query);
 
     setSelectedModel(null);
     setResults([]);
@@ -35,23 +35,34 @@ export default function SearchResults() {
     setError(null);
     setIsLoading(true);
 
-    searchAIStream(query, (evt: SearchStreamEvent) => {
-      if (evt.type === "search") {
-        setSearch(evt.data);
-      } else if (evt.type === "result") {
-        setResults((prev) => [...prev, evt.data]);
-      } else if (evt.type === "done") {
-        setTotalTime(evt.data.totalTime);
-        setIsLoading(false);
-        addToSearchHistory(query);
-      } else if (evt.type === "error") {
-        setError(new Error(evt.data?.message || "Stream error"));
-        setIsLoading(false);
-      }
-    }).catch((err) => {
-      setError(err instanceof Error ? err : new Error(String(err)));
+    try {
+      await searchAIStream(query, (evt: SearchStreamEvent) => {
+        if (evt.type === "search") {
+          setSearch(evt.data);
+        } else if (evt.type === "result") {
+          setResults((prev) => [...prev, evt.data]);
+        } else if (evt.type === "done") {
+          setTotalTime(evt.data.totalTime);
+          setIsLoading(false);
+          addToSearchHistory(query);
+        } else if (evt.type === "error") {
+          const appError = parseError(new Error(evt.data?.message || "Stream error"));
+          setError(appError);
+          setIsLoading(false);
+        }
+      });
+    } catch (err) {
+      const appError = parseError(err);
+      setError(appError);
       setIsLoading(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    if (query) {
+      addToSearchHistory(query);
+      performSearch();
+    }
   }, [query]);
   
   // Filter results by selected model
@@ -90,43 +101,41 @@ export default function SearchResults() {
         </div>
       )}
       
-      {/* Results or Loading State */}
-      {error ? (
-        <div className="p-6 text-center">
-          <h3 className="text-lg font-medium text-secondary mb-2">Error Fetching Results</h3>
-          <p className="text-muted-foreground">
-            {error instanceof Error ? error.message : "An unknown error occurred"}
-          </p>
-          <button
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-            onClick={() => handleSearch(query)}
-          >
-            Try Again
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
-          {filteredResults.map((result: ModelResponse) => (
-            <ResultCard key={result.id} result={result} />
-          ))}
-          {isLoading && (
-            <LoadingSkeleton
-              count={Math.max(4 - filteredResults.length, 1)}
-              blink={results.length > 0}
-            />
-          )}
-          {!isLoading && filteredResults.length === 0 && (
-            <div className="p-6 text-center">
-              <h3 className="text-lg font-medium text-foreground mb-2">No Results Found</h3>
-              <p className="text-muted-foreground">
-                {selectedModel
-                  ? `No results from the selected model. Try another model or remove the filter.`
-                  : `We couldn't find any results for your query. Try a different search term.`}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Results */}
+      <div className="grid grid-cols-1 gap-6">
+        {filteredResults.map((result: ModelResponse) => (
+          <ResultCard key={result.id} result={result} />
+        ))}
+        {isLoading && (
+          <LoadingSkeleton
+            count={Math.max(4 - filteredResults.length, 1)}
+            blink={results.length > 0}
+          />
+        )}
+        {!isLoading && !error && filteredResults.length === 0 && results.length === 0 && (
+          <div className="p-6 text-center">
+            <h3 className="text-lg font-medium text-foreground mb-2">No Results Found</h3>
+            <p className="text-muted-foreground">
+              We couldn't find any results for your query. Try a different search term.
+            </p>
+          </div>
+        )}
+        {!isLoading && !error && filteredResults.length === 0 && results.length > 0 && (
+          <div className="p-6 text-center">
+            <h3 className="text-lg font-medium text-foreground mb-2">No Results for Selected Model</h3>
+            <p className="text-muted-foreground">
+              No results from the selected model. Try another model or remove the filter.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Error Notification */}
+      <ErrorNotification
+        error={error}
+        onDismiss={() => setError(null)}
+        onRetry={performSearch}
+      />
     </div>
   );
 }
