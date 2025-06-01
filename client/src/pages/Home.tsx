@@ -63,7 +63,8 @@ export default function Home() {
                 className="text-xs bg-card px-3 py-1.5 rounded-full text-muted-foreground cursor-pointer hover:bg-card/80 transition-colors"
                 onClick={() => handleSearch(suggestion)}
               >
-                {`Try: "${suggestion}"`}
+
+                {`Try: ${suggestion}`}
               </button>
             ))}
           </div>
