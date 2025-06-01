@@ -17,6 +17,7 @@ export async function apiRequest(
   options?: {
     headers?: Record<string, string>
     skipErrorHandling?: boolean
+    signal?: AbortSignal
   },
 ): Promise<Response> {
   const base = typeof window !== "undefined" && (window as any).API_BASE_URL;
@@ -39,6 +40,7 @@ export async function apiRequest(
     },
     body: data ? JSON.stringify(data) : undefined,
     credentials: useCredentials ? "include" : "omit",
+    signal: options?.signal,
   });
 
   if (!options?.skipErrorHandling) {

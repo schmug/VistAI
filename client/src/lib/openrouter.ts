@@ -58,6 +58,7 @@ export interface SearchStreamEvent {
 export async function searchAIStream(
   query: string,
   onEvent: (event: SearchStreamEvent) => void,
+  signal?: AbortSignal,
 ): Promise<SearchResponse> {
   return withRetry(async () => {
     try {
@@ -65,7 +66,10 @@ export async function searchAIStream(
         "POST",
         "/api/search",
         { query },
-        { headers: { Accept: "text/event-stream" } },
+        { 
+          headers: { Accept: "text/event-stream" },
+          signal 
+        },
       );
 
       const contentType = response.headers.get("content-type") || "";
@@ -78,6 +82,11 @@ export async function searchAIStream(
 
         try {
           while (true) {
+            // Check if the request was aborted
+            if (signal?.aborted) {
+              throw new Error('Request aborted');
+            }
+            
             const { value, done } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
@@ -133,9 +142,12 @@ export async function searchAIStream(
         return data;
       }
     } catch (error) {
-      // Emit error event to UI
-      const appError = parseError(error);
-      onEvent({ type: "error", data: { message: appError.message, type: appError.type } });
+      // Don't emit error events for aborted requests
+      if (!signal?.aborted) {
+        // Emit error event to UI
+        const appError = parseError(error);
+        onEvent({ type: "error", data: { message: appError.message, type: appError.type } });
+      }
       throw error;
     }
   }, {
