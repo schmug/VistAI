@@ -38,8 +38,8 @@ Open `dist/public/index.html` in your browser to test locally.
 Set `OPENROUTER_API_KEY` as a secret when deploying the Cloudflare worker.
 The worker uses this server-side key exclusively.
 Use `ACCESS_CONTROL_ALLOW_ORIGIN` to control which origins may access the Worker
-APIs. Provide `*` to allow any origin or a comma separated list of allowed
-origins.
+APIs. By default no cross-origin requests are allowed. Provide `*` for
+development or a comma separated list of allowed origins.
 
 ## D1 Database
 
