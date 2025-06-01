@@ -15,6 +15,7 @@ This document outlines a phased approach for transitioning VistAI's UI component
 - Replace Radix primitives with Material Web counterparts one component at a time.
 - Start with commonly used elements like buttons, form inputs and dialogs.
 - Remove or refactor custom components once their Material equivalents are in place.
+- Search history buttons in `SearchBar.tsx` now use the shared `<Button>` component.
 
 ## 4. Tailwind Integration
 - Decide if Tailwind should remain for layout utilities.
