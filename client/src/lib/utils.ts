@@ -172,38 +172,10 @@ export async function getRandomSuggestions(count: number = 3): Promise<string[]>
 }
 
 /** Key used to store query history in localStorage. */
-const QUERY_HISTORY_KEY = "queryHistory";
-
-/**
- * Retrieve past search queries from localStorage.
- */
-export function getQueryHistory(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const data = window.localStorage.getItem(QUERY_HISTORY_KEY);
-    return data ? (JSON.parse(data) as string[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Save a new query to localStorage, keeping only the most recent 10.
- */
-export function saveQueryToHistory(query: string, limit = 10): void {
-  if (typeof window === "undefined") return;
-  const history = getQueryHistory().filter((q) => q !== query);
-  history.unshift(query);
-  window.localStorage.setItem(
-    QUERY_HISTORY_KEY,
-    JSON.stringify(history.slice(0, limit)),
-  );
-}
-
 /**
  * Clear all stored search history.
  */
-export function clearQueryHistory(): void {
+export function clearSearchHistory(): void {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(QUERY_HISTORY_KEY);
+  window.localStorage.removeItem("searchHistory");
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { searchAIStream, ModelResponse, SearchStreamEvent } from "@/lib/openrouter";
 import { formatSearchTime, addToSearchHistory } from "@/lib/utils";
 import { parseError, AppError } from "@/lib/errorHandling";
@@ -27,7 +27,7 @@ export default function SearchResults() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentSearchIdRef = useRef<number | null>(null);
 
-  const performSearch = async () => {
+  const performSearch = useCallback(async () => {
     if (!query) return;
 
     // Cancel any existing search request
@@ -88,7 +88,7 @@ export default function SearchResults() {
         setIsLoading(false);
       }
     }
-  };
+  }, [query]);
 
   useEffect(() => {
     if (query) {
@@ -102,19 +102,25 @@ export default function SearchResults() {
         abortControllerRef.current.abort();
       }
     };
-  }, [query]);
+  }, [query, performSearch]);
   
   // Filter results by selected model
-  const filteredResults = selectedModel
-    ? results.filter((result) => result.modelId.includes(selectedModel))
-    : results;
+  const filteredResults = useMemo(() => 
+    selectedModel
+      ? results.filter((result) => result.modelId.includes(selectedModel))
+      : results,
+    [selectedModel, results]
+  );
 
   // Get unique model IDs for filter pills
-  const modelIds = [...new Set(results.map((result) => result.modelId))];
+  const modelIds = useMemo(() => 
+    [...new Set(results.map((result) => result.modelId))],
+    [results]
+  );
   
-  const handleSearch = (q: string) => {
+  const handleSearch = useCallback((q: string) => {
     navigate(`/search?q=${encodeURIComponent(q)}`);
-  };
+  }, [navigate]);
 
   return (
     <div className="search-results-appear mt-4 md:mt-6">
