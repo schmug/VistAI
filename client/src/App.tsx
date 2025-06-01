@@ -1,5 +1,4 @@
 import { Route, Switch } from "wouter";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,30 +17,29 @@ import "./index.css";
  */
 export default function App() {
   return (
-    <AuthProvider>
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-6 md:py-12">
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/search" component={SearchResults} />
-            <Route path="/dashboard">
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            </Route>
-            <Route path="/settings">
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            </Route>
-            <Route path="/login" component={Login} />
-            <Route path="/register" component={Register} />
-            <Route component={NotFound} />
-          </Switch>
-        </main>
-        <Footer />
-      </div>
-    </AuthProvider>
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <Header />
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-12">
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/search" component={SearchResults} />
+          <Route path="/dashboard">
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/settings">
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/logout" component={Logout} />
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+      <Footer />
+    </div>
   );
 }

@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(rm:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)"
     ]
   },
   "enableAllProjectMcpServers": false

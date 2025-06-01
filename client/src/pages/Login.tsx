@@ -4,14 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Login page allowing users to authenticate.
  */
 export default function Login() {
   const [, navigate] = useLocation();
-  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
