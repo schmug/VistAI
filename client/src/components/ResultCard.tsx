@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,14 +47,20 @@ interface ResultCardProps {
  * />
  * ```
  */
-export default function ResultCard({ result }: ResultCardProps) {
+const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
   const [open, setOpen] = useState(false);
-  const preview = result.snippet || result.content.split(/\n/)[0];
-  const truncated = preview.length > 120 ? preview.slice(0, 120) + "..." : preview;
+  const preview = useMemo(() => 
+    result.snippet || result.content.split(/\n/)[0], 
+    [result.snippet, result.content]
+  );
+  const truncated = useMemo(() => 
+    preview.length > 120 ? preview.slice(0, 120) + "..." : preview, 
+    [preview]
+  );
 
   const toggleOpen = () => {
     const value = !open;
@@ -63,7 +69,7 @@ export default function ResultCard({ result }: ResultCardProps) {
   };
   
   // Track click on result
-  const handleContentClick = () => {
+  const handleContentClick = useCallback(() => {
     trackResultClick(result.id)
       .then((stats) => {
         queryClient.setQueryData(["/api/model-stats"], stats);
@@ -75,7 +81,7 @@ export default function ResultCard({ result }: ResultCardProps) {
       .catch((error) => {
         console.error("Failed to track click:", error);
       });
-  };
+  }, [result.id, queryClient, toast]);
   
   // Handle copy to clipboard
   const handleCopy = () => {
@@ -246,4 +252,6 @@ export default function ResultCard({ result }: ResultCardProps) {
       </Card>
     </Collapsible>
   );
-}
+});
+
+export default ResultCard;

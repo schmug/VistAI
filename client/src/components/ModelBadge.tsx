@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { getModelInfo, getModelNameFromId } from "@/lib/utils";
 
@@ -10,7 +11,7 @@ interface ModelBadgeProps {
 /**
  * Display information about a model using its ID.
  */
-export default function ModelBadge({ modelId, size = "md", showName = true }: ModelBadgeProps) {
+const ModelBadge = memo(function ModelBadge({ modelId, size = "md", showName = true }: ModelBadgeProps) {
   const model = getModelInfo(modelId);
   const modelName = getModelNameFromId(modelId);
   
@@ -42,4 +43,6 @@ export default function ModelBadge({ modelId, size = "md", showName = true }: Mo
       )}
     </div>
   );
-}
+});
+
+export default ModelBadge;
