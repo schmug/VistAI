@@ -11,7 +11,7 @@ interface LoadingSkeletonProps {
  * Displays placeholder cards while search results load.
  */
 export default function LoadingSkeleton({ count = 4, blink = false }: LoadingSkeletonProps) {
-  const skeletonCls = blink ? "skeleton blink" : "skeleton"
+  const skeletonCls = blink ? "skeleton-glow blink" : "skeleton-glow"
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -19,7 +19,7 @@ export default function LoadingSkeleton({ count = 4, blink = false }: LoadingSke
         <span>Searching...</span>
       </div>
       {Array.from({ length: count }).map((_, index) => (
-        <Card key={index} className="bg-card border-border p-5">
+        <Card key={index} className="glass-card p-5 animate-fade-in">
           {/* Model Badge Skeleton */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
@@ -56,8 +56,8 @@ export default function LoadingSkeleton({ count = 4, blink = false }: LoadingSke
           </div>
 
           {/* Loading Indicator */}
-          <div className="mt-4 flex items-center gap-2 justify-center text-muted-foreground text-sm">
-            <i className="ri-loader-4-line animate-spin"></i>
+          <div className="mt-4 flex items-center gap-2 justify-center text-primary/80 text-sm">
+            <i className="ri-loader-4-line animate-spin text-primary"></i>
             <span>Waiting for response...</span>
           </div>
         </Card>

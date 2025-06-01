@@ -32,13 +32,13 @@ export default function Settings() {
   }, [darkMode]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gradient-primary">Settings</h1>
         <p className="text-muted-foreground">Manage your preferences</p>
       </div>
 
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>Appearance</CardTitle>
         </CardHeader>

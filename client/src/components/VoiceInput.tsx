@@ -85,8 +85,8 @@ export function VoiceInput({ compact = false, onResult }: VoiceInputProps) {
       type="button"
       onClick={toggleRecording}
       className={cn(
-        "hover:text-primary",
-        isRecording ? "text-red-500" : "text-muted-foreground"
+        "hover:text-primary transition-colors",
+        isRecording ? "text-error shadow-glow" : "text-muted-foreground"
       )}
     >
       <i
