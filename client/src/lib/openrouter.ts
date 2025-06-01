@@ -1,4 +1,5 @@
 import { apiRequest } from "./queryClient";
+import { withRetry, parseError, VistAIError } from "./errorHandling";
 
 // Types for OpenRouter API responses
 export interface ModelResponse {
@@ -33,12 +34,17 @@ export interface ModelStats {
 }
 
 /**
- * Perform a standard search request across multiple AI models.
+ * Perform a standard search request across multiple AI models with retry logic.
  */
 export async function searchAI(query: string): Promise<SearchResponse> {
-  const response = await apiRequest("POST", "/api/search", { query });
-  const data = await response.json();
-  return data;
+  return withRetry(async () => {
+    const response = await apiRequest("POST", "/api/search", { query });
+    const data = await response.json();
+    return data;
+  }, {
+    maxAttempts: 2, // Only retry once for search requests
+    shouldRetry: (error) => error.retryable && error.type !== 'auth',
+  });
 }
 
 export interface SearchStreamEvent {
@@ -47,68 +53,96 @@ export interface SearchStreamEvent {
 }
 
 /**
- * Perform a streaming search request and emit events as results arrive.
+ * Perform a streaming search request and emit events as results arrive with enhanced error handling.
  */
 export async function searchAIStream(
   query: string,
   onEvent: (event: SearchStreamEvent) => void,
 ): Promise<SearchResponse> {
-  const response = await apiRequest(
-    "POST",
-    "/api/search",
-    { query },
-    { headers: { Accept: "text/event-stream" } },
-  );
+  return withRetry(async () => {
+    try {
+      const response = await apiRequest(
+        "POST",
+        "/api/search",
+        { query },
+        { headers: { Accept: "text/event-stream" } },
+      );
 
-  const contentType = response.headers.get("content-type") || "";
+      const contentType = response.headers.get("content-type") || "";
 
-  if (contentType.startsWith("text/event-stream")) {
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let finalData: SearchResponse | null = null;
+      if (contentType.startsWith("text/event-stream")) {
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let finalData: SearchResponse | null = null;
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
 
-      let idx;
-      while ((idx = buffer.indexOf("\n\n")) >= 0) {
-        const chunk = buffer.slice(0, idx).trim();
-        buffer = buffer.slice(idx + 2);
-        if (!chunk) continue;
+            let idx;
+            while ((idx = buffer.indexOf("\n\n")) >= 0) {
+              const chunk = buffer.slice(0, idx).trim();
+              buffer = buffer.slice(idx + 2);
+              if (!chunk) continue;
 
-        const lines = chunk.split("\n");
-        let event = "message";
-        let data = "";
-        for (const line of lines) {
-          if (line.startsWith("event:")) {
-            event = line.slice(6).trim();
-          } else if (line.startsWith("data:")) {
-            data += line.slice(5).trim();
+              const lines = chunk.split("\n");
+              let event = "message";
+              let data = "";
+              for (const line of lines) {
+                if (line.startsWith("event:")) {
+                  event = line.slice(6).trim();
+                } else if (line.startsWith("data:")) {
+                  data += line.slice(5).trim();
+                }
+              }
+
+              if (data) {
+                try {
+                  const parsed = JSON.parse(data);
+                  
+                  // Handle error events from the stream
+                  if (event === "error") {
+                    throw new Error(parsed.message || "Stream error occurred");
+                  }
+                  
+                  onEvent({ type: event as any, data: parsed });
+                  if (event === "done") {
+                    finalData = parsed;
+                  }
+                } catch (parseError) {
+                  console.warn("Failed to parse stream data:", data, parseError);
+                  // Continue processing other chunks
+                }
+              }
+            }
           }
+        } finally {
+          reader.releaseLock();
         }
 
-        if (data) {
-          const parsed = JSON.parse(data);
-          onEvent({ type: event as any, data: parsed });
-          if (event === "done") {
-            finalData = parsed;
-          }
-        }
+        if (finalData) return finalData;
+        throw new Error("Stream ended unexpectedly without final data");
+      } else {
+        const data: SearchResponse = await response.json();
+        onEvent({ type: "search", data: data.search });
+        data.results.forEach((r) => onEvent({ type: "result", data: r }));
+        onEvent({ type: "done", data });
+        return data;
       }
+    } catch (error) {
+      // Emit error event to UI
+      const appError = parseError(error);
+      onEvent({ type: "error", data: { message: appError.message, type: appError.type } });
+      throw error;
     }
-
-    if (finalData) return finalData;
-    throw new Error("Stream ended unexpectedly");
-  } else {
-    const data: SearchResponse = await response.json();
-    onEvent({ type: "search", data: data.search });
-    data.results.forEach((r) => onEvent({ type: "result", data: r }));
-    onEvent({ type: "done", data });
-    return data;
-  }
+  }, {
+    maxAttempts: 2,
+    shouldRetry: (error) => error.retryable && error.type !== 'auth',
+    baseDelay: 2000, // Longer delay for search retries
+  });
 }
 
 // Track when a user clicks on a result

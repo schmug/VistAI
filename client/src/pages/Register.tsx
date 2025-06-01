@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { parseError, AppError } from "@/lib/errorHandling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ErrorNotification } from "@/components/ErrorNotification";
 import { useLocation } from "wouter";
 
 /**
@@ -12,7 +14,7 @@ export default function Register() {
   const [, navigate] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AppError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { register, isAuthenticated } = useAuth();
 
@@ -31,7 +33,7 @@ export default function Register() {
       await register(username, password);
       navigate("/");
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      setError(parseError(err));
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +64,6 @@ export default function Register() {
               minLength={6}
               disabled={isLoading}
             />
-            {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={isLoading || !username || password.length < 6}>
               {isLoading ? "Creating account..." : "Register"}
             </Button>
@@ -79,6 +80,16 @@ export default function Register() {
           </form>
         </CardContent>
       </Card>
+      
+      <ErrorNotification
+        error={error}
+        onDismiss={() => setError(null)}
+        onRetry={() => {
+          if (username && password && password.length >= 6) {
+            handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+          }
+        }}
+      />
     </div>
   );
 }
