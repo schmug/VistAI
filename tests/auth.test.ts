@@ -15,8 +15,9 @@ test('authentication tokens are signed', async () => {
     body: JSON.stringify({ username: 'u', password: 'p' }),
   })
   const regRes = await worker.fetch(regReq, env)
-  const reg = await regRes.json()
-  const [h, b, s] = reg.token.split('.')
+  const cookie = regRes.headers.get('Set-Cookie') || ''
+  const token = cookie.split('token=')[1]?.split(';')[0] || ''
+  const [h, b, s] = token.split('.')
   const expected = crypto.createHmac('sha256', env.JWT_SECRET).update(`${h}.${b}`).digest('base64url')
   assert.strictEqual(s, expected)
   const payload = JSON.parse(Buffer.from(b, 'base64url').toString())
@@ -28,6 +29,7 @@ test('authentication tokens are signed', async () => {
     body: JSON.stringify({ username: 'u', password: 'p' }),
   })
   const loginRes = await worker.fetch(loginReq, env)
-  const { token } = await loginRes.json()
-  assert.ok(token && token.split('.').length === 3)
+  const loginCookie = loginRes.headers.get('Set-Cookie') || ''
+  const loginToken = loginCookie.split('token=')[1]?.split(';')[0] || ''
+  assert.ok(loginToken && loginToken.split('.').length === 3)
 })

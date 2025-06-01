@@ -21,7 +21,8 @@ test('track-click updates model stats with percentages', async () => {
     body: JSON.stringify({ username: 'u', password: 'p' }),
   });
   const registerRes = await worker.fetch(registerReq, { DB: db, OPENROUTER_API_KEY: 'key', JWT_SECRET: 'secret' });
-  const { token } = await registerRes.json();
+  const cookie = registerRes.headers.get('Set-Cookie') || '';
+  const token = cookie.split('token=')[1]?.split(';')[0] || '';
 
   const search = await createSearch(db as any, { query: 'q' });
   await createResult(db as any, {
