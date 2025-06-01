@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
-import { LoadingSkeleton } from "./LoadingSkeleton";
+import LoadingSkeleton from "./LoadingSkeleton";
 
 interface ProtectedRouteProps {
   children: ReactNode;

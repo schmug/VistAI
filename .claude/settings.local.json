@@ -1,8 +1,9 @@
 {
-  "enableAllProjectMcpServers": false,
   "permissions": {
     "allow": [
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run check:*)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": false
 }
