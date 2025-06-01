@@ -66,7 +66,7 @@ Create a new user account.
 ```json
 {
   "username": "string (3-50 chars, alphanumeric)",
-  "password": "string (6+ chars)"
+  "password": "string (8+ chars)"
 }
 ```
 
