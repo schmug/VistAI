@@ -160,10 +160,13 @@ export async function fetchPopularQueries(limit = 5): Promise<string[]> {
  * Select a random subset of suggestions using history or API data.
  */
 export async function getRandomSuggestions(count: number = 3): Promise<string[]> {
-  const history = getSearchHistory(count);
+  const [history, fromApi] = await Promise.all([
+    Promise.resolve(getSearchHistory(count)),
+    fetchPopularQueries(count * 2).catch(() => []) // Graceful fallback
+  ]);
+  
   let pool: string[] = history;
   if (pool.length < count) {
-    const fromApi = await fetchPopularQueries(count * 2);
     pool = [...history, ...fromApi];
   }
   if (pool.length === 0) pool = [...fallbackSuggestions];
