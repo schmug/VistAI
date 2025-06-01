@@ -11,6 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+
 /**
  * Sticky page header containing navigation and the search bar.
  */

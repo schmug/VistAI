@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import Logout from "@/pages/Logout";
 import NotFound from "@/pages/not-found";
 import "./index.css";
 

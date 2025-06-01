@@ -12,6 +12,7 @@ import {
   findUserById,
   hashPassword,
 } from './db.js';
+import crypto from 'node:crypto';
 
 /**
  * Fallback model list used when dynamic fetch fails.
@@ -24,8 +25,30 @@ export const FALLBACK_MODELS = [
   'deepseek/deepseek-chat-v3-0324:free',
 ];
 
-// Simple in-memory token store mapping tokens to user IDs
-const tokenMap = new Map();
+function base64url(input) {
+  return Buffer.from(input).toString('base64url');
+}
+
+function signToken(payload, secret) {
+  const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const body = base64url(JSON.stringify(payload));
+  const data = `${header}.${body}`;
+  const sig = crypto.createHmac('sha256', secret).update(data).digest('base64url');
+  return `${data}.${sig}`;
+}
+
+function verifyToken(token, secret) {
+  try {
+    const [h, b, s] = token.split('.');
+    if (!h || !b || !s) return null;
+    const data = `${h}.${b}`;
+    const expected = crypto.createHmac('sha256', secret).update(data).digest('base64url');
+    if (s !== expected) return null;
+    return JSON.parse(Buffer.from(b, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
 
 const openapiSpec = `openapi: 3.0.0
 info:
@@ -402,8 +425,8 @@ export default {
           return jsonResponse({ message: 'Invalid user data' }, headers, 400);
         }
         const user = await createUser(env.DB, { username, password });
-        const token = crypto.randomUUID();
-        tokenMap.set(token, user.id);
+        const secret = env.JWT_SECRET || 'secret';
+        const token = signToken({ userId: user.id }, secret);
         return jsonResponse({ token, user }, headers);
       }
 
@@ -417,8 +440,8 @@ export default {
         if (!user || hashPassword(password) !== user.password) {
           return jsonResponse({ message: 'Invalid credentials' }, headers, 401);
         }
-        const token = crypto.randomUUID();
-        tokenMap.set(token, user.id);
+        const secret = env.JWT_SECRET || 'secret';
+        const token = signToken({ userId: user.id }, secret);
         return jsonResponse({ token, user: { id: user.id, username: user.username } }, headers);
       }
 
@@ -518,7 +541,9 @@ export default {
         const auth = request.headers.get('Authorization') || '';
         const m = auth.match(/^Bearer\s+(.*)$/);
         const token = m ? m[1] : '';
-        const userId = tokenMap.get(token);
+        const secret = env.JWT_SECRET || 'secret';
+        const payload = verifyToken(token, secret);
+        const userId = payload ? payload.userId : undefined;
 
         const click = await trackClick(env.DB, { resultId, userId });
         const stats = await getModelStatsWithPercent(env.DB);

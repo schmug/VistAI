@@ -28,9 +28,10 @@ Open `dist/public/index.html` in your browser to test locally.
 
 - **Multi-Model Search**: Query multiple AI models simultaneously and compare their responses
 - **Real-time Analytics**: Track which models users prefer through click metrics
-- **Responsive UI**: Material dark theme with high-contrast colors that works on all devices
+- **Responsive UI**: Material dark theme built with Material Web components and high-contrast colors that works on all devices
 - **Performance Tracking**: See which models respond fastest and are chosen most often
 - **User Accounts**: Register and log in to track personal model preferences
+- **Voice Search**: Click the microphone to dictate your question
 
 ## Environment Variables
 

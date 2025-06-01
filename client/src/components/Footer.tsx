@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
 /**
  * Site footer with navigation links and OpenRouter attribution.
@@ -10,16 +11,16 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-muted-foreground text-sm">
             <p>
-              © {new Date().getFullYear()} VistAI • 
-              <button className="hover:text-primary ml-1">Terms</button> • 
-              <button className="hover:text-primary ml-1">Privacy</button>
+              © {new Date().getFullYear()} VistAI •
+              <Button variant="link" className="ml-1 h-auto p-0">Terms</Button> •
+              <Button variant="link" className="ml-1 h-auto p-0">Privacy</Button>
             </p>
           </div>
           
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-primary">Home</Link>
             <Link href="/dashboard" className="hover:text-primary">Dashboard</Link>
-            <Link href="/docs" className="hover:text-primary">API</Link>
+            <a href="/docs" className="hover:text-primary">API</a>
             <button className="hover:text-primary">Pricing</button>
             <button className="hover:text-primary">Contact</button>
           </div>
