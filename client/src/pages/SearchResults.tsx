@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { searchAIStream, ModelResponse, SearchStreamEvent } from "@/lib/openrouter";
 import { formatSearchTime, addToSearchHistory } from "@/lib/utils";
 import { parseError, AppError } from "@/lib/errorHandling";
@@ -24,9 +24,20 @@ export default function SearchResults() {
   const [totalTime, setTotalTime] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentSearchIdRef = useRef<number | null>(null);
 
   const performSearch = async () => {
     if (!query) return;
+
+    // Cancel any existing search request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this search
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     setSelectedModel(null);
     setResults([]);
@@ -34,27 +45,48 @@ export default function SearchResults() {
     setTotalTime(0);
     setError(null);
     setIsLoading(true);
+    currentSearchIdRef.current = null;
 
     try {
-      await searchAIStream(query, (evt: SearchStreamEvent) => {
-        if (evt.type === "search") {
-          setSearch(evt.data);
-        } else if (evt.type === "result") {
-          setResults((prev) => [...prev, evt.data]);
-        } else if (evt.type === "done") {
-          setTotalTime(evt.data.totalTime);
-          setIsLoading(false);
-          addToSearchHistory(query);
-        } else if (evt.type === "error") {
-          const appError = parseError(new Error(evt.data?.message || "Stream error"));
-          setError(appError);
-          setIsLoading(false);
-        }
-      });
+      await searchAIStream(
+        query,
+        (evt: SearchStreamEvent) => {
+          // Check if this search was aborted
+          if (abortController.signal.aborted) {
+            return;
+          }
+
+          if (evt.type === "search") {
+            // Store the current search ID for validation
+            currentSearchIdRef.current = evt.data.id;
+            setSearch(evt.data);
+          } else if (evt.type === "result") {
+            // Validate that this result belongs to the current search
+            if (currentSearchIdRef.current && evt.data.searchId === currentSearchIdRef.current) {
+              setResults((prev) => [...prev, evt.data]);
+            }
+          } else if (evt.type === "done") {
+            // Validate that this completion belongs to the current search
+            if (currentSearchIdRef.current && evt.data.search.id === currentSearchIdRef.current) {
+              setTotalTime(evt.data.totalTime);
+              setIsLoading(false);
+              addToSearchHistory(query);
+            }
+          } else if (evt.type === "error") {
+            const appError = parseError(new Error(evt.data?.message || "Stream error"));
+            setError(appError);
+            setIsLoading(false);
+          }
+        },
+        abortController.signal
+      );
     } catch (err) {
-      const appError = parseError(err);
-      setError(appError);
-      setIsLoading(false);
+      // Only set error if the request wasn't aborted
+      if (!abortController.signal.aborted) {
+        const appError = parseError(err);
+        setError(appError);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -63,6 +95,13 @@ export default function SearchResults() {
       addToSearchHistory(query);
       performSearch();
     }
+    
+    // Cleanup: abort any ongoing search when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [query]);
   
   // Filter results by selected model

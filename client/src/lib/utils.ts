@@ -92,7 +92,21 @@ const fallbackSuggestions = [
   "Recipe for vegan chocolate cake",
 ];
 
-/** Retrieve recent search history from localStorage. */
+/**
+ * Retrieve recent search history from localStorage.
+ * 
+ * Returns the most recent search queries in reverse chronological order.
+ * Gracefully handles localStorage errors and SSR environments.
+ * 
+ * @param limit - Maximum number of queries to return (default: 5)
+ * @returns Array of recent search queries, empty array if none or on error
+ * 
+ * @example
+ * ```ts
+ * const recentSearches = getSearchHistory(3);
+ * // Returns: ["latest query", "previous query", "older query"]
+ * ```
+ */
 export function getSearchHistory(limit = 5): string[] {
   if (typeof window === "undefined") return [];
   try {
@@ -104,7 +118,21 @@ export function getSearchHistory(limit = 5): string[] {
   }
 }
 
-/** Store a query in local search history. */
+/**
+ * Store a query in local search history with deduplication.
+ * 
+ * Adds the query to the beginning of the history list, removing any
+ * existing occurrence to prevent duplicates. Maintains a maximum of
+ * 20 entries to prevent localStorage bloat.
+ * 
+ * @param query - Search query to add to history
+ * 
+ * @example
+ * ```ts
+ * addToSearchHistory("What is machine learning?");
+ * // Query is now at the top of search history
+ * ```
+ */
 export function addToSearchHistory(query: string) {
   if (typeof window === "undefined") return;
   try {

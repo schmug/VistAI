@@ -5,7 +5,13 @@
       "Bash(npm run check:*)",
       "Bash(rm:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(rg:*)",
+      "Bash(true)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm test)"
     ]
   },
   "enableAllProjectMcpServers": false

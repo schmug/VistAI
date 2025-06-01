@@ -460,14 +460,16 @@ export default {
       }
 
       if (pathname === '/api/me' && request.method === 'GET') {
+        const auth = request.headers.get('Authorization') || '';
+        const m = auth.match(/^Bearer\s+(.*)$/);
+        const token = m ? m[1] : '';
         const secret = env.JWT_SECRET;
         if (!secret) {
           return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
         }
-        const token = getTokenFromRequest(request);
         const payload = verifyToken(token, secret);
         const userId = payload ? payload.userId : undefined;
-
+        
         if (!userId) {
           return jsonResponse({ message: 'Invalid token' }, headers, 401);
         }

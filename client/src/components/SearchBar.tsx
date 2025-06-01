@@ -3,14 +3,42 @@ import { cn, getQueryHistory, clearQueryHistory } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+/**
+ * Props for the SearchBar component
+ */
 interface SearchBarProps {
+  /** Initial query text to populate the search input */
   initialQuery?: string;
+  /** Whether to display in compact mode (smaller size for header) */
   compact?: boolean;
+  /** Callback function called when a search is submitted */
   onSearch: (query: string) => void;
 }
 
 /**
- * Search input with optional compact display used throughout the app.
+ * Search input component with voice recognition, search history, and auto-resize functionality.
+ * 
+ * Features:
+ * - Voice input using Web Speech API (browser dependent)
+ * - Search history dropdown with localStorage persistence
+ * - Auto-resizing textarea
+ * - Compact mode for header usage
+ * - Keyboard shortcuts (Enter to submit, Shift+Enter for new line)
+ * 
+ * @example
+ * ```tsx
+ * // Full-size search bar on home page
+ * <SearchBar 
+ *   onSearch={(query) => navigate(`/search?q=${encodeURIComponent(query)}`)} 
+ * />
+ * 
+ * // Compact search bar in header
+ * <SearchBar 
+ *   compact={true}
+ *   initialQuery={currentQuery}
+ *   onSearch={handleSearch}
+ * />
+ * ```
  */
 export default function SearchBar({ initialQuery = "", compact = false, onSearch }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
