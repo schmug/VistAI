@@ -9,6 +9,7 @@ import {
   getRecentQueries,
   createUser,
   findUser,
+  findUserById,
   hashPassword,
 } from './db.js';
 
@@ -419,6 +420,25 @@ export default {
         const token = crypto.randomUUID();
         tokenMap.set(token, user.id);
         return jsonResponse({ token, user: { id: user.id, username: user.username } }, headers);
+      }
+
+      if (pathname === '/api/me' && request.method === 'GET') {
+        const auth = request.headers.get('Authorization') || '';
+        const m = auth.match(/^Bearer\s+(.*)$/);
+        const token = m ? m[1] : '';
+        const userId = tokenMap.get(token);
+        
+        if (!userId) {
+          return jsonResponse({ message: 'Invalid token' }, headers, 401);
+        }
+        
+        // Get user data from database
+        const user = await findUserById(env.DB, userId);
+        if (!user) {
+          return jsonResponse({ message: 'User not found' }, headers, 404);
+        }
+        
+        return jsonResponse({ id: user.id, username: user.username }, headers);
       }
 
       if (pathname === '/api/search' && request.method === 'POST') {

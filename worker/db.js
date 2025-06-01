@@ -26,6 +26,15 @@ export async function findUser(db, username) {
   return results[0];
 }
 
+/** Find a user by ID. */
+export async function findUserById(db, id) {
+  const { results } = await db
+    .prepare('SELECT id, username FROM users WHERE id = ?')
+    .bind(id)
+    .all();
+  return results[0];
+}
+
 /**
  * Insert a new search row and return the created record.
  */

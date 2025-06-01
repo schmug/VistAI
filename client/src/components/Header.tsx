@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 /**
  * Sticky page header containing navigation and the search bar.
@@ -10,6 +18,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [location, navigate] = useLocation();
   const isHomePage = location === "/";
+  const { isAuthenticated, user, logout } = useAuth();
   
   // Detect scroll for styling
   useEffect(() => {
@@ -49,20 +58,48 @@ export default function Header() {
           )}
           
           <nav className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="text-muted-foreground hover:text-foreground transition-colors p-1"
-            >
-              <i className="ri-dashboard-line text-xl"></i>
-              <span className="sr-only">Dashboard</span>
-            </Link>
+            {isAuthenticated && (
+              <Link
+                href="/dashboard"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <i className="ri-dashboard-line text-xl"></i>
+                <span className="sr-only">Dashboard</span>
+              </Link>
+            )}
             
-            <button 
-              className="ml-2 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors"
-            >
-              <i className="ri-user-line"></i>
-              <span className="sr-only">Account</span>
-            </button>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="ml-2 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors">
+                    <i className="ri-user-line"></i>
+                    <span className="sr-only">Account</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem className="font-medium">
+                    {user?.username}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <i className="ri-settings-line mr-2"></i>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>
+                    <i className="ri-logout-circle-line mr-2"></i>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+                  Login
+                </Button>
+                <Button size="sm" onClick={() => navigate("/register")}>
+                  Register
+                </Button>
+              </div>
+            )}
           </nav>
         </div>
       </div>
