@@ -21,7 +21,7 @@ export class FakeD1Database {
         const q = this._query;
         const a = this._args;
         if (q.startsWith('INSERT INTO searches')) {
-          const row = { id: db.nextSearchId++, query: a[0], createdAt: a[1] };
+          const row = { id: db.nextSearchId++, query: a[0], created_at: a[1] };
           db.searches.push(row);
           return { results: [row] };
         }
@@ -67,9 +67,9 @@ export class FakeD1Database {
         if (q.startsWith('SELECT query, created_at as createdAt FROM searches')) {
           const limit = a[0];
           const arr = [...db.searches]
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, limit)
-            .map((s) => ({ query: s.query, createdAt: s.createdAt }));
+            .map((s) => ({ query: s.query, createdAt: s.created_at }));
           return { results: arr };
         }
         if (q.startsWith('SELECT model_id as modelId')) {

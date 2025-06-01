@@ -126,7 +126,7 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   return (
     <Collapsible open={open}>
       <Card
-        className="result-card bg-card border-border hover:shadow-md transition-all"
+        className="result-card cursor-pointer animate-fade-in"
         onClick={toggleOpen}
       >
       <CardHeader className="p-5 pb-2">
@@ -195,15 +195,15 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
 
       <CardContent className="p-5 pt-3">
         <div className="result-content">
-          <h3 className="text-lg font-medium mb-2 text-foreground">
+          <h3 className="text-lg font-semibold mb-2 text-foreground">
             {result.title || "AI Response"}
           </h3>
           {open ? (
-            <div className="text-muted-foreground whitespace-pre-line">
+            <div className="text-foreground-secondary whitespace-pre-line leading-relaxed">
               {result.content}
             </div>
           ) : (
-            <div className="text-muted-foreground">{truncated}</div>
+            <div className="text-foreground-secondary leading-relaxed">{truncated}</div>
           )}
         </div>
       </CardContent>
@@ -217,7 +217,7 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={feedback === "liked" ? "text-primary" : "text-muted-foreground hover:text-primary"}
+              className={feedback === "liked" ? "text-accent shadow-glow-success" : "text-muted-foreground hover:text-accent"}
               onClick={(e) => {
                 e.stopPropagation();
                 handleFeedback("liked");
@@ -230,7 +230,7 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={feedback === "disliked" ? "text-secondary" : "text-muted-foreground hover:text-secondary"}
+              className={feedback === "disliked" ? "text-error" : "text-muted-foreground hover:text-error"}
               onClick={(e) => {
                 e.stopPropagation();
                 handleFeedback("disliked");
@@ -242,8 +242,8 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
           </div>
           
           {result.responseTime && (
-            <div className="text-xs text-muted-foreground">
-              Response time: {(result.responseTime / 1000).toFixed(2)}s
+            <div className="text-xs text-muted-foreground-light font-mono">
+              {(result.responseTime / 1000).toFixed(2)}s
             </div>
           )}
         </div>
