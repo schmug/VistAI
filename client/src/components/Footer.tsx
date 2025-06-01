@@ -1,10 +1,12 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Site footer with navigation links and OpenRouter attribution.
  */
 export default function Footer() {
+  const { isAuthenticated } = useAuth();
   return (
     <footer className="border-t border-border py-6 mt-auto">
       <div className="container mx-auto px-4">
@@ -19,7 +21,12 @@ export default function Footer() {
           
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-primary">Home</Link>
-            <Link href="/dashboard" className="hover:text-primary">Dashboard</Link>
+            <Link
+              href={isAuthenticated ? "/dashboard" : "/dashboard-public"}
+              className="hover:text-primary"
+            >
+              Dashboard
+            </Link>
             <a href="/docs" className="hover:text-primary">API</a>
             <button className="hover:text-primary">Pricing</button>
             <button className="hover:text-primary">Contact</button>

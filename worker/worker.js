@@ -43,12 +43,29 @@ function verifyToken(token, secret) {
     const [h, b, s] = token.split('.');
     if (!h || !b || !s) return null;
     const data = `${h}.${b}`;
-    const expected = crypto.createHmac('sha256', secret).update(data).digest('base64url');
+    const expected = crypto
+      .createHmac('sha256', secret)
+      .update(data)
+      .digest('base64url');
     if (s !== expected) return null;
     return JSON.parse(Buffer.from(b, 'base64url').toString('utf8'));
   } catch {
     return null;
   }
+}
+
+function getTokenFromRequest(request) {
+  const auth = request.headers.get('Authorization') || '';
+  const m = auth.match(/^Bearer\s+(.*)$/);
+  if (m) return m[1];
+  const cookie = request.headers.get('Cookie') || '';
+  const ck = cookie.split(';').find((c) => c.trim().startsWith('token='));
+  return ck ? ck.trim().slice('token='.length) : '';
+}
+
+function tokenCookie(token) {
+  const week = 7 * 24 * 60 * 60;
+  return `token=${token}; HttpOnly; Path=/; Max-Age=${week}`;
 }
 
 const openapiSpec = `openapi: 3.0.0
@@ -98,13 +115,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  token:
-                    type: string
                   user:
                     type: object
   /api/login:
     post:
-      summary: Login and obtain auth token
+      summary: Login and obtain auth cookie
       requestBody:
         required: true
         content:
@@ -124,10 +139,21 @@ paths:
               schema:
                 type: object
                 properties:
-                  token:
-                    type: string
                   user:
                     type: object
+  /api/logout:
+    post:
+      summary: Clear authentication cookie
+      responses:
+        '200':
+          description: Logout success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
   /api/search:
     post:
       summary: Query models
@@ -406,7 +432,10 @@ export default {
           return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
         }
         const token = signToken({ userId: user.id }, secret);
-        return jsonResponse({ token, user }, headers);
+        return jsonResponse(
+          { user },
+          { ...headers, 'Set-Cookie': tokenCookie(token) },
+        );
       }
 
       if (pathname === '/api/login' && request.method === 'POST') {
@@ -424,7 +453,10 @@ export default {
           return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
         }
         const token = signToken({ userId: user.id }, secret);
-        return jsonResponse({ token, user: { id: user.id, username: user.username } }, headers);
+        return jsonResponse(
+          { user: { id: user.id, username: user.username } },
+          { ...headers, 'Set-Cookie': tokenCookie(token) },
+        );
       }
 
       if (pathname === '/api/me' && request.method === 'GET') {
@@ -441,13 +473,12 @@ export default {
         if (!userId) {
           return jsonResponse({ message: 'Invalid token' }, headers, 401);
         }
-        
-        // Get user data from database
+
         const user = await findUserById(env.DB, userId);
         if (!user) {
           return jsonResponse({ message: 'User not found' }, headers, 404);
         }
-        
+
         return jsonResponse({ id: user.id, username: user.username }, headers);
       }
 
@@ -525,19 +556,24 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
-        const auth = request.headers.get('Authorization') || '';
-        const m = auth.match(/^Bearer\s+(.*)$/);
-        const token = m ? m[1] : '';
         const secret = env.JWT_SECRET;
         if (!secret) {
           return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
         }
+        const token = getTokenFromRequest(request);
         const payload = verifyToken(token, secret);
         const userId = payload ? payload.userId : undefined;
 
         const click = await trackClick(env.DB, { resultId, userId });
         const stats = await getModelStatsWithPercent(env.DB);
         return jsonResponse({ success: true, click, stats }, headers);
+      }
+
+      if (pathname === '/api/logout' && request.method === 'POST') {
+        return jsonResponse(
+          { success: true },
+          { ...headers, 'Set-Cookie': 'token=; Path=/; Max-Age=0; HttpOnly' },
+        );
       }
 
       if (pathname === '/api/model-stats' && request.method === 'GET') {

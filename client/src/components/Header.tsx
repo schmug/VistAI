@@ -58,9 +58,17 @@ export default function Header() {
           )}
           
           <nav className="flex items-center gap-3">
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Link
                 href="/dashboard"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <i className="ri-dashboard-line text-xl"></i>
+                <span className="sr-only">Dashboard</span>
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard-public"
                 className="text-muted-foreground hover:text-foreground transition-colors p-1"
               >
                 <i className="ri-dashboard-line text-xl"></i>

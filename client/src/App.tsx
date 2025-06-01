@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
 import SearchResults from "@/pages/SearchResults";
 import Dashboard from "@/pages/Dashboard";
+import PublicDashboard from "@/pages/PublicDashboard";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -23,6 +24,7 @@ export default function App() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/search" component={SearchResults} />
+          <Route path="/dashboard-public" component={PublicDashboard} />
           <Route path="/dashboard">
             <ProtectedRoute>
               <Dashboard />

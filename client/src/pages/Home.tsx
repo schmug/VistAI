@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { getRandomSuggestions, fetchPopularQueries } from "@/lib/utils";
 import SearchBar from "@/components/SearchBar";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Landing page with search bar and example suggestions.
  */
 export default function Home() {
   const [, navigate] = useLocation();
+  const { isAuthenticated } = useAuth();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isTrending, setIsTrending] = useState(false);
 
@@ -72,8 +74,13 @@ export default function Home() {
 
         <div className="mt-16 text-center">
           <p className="text-muted-foreground text-sm">
-            Powered by <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenRouter</a> •
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground ml-1">Dashboard</Link> •
+            Powered by <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenRouter</a> •{' '}
+            <Link
+              href={isAuthenticated ? "/dashboard" : "/dashboard-public"}
+              className="text-muted-foreground hover:text-foreground ml-1"
+            >
+              Dashboard
+            </Link>{' '}•{' '}
             <Link href="/settings" className="text-muted-foreground hover:text-foreground ml-1">Settings</Link>
           </p>
         </div>
