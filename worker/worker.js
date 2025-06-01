@@ -11,6 +11,7 @@ import {
   findUser,
   findUserById,
   hashPassword,
+  verifyPassword,
 } from './db.js';
 import crypto from 'node:crypto';
 
@@ -440,7 +441,7 @@ export default {
           return jsonResponse({ message: 'Invalid credentials' }, headers, 400);
         }
         const user = await findUser(env.DB, username);
-        if (!user || hashPassword(password) !== user.password) {
+        if (!user || !verifyPassword(password, user.password)) {
           return jsonResponse({ message: 'Invalid credentials' }, headers, 401);
         }
         const secret = env.JWT_SECRET;
