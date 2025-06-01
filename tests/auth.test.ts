@@ -12,7 +12,7 @@ test('authentication tokens are signed', async () => {
   const regReq = new Request('http://localhost/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'u', password: 'p' }),
+    body: JSON.stringify({ username: 'u', password: 'password123' }),
   })
   const regRes = await worker.fetch(regReq, env)
   const cookie = regRes.headers.get('Set-Cookie') || ''
@@ -26,7 +26,7 @@ test('authentication tokens are signed', async () => {
   const loginReq = new Request('http://localhost/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'u', password: 'p' }),
+    body: JSON.stringify({ username: 'u', password: 'password123' }),
   })
   const loginRes = await worker.fetch(loginReq, env)
   const loginCookie = loginRes.headers.get('Set-Cookie') || ''
