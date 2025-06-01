@@ -55,12 +55,7 @@ const openapiSpec = `openapi: 3.0.0
 info:
   title: VistAI API
   version: '1.0.0'
-components:
-  securitySchemes:
-    openrouter_api_key:
-      type: apiKey
-      in: header
-      name: openrouter_api_key
+components: {}
 paths:
   /api/status:
     get:
@@ -136,8 +131,6 @@ paths:
   /api/search:
     post:
       summary: Query models
-      security:
-        - openrouter_api_key: []
       requestBody:
         required: true
         content:
@@ -331,11 +324,6 @@ const swaggerHtml = `<!DOCTYPE html>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
 </head>
 <body>
-  <div style="margin:10px">
-    OpenRouter API Key:
-    <input id="or-key" type="text" style="width:300px" />
-    <button onclick="setKey()">Set</button>
-  </div>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
@@ -347,18 +335,6 @@ const swaggerHtml = `<!DOCTYPE html>
       presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
       layout: 'StandaloneLayout'
     });
-    const stored = localStorage.getItem('openrouter_api_key');
-    if (stored) {
-      ui.preauthorizeApiKey('openrouter_api_key', stored);
-      document.getElementById('or-key').value = stored;
-    }
-    window.setKey = () => {
-      const k = document.getElementById('or-key').value;
-      if (k) {
-        localStorage.setItem('openrouter_api_key', k);
-        ui.preauthorizeApiKey('openrouter_api_key', k);
-      }
-    };
   };
   </script>
 </body>
@@ -377,8 +353,7 @@ export default {
     // Basic CORS support with configurable origins
     const headers = createCorsHeaders(request, env);
 
-    const requestApiKey = request.headers.get('openrouter_api_key');
-    const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
+    const apiKey = env.OPENROUTER_API_KEY;
 
     if (!apiKey) {
       return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
@@ -613,8 +588,8 @@ export default {
     return {
       'Access-Control-Allow-Origin': allow,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, openrouter_api_key',
-      Vary: 'Origin',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Vary': 'Origin',
     };
   }
 
