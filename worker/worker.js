@@ -423,7 +423,7 @@ export default {
       if (pathname === '/api/register' && request.method === 'POST') {
         const body = await request.json();
         const { username, password } = body;
-        if (!username || !password) {
+        if (!username || !password || password.length < 8) {
           return jsonResponse({ message: 'Invalid user data' }, headers, 400);
         }
         const user = await createUser(env.DB, { username, password });
