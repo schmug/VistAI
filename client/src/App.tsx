@@ -1,4 +1,5 @@
 import { Route, Switch } from "wouter";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
@@ -22,8 +23,16 @@ export default function App() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/search" component={SearchResults} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/settings" component={Settings} />
+          <Route path="/dashboard">
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/settings">
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          </Route>
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/logout" component={Logout} />

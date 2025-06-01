@@ -9,6 +9,7 @@ import {
   getRecentQueries,
   createUser,
   findUser,
+  findUserById,
   hashPassword,
 } from './db.js';
 import crypto from 'node:crypto';
@@ -442,6 +443,25 @@ export default {
         const secret = env.JWT_SECRET || 'secret';
         const token = signToken({ userId: user.id }, secret);
         return jsonResponse({ token, user: { id: user.id, username: user.username } }, headers);
+      }
+
+      if (pathname === '/api/me' && request.method === 'GET') {
+        const auth = request.headers.get('Authorization') || '';
+        const m = auth.match(/^Bearer\s+(.*)$/);
+        const token = m ? m[1] : '';
+        const userId = tokenMap.get(token);
+        
+        if (!userId) {
+          return jsonResponse({ message: 'Invalid token' }, headers, 401);
+        }
+        
+        // Get user data from database
+        const user = await findUserById(env.DB, userId);
+        if (!user) {
+          return jsonResponse({ message: 'User not found' }, headers, 404);
+        }
+        
+        return jsonResponse({ id: user.id, username: user.username }, headers);
       }
 
       if (pathname === '/api/search' && request.method === 'POST') {

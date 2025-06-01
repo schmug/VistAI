@@ -1,36 +1,39 @@
-import { useState } from "react";
-import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
-
-interface AuthResponse {
-  token: string;
-  user: { id: number; username: string };
-}
 
 /**
  * Registration page for creating new user accounts.
  */
 export default function Register() {
   const [, navigate] = useLocation();
-  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { register, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
+    
     try {
-      const res = await apiRequest("POST", "/api/register", { username, password });
-      const data: AuthResponse = await res.json();
-      login(data.token, data.user);
+      await register(username, password);
       navigate("/");
     } catch (err: any) {
       setError(err.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,17 +49,33 @@ export default function Register() {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              required
+              minLength={3}
+              disabled={isLoading}
             />
             <Input
               type="password"
-              placeholder="Password"
+              placeholder="Password (min 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              disabled={isLoading}
             />
             {error && <p className="text-destructive text-sm">{error}</p>}
-            <Button type="submit" className="w-full">
-              Register
+            <Button type="submit" className="w-full" disabled={isLoading || !username || password.length < 6}>
+              {isLoading ? "Creating account..." : "Register"}
             </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="text-primary hover:underline"
+              >
+                Login here
+              </button>
+            </p>
           </form>
         </CardContent>
       </Card>

@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { Link, useLocation } from "wouter";
-
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 /**
  * Sticky page header containing navigation and the search bar.
@@ -19,7 +18,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [location, navigate] = useLocation();
   const isHomePage = location === "/";
-  const { user, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   
   // Detect scroll for styling
   useEffect(() => {
@@ -59,47 +58,47 @@ export default function Header() {
           )}
           
           <nav className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="text-muted-foreground hover:text-foreground transition-colors p-1"
-            >
-              <i className="ri-dashboard-line text-xl"></i>
-              <span className="sr-only">Dashboard</span>
-            </Link>
-
-            {user ? (
+            {isAuthenticated && (
+              <Link
+                href="/dashboard"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <i className="ri-dashboard-line text-xl"></i>
+                <span className="sr-only">Dashboard</span>
+              </Link>
+            )}
+            
+            {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="ml-2 w-8 h-8 rounded-full bg-primary/20 text-primary hover:bg-primary/30 p-0">
+                  <button className="ml-2 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors">
                     <i className="ri-user-line"></i>
                     <span className="sr-only">Account</span>
-                  </Button>
+                  </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem disabled>{user.username}</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => navigate('/settings')}>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem className="font-medium">
+                    {user?.username}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <i className="ri-settings-line mr-2"></i>
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => logout()}>
+                  <DropdownMenuItem onClick={logout}>
+                    <i className="ri-logout-circle-line mr-2"></i>
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-muted-foreground hover:text-foreground text-sm"
-                >
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
                   Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="text-muted-foreground hover:text-foreground text-sm"
-                >
+                </Button>
+                <Button size="sm" onClick={() => navigate("/register")}>
                   Register
-                </Link>
-              </>
+                </Button>
+              </div>
             )}
           </nav>
         </div>
