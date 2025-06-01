@@ -31,10 +31,10 @@ export async function apiRequest(
     method,
     headers: {
       ...(data ? { "Content-Type": "application/json" } : {}),
-      ...(typeof window !== "undefined" && window.localStorage?.getItem("token")
-        ? { Authorization: `Bearer ${window.localStorage.getItem("token")}` }
+      ...(typeof window !== "undefined" &&
+      window.localStorage?.getItem("openrouter_api_key")
+        ? { "openrouter_api_key": String(window.localStorage.getItem("openrouter_api_key")) }
         : {}),
-      // Removed custom OpenRouter API key header for security
       ...(options?.headers || {}),
     },
     body: data ? JSON.stringify(data) : undefined,

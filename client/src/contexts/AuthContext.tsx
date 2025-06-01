@@ -8,7 +8,6 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
   logout: () => void;
@@ -32,53 +31,30 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = !!(user && token);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
-      validateToken(storedToken);
-    } else {
-      setIsLoading(false);
-    }
+    (async () => {
+      try {
+        const res = await apiRequest("GET", "/api/me");
+        if (res.ok) {
+          const userData = await res.json();
+          setUser(userData);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, []);
 
-  const validateToken = async (tokenToValidate: string) => {
-    try {
-      const res = await apiRequest("GET", "/api/me", undefined, {
-        headers: { Authorization: `Bearer ${tokenToValidate}` }
-      });
-      
-      if (res.ok) {
-        const userData = await res.json();
-        setUser(userData);
-      } else {
-        localStorage.removeItem("token");
-        setToken(null);
-      }
-    } catch (error) {
-      localStorage.removeItem("token");
-      setToken(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const login = async (username: string, password: string) => {
     try {
       const res = await apiRequest("POST", "/api/login", { username, password });
       const data = await res.json();
-      
-      const newToken = data.token;
-      const userData = data.user;
-      
-      localStorage.setItem("token", newToken);
-      setToken(newToken);
-      setUser(userData);
+      setUser(data.user);
     } catch (error) {
       throw error;
     }
@@ -88,27 +64,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const res = await apiRequest("POST", "/api/register", { username, password });
       const data = await res.json();
-      
-      const newToken = data.token;
-      const userData = data.user;
-      
-      localStorage.setItem("token", newToken);
-      setToken(newToken);
-      setUser(userData);
+      setUser(data.user);
     } catch (error) {
       throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
+  const logout = async () => {
+    await apiRequest("POST", "/api/logout");
     setUser(null);
   };
 
   const value: AuthContextType = {
     user,
-    token,
     login,
     register,
     logout,
