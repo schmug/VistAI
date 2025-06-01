@@ -11,6 +11,7 @@ import {
   findUser,
   findUserById,
   hashPassword,
+  verifyPassword,
 } from './db.js';
 import crypto from 'node:crypto';
 
@@ -71,12 +72,7 @@ const openapiSpec = `openapi: 3.0.0
 info:
   title: VistAI API
   version: '1.0.0'
-components:
-  securitySchemes:
-    openrouter_api_key:
-      type: apiKey
-      in: header
-      name: openrouter_api_key
+components: {}
 paths:
   /api/status:
     get:
@@ -161,8 +157,6 @@ paths:
   /api/search:
     post:
       summary: Query models
-      security:
-        - openrouter_api_key: []
       requestBody:
         required: true
         content:
@@ -356,11 +350,6 @@ const swaggerHtml = `<!DOCTYPE html>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
 </head>
 <body>
-  <div style="margin:10px">
-    OpenRouter API Key:
-    <input id="or-key" type="text" style="width:300px" />
-    <button onclick="setKey()">Set</button>
-  </div>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
@@ -372,18 +361,6 @@ const swaggerHtml = `<!DOCTYPE html>
       presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
       layout: 'StandaloneLayout'
     });
-    const stored = localStorage.getItem('openrouter_api_key');
-    if (stored) {
-      ui.preauthorizeApiKey('openrouter_api_key', stored);
-      document.getElementById('or-key').value = stored;
-    }
-    window.setKey = () => {
-      const k = document.getElementById('or-key').value;
-      if (k) {
-        localStorage.setItem('openrouter_api_key', k);
-        ui.preauthorizeApiKey('openrouter_api_key', k);
-      }
-    };
   };
   </script>
 </body>
@@ -402,8 +379,7 @@ export default {
     // Basic CORS support with configurable origins
     const headers = createCorsHeaders(request, env);
 
-    const requestApiKey = request.headers.get('openrouter_api_key');
-    const apiKey = requestApiKey || env.OPENROUTER_API_KEY;
+    const apiKey = env.OPENROUTER_API_KEY;
 
     if (!apiKey) {
       return jsonResponse({ message: 'OPENROUTER_API_KEY is missing' }, headers, 500);
@@ -469,7 +445,7 @@ export default {
           return jsonResponse({ message: 'Invalid credentials' }, headers, 400);
         }
         const user = await findUser(env.DB, username);
-        if (!user || hashPassword(password) !== user.password) {
+        if (!user || !verifyPassword(password, user.password)) {
           return jsonResponse({ message: 'Invalid credentials' }, headers, 401);
         }
         const secret = env.JWT_SECRET;
@@ -636,21 +612,22 @@ export default {
   }
 
   function createCorsHeaders(request, env) {
-    const cfg = env.ACCESS_CONTROL_ALLOW_ORIGIN || '*';
+    const cfg = env.ACCESS_CONTROL_ALLOW_ORIGIN || '';
+    if (!cfg) {
+      return {};
+    }
     const allowed = cfg.split(',').map((o) => o.trim()).filter(Boolean);
     const origin = request.headers.get('Origin') || '';
-    let allow = '*';
-    if (!allowed.includes('*')) {
-      if (origin && allowed.includes(origin)) {
-        allow = origin;
-      } else {
-        allow = allowed[0] || 'null';
-      }
+    let allow = allowed[0] || 'null';
+    if (allowed.includes('*')) {
+      allow = '*';
+    } else if (origin && allowed.includes(origin)) {
+      allow = origin;
     }
     return {
       'Access-Control-Allow-Origin': allow,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, openrouter_api_key',
+      'Access-Control-Allow-Headers': 'Content-Type',
       'Vary': 'Origin',
     };
   }

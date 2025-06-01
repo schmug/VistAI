@@ -83,7 +83,7 @@ wrangler pages deploy dist/public
 - `JWT_SECRET` - Secret for JWT token signing (generates random if not set)
 
 ### Optional Variables (Worker)
-- `ACCESS_CONTROL_ALLOW_ORIGIN` - CORS configuration (defaults to "*")
+- `ACCESS_CONTROL_ALLOW_ORIGIN` - CORS configuration. Set a comma separated list of allowed origins or `*` for development. If unset, cross-origin requests are blocked.
 
 ### Required Variables (Frontend - Cloudflare Pages)
 - `API_BASE_URL` - Your worker URL for API requests
@@ -126,9 +126,9 @@ wrangler secret put OPENROUTER_API_KEY --env production
    - Verify database_id in wrangler.toml matches your D1 database
    - Run migrations: `wrangler d1 migrations apply vistai`
 
-2. **CORS errors**  
+2. **CORS errors**
    - Set `ACCESS_CONTROL_ALLOW_ORIGIN` to your frontend URL
-   - For development, use "*"
+   - For development, you may use "*"
 
 3. **API key errors**
    - Ensure `OPENROUTER_API_KEY` is set as a secret
