@@ -91,7 +91,26 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
       setIsRecording(false);
     };
 
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
     recognitionRef.current = recognition;
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+          recognitionRef.current.onresult = null;
+          recognitionRef.current.onend = null;
+          recognitionRef.current.onerror = null;
+        } catch (error) {
+          // Ignore cleanup errors
+        }
+        recognitionRef.current = null;
+      }
+    };
   }, [onSearch]);
 
   useEffect(() => {

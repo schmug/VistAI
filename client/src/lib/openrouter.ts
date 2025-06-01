@@ -75,12 +75,14 @@ export async function searchAIStream(
       const contentType = response.headers.get("content-type") || "";
 
       if (contentType.startsWith("text/event-stream")) {
-        const reader = response.body!.getReader();
+        let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
         const decoder = new TextDecoder();
         let buffer = "";
         let finalData: SearchResponse | null = null;
 
         try {
+          reader = response.body!.getReader();
+          
           while (true) {
             // Check if the request was aborted
             if (signal?.aborted) {
@@ -129,7 +131,14 @@ export async function searchAIStream(
             }
           }
         } finally {
-          reader.releaseLock();
+          // Ensure reader is properly released even if an error occurs
+          if (reader) {
+            try {
+              reader.releaseLock();
+            } catch (releaseError) {
+              console.warn("Error releasing stream reader:", releaseError);
+            }
+          }
         }
 
         if (finalData) return finalData;
