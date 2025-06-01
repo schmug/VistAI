@@ -597,22 +597,23 @@ export default {
   }
 
   function createCorsHeaders(request, env) {
-    const cfg = env.ACCESS_CONTROL_ALLOW_ORIGIN || '*';
+    const cfg = env.ACCESS_CONTROL_ALLOW_ORIGIN || '';
+    if (!cfg) {
+      return {};
+    }
     const allowed = cfg.split(',').map((o) => o.trim()).filter(Boolean);
     const origin = request.headers.get('Origin') || '';
-    let allow = '*';
-    if (!allowed.includes('*')) {
-      if (origin && allowed.includes(origin)) {
-        allow = origin;
-      } else {
-        allow = allowed[0] || 'null';
-      }
+    let allow = allowed[0] || 'null';
+    if (allowed.includes('*')) {
+      allow = '*';
+    } else if (origin && allowed.includes(origin)) {
+      allow = origin;
     }
     return {
       'Access-Control-Allow-Origin': allow,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, openrouter_api_key',
-      'Vary': 'Origin',
+      Vary: 'Origin',
     };
   }
 
