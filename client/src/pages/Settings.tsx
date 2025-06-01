@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 /**
  * Settings page for managing user preferences.
  */
 export default function Settings() {
   const [darkMode, setDarkMode] = useState(false);
-  const [apiKey, setApiKey] = useState("");
 
   // Initialize theme from localStorage
   useEffect(() => {
@@ -20,12 +17,6 @@ export default function Settings() {
     setDarkMode(prefersDark);
   }, []);
 
-  // Initialize API key from localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedKey = window.localStorage.getItem("openrouter_api_key") || "";
-    setApiKey(storedKey);
-  }, []);
 
   // Apply theme when darkMode changes
   useEffect(() => {
@@ -59,30 +50,6 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>OpenRouter API Key</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="sk-..."
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-          />
-          <Button
-            onClick={() => {
-              if (typeof window === "undefined") return;
-              if (apiKey) {
-                window.localStorage.setItem("openrouter_api_key", apiKey);
-              } else {
-                window.localStorage.removeItem("openrouter_api_key");
-              }
-            }}
-          >
-            Save
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 }

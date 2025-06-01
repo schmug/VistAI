@@ -1,24 +1,30 @@
 import crypto from 'node:crypto';
 
 /**
- * Hash a plain text password using SHA-256.
- * 
- * ⚠️ SECURITY WARNING: This implementation is not secure for production use.
- * SHA-256 without salt is vulnerable to rainbow table attacks.
- * 
- * TODO: Replace with bcrypt for production deployment:
- * ```js
- * import bcrypt from 'bcrypt';
- * export async function hashPassword(password) {
- *   return await bcrypt.hash(password, 12);
- * }
- * ```
- * 
- * @param {string} password - Plain text password to hash
- * @returns {string} SHA-256 hash of the password (hex encoded)
+ * Hash a plain text password using PBKDF2 with SHA-256 and a random salt.
+ * Returns a string in the format `salt:hash` where both values are hex encoded.
  */
 export function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 100000, 32, 'sha256')
+    .toString('hex');
+  return `${salt}:${hash}`;
+}
+
+/**
+ * Verify a plain text password against a stored `salt:hash` string.
+ */
+export function verifyPassword(password, stored) {
+  const [salt, hash] = stored.split(':');
+  if (!salt || !hash) return false;
+  const hashed = crypto
+    .pbkdf2Sync(password, salt, 100000, 32, 'sha256')
+    .toString('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(hashed, 'hex'),
+    Buffer.from(hash, 'hex'),
+  );
 }
 
 /**

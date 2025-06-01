@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # Environment variables can be set in Cloudflare dashboard or via wrangler secret put
-# ACCESS_CONTROL_ALLOW_ORIGIN = "*"  # For development, restrict in production
+# ACCESS_CONTROL_ALLOW_ORIGIN = "*"  # Use only for development; set specific origins in production
 # JWT_SECRET = "your-secure-jwt-secret-here"  # Set via wrangler secret put JWT_SECRET
 
 [observability]
