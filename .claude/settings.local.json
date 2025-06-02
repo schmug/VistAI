@@ -15,7 +15,11 @@
       "Bash(/home/schmug/.nvm/versions/node/v23.10.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"recent-queries|getRecentQueries\" worker/worker.js)",
       "Bash(npm test:*)",
       "Bash(git add:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(/home/schmug/.nvm/versions/node/v23.10.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"Card \" client/src/pages/Dashboard.tsx)",
+      "Bash(/home/schmug/.nvm/versions/node/v23.10.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"Button\" client/src/components/SubscriptionModal.tsx)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ]
   },
   "enableAllProjectMcpServers": false

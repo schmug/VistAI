@@ -79,8 +79,8 @@ export function ErrorNotification({ error, onDismiss, onRetry }: ErrorNotificati
               {needsApiKey(error) && (
                 <Button
                   size="sm"
+                  variant="accent"
                   onClick={() => navigate("/settings")}
-                  className="bg-info hover:bg-info/90 text-info-foreground"
                 >
                   <i className="ri-settings-line mr-1"></i>
                   Settings

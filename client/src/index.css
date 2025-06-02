@@ -259,6 +259,30 @@
     );
   }
 
+  /* === Gradient Border Utilities === */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-variant)));
+    border-radius: var(--radius-lg);
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
+
+  .gradient-border-accent::before {
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+  }
+
   /* === Animation Utilities === */
   .animate-float {
     animation: float 6s ease-in-out infinite;

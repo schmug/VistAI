@@ -60,9 +60,9 @@ export default function SubscriptionModal({
 
           <div className="space-y-3">
             <div 
-              className={`flex items-center justify-between p-3 rounded-lg border ${
-                plan === "monthly" ? "border-primary/50" : "border-border"
-              } hover:border-primary/50 transition-colors cursor-pointer`}
+              className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 cursor-pointer ${
+                plan === "monthly" ? "gradient-border" : "border-border hover:border-primary/50"
+              }`}
               onClick={() => setPlan("monthly")}
             >
               <div>
@@ -79,9 +79,9 @@ export default function SubscriptionModal({
             </div>
             
             <div 
-              className={`flex items-center justify-between p-3 rounded-lg border ${
-                plan === "annual" ? "border-primary/50" : "border-border"
-              } hover:border-primary/50 transition-colors cursor-pointer`}
+              className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 cursor-pointer ${
+                plan === "annual" ? "gradient-border-accent" : "border-border hover:border-primary/50"
+              }`}
               onClick={() => setPlan("annual")}
             >
               <div>
@@ -102,7 +102,7 @@ export default function SubscriptionModal({
         <Separator />
         
         <DialogFooter className="flex-col gap-2">
-          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button className="w-full">
             Subscribe Now
           </Button>
           
