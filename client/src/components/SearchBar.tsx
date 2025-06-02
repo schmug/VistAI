@@ -18,6 +18,11 @@ interface SearchBarProps {
 }
 
 /**
+ * Maximum height in pixels before the textarea begins scrolling
+ */
+const MAX_TEXTAREA_HEIGHT = 160;
+
+/**
  * Search input component with voice recognition, search history, and auto-resize functionality.
  * 
  * Features:
@@ -66,7 +71,8 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
     const el = inputRef.current;
     if (el) {
       el.style.height = "auto";
-      el.style.height = `${el.scrollHeight}px`;
+      const newHeight = Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT);
+      el.style.height = `${newHeight}px`;
     }
   }, [query]);
 
@@ -109,9 +115,10 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
             }
           }}
           className={cn(
-            "flex-1 resize-none overflow-hidden border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+            "flex-1 resize-none overflow-y-auto border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
             compact ? "text-base" : "text-lg"
           )}
+          style={{ maxHeight: MAX_TEXTAREA_HEIGHT }}
         />
         
         <div className="flex items-center gap-2">
