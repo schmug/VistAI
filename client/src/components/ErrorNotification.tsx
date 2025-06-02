@@ -51,14 +51,14 @@ export function ErrorNotification({ error, onDismiss, onRetry }: ErrorNotificati
   };
 
   const getErrorColor = () => {
-    if (needsApiKey(error)) return 'border-blue-500 bg-blue-50 dark:bg-blue-950';
-    if (error.type === 'auth') return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950';
-    return 'border-red-500 bg-red-50 dark:bg-red-950';
+    if (needsApiKey(error)) return 'border-info bg-info/10';
+    if (error.type === 'auth') return 'border-warning bg-warning/10';
+    return 'border-error bg-error/10';
   };
 
   return (
     <div className={`fixed top-4 right-4 z-50 max-w-md transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
-      <Alert className={`${getErrorColor()} shadow-lg border-2`}>
+      <Alert className={`${getErrorColor()} shadow-lg border-2 glass-card`}>
         <div className="flex items-start gap-3">
           <i className={`${getErrorIcon()} text-lg mt-0.5 flex-shrink-0`}></i>
           <div className="flex-1 min-w-0">
@@ -79,8 +79,8 @@ export function ErrorNotification({ error, onDismiss, onRetry }: ErrorNotificati
               {needsApiKey(error) && (
                 <Button
                   size="sm"
+                  variant="accent"
                   onClick={() => navigate("/settings")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <i className="ri-settings-line mr-1"></i>
                   Settings

@@ -121,7 +121,7 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
             <Button 
               type="submit" 
               size="icon" 
-              className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white rounded-full shadow-glow transition-all duration-300"
+              className="rounded-full"
             >
               <i className="ri-search-line text-xl"></i>
               <span className="sr-only">Search</span>

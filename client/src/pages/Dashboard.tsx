@@ -37,7 +37,7 @@ export default function Dashboard() {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Searches</CardTitle>
             <i className="ri-search-line text-muted-foreground"></i>
@@ -54,7 +54,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
             <i className="ri-cursor-line text-muted-foreground"></i>
@@ -71,7 +71,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="glass-card gradient-border-accent">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Top Model</CardTitle>
             <i className="ri-trophy-line text-muted-foreground"></i>
@@ -92,7 +92,7 @@ export default function Dashboard() {
       </div>
       
       <div className="grid gap-4 md:grid-cols-7">
-        <Card className="md:col-span-4">
+        <Card className="md:col-span-4 gradient-border">
           <CardHeader>
             <CardTitle>Model Preference Distribution</CardTitle>
             <CardDescription>
@@ -137,7 +137,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card className="md:col-span-3">
+        <Card className="md:col-span-3 gradient-border-accent">
           <CardHeader>
             <CardTitle>Model Rankings</CardTitle>
             <CardDescription>
