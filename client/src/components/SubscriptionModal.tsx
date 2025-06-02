@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ModelStats } from "@/lib/openrouter";
 import { getModelInfo } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ export default function SubscriptionModal({
   topModels = []
 }: SubscriptionModalProps) {
   const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
+  const { toast } = useToast();
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,12 +104,21 @@ export default function SubscriptionModal({
         <Separator />
         
         <DialogFooter className="flex-col gap-2">
-          <Button className="w-full">
+          <Button 
+            className="w-full" 
+            onClick={() => {
+              // TODO: Implement Stripe or payment processing
+              toast({
+                title: "Coming Soon!",
+                description: "Subscription functionality is being developed. We'll notify you when it's ready!",
+              });
+            }}
+          >
             Subscribe Now
           </Button>
           
           <p className="text-xs text-muted-foreground text-center">
-            Cancel anytime. <a href="#" className="text-primary hover:underline">Terms apply</a>
+            Cancel anytime. <a href="/terms" className="text-primary hover:underline">Terms apply</a>
           </p>
         </DialogFooter>
       </DialogContent>

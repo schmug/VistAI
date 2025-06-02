@@ -14,8 +14,8 @@ export default function Footer() {
           <div className="text-muted-foreground text-sm">
             <p>
               © {new Date().getFullYear()} VistAI •
-              <Button variant="link" className="ml-1 h-auto p-0">Terms</Button> •
-              <Button variant="link" className="ml-1 h-auto p-0">Privacy</Button>
+              <Link href="/terms" className="ml-1 text-primary hover:text-accent transition-colors">Terms</Link> •
+              <Link href="/privacy" className="ml-1 text-primary hover:text-accent transition-colors">Privacy</Link>
             </p>
           </div>
           
@@ -27,9 +27,9 @@ export default function Footer() {
             >
               Dashboard
             </Link>
-            <a href="/docs" className="hover:text-primary transition-colors">API</a>
-            <button className="hover:text-primary transition-colors">Pricing</button>
-            <button className="hover:text-primary transition-colors">Contact</button>
+            <button className="hover:text-primary transition-colors" disabled title="Coming soon">API</button>
+            <button className="hover:text-primary transition-colors opacity-50" disabled title="Coming soon">Pricing</button>
+            <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
           </div>
         </div>
         
