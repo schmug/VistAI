@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { parseError, AppError } from "@/lib/errorHandling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ErrorNotification } from "@/components/ErrorNotification";
 import { useLocation } from "wouter";
 
@@ -57,16 +56,20 @@ export default function Login() {
             />
             <Input
               type="password"
-              placeholder="Password"
+              placeholder="Password (min 8 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               disabled={isLoading}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || !username || !password}>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+              disabled={isLoading || !username || password.length < 8}
+            >
               {isLoading ? "Logging in..." : "Login"}
-            </Button>
+            </button>
             <p className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <button
@@ -85,7 +88,7 @@ export default function Login() {
         error={error}
         onDismiss={() => setError(null)}
         onRetry={() => {
-          if (username && password) {
+          if (username && password && password.length >= 8) {
             handleSubmit({ preventDefault: () => {} } as React.FormEvent);
           }
         }}
