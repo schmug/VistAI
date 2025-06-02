@@ -259,6 +259,36 @@
     );
   }
 
+  /* === Floating Particles === */
+  .floating-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .particle {
+    position: absolute;
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
+    border-radius: 50%;
+    opacity: 0.1;
+    animation: floatParticle 20s infinite linear;
+  }
+
+  .particle:nth-child(1) { left: 10%; animation-delay: 0s; width: 20px; height: 20px; }
+  .particle:nth-child(2) { left: 20%; animation-delay: 2s; width: 30px; height: 30px; }
+  .particle:nth-child(3) { left: 30%; animation-delay: 4s; width: 25px; height: 25px; }
+  .particle:nth-child(4) { left: 40%; animation-delay: 6s; width: 15px; height: 15px; }
+  .particle:nth-child(5) { left: 50%; animation-delay: 8s; width: 35px; height: 35px; }
+  .particle:nth-child(6) { left: 60%; animation-delay: 10s; width: 20px; height: 20px; }
+  .particle:nth-child(7) { left: 70%; animation-delay: 12s; width: 25px; height: 25px; }
+  .particle:nth-child(8) { left: 80%; animation-delay: 14s; width: 30px; height: 30px; }
+  .particle:nth-child(9) { left: 90%; animation-delay: 16s; width: 15px; height: 15px; }
+
   /* === Gradient Border Utilities === */
   .gradient-border {
     position: relative;
@@ -303,6 +333,42 @@
   .animate-scale-in {
     animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .animate-gradient {
+    background-size: 400% 400%;
+    animation: gradientShift 4s ease infinite;
+  }
+
+  .animate-typing {
+    animation: typing 2s steps(40, end), blinkCursor 0.75s step-end infinite;
+  }
+
+  .stagger-animation {
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .stagger-animation:nth-child(1) { animation-delay: 0s; }
+  .stagger-animation:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-animation:nth-child(3) { animation-delay: 0.2s; }
+  .stagger-animation:nth-child(4) { animation-delay: 0.3s; }
+  .stagger-animation:nth-child(5) { animation-delay: 0.4s; }
+
+  .success-pulse {
+    animation: successPulse 0.6s ease-out;
+  }
+
+  .celebrate {
+    position: relative;
+  }
+
+  .celebrate::after {
+    content: '✨';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    animation: celebrationBounce 1s ease-out;
+    pointer-events: none;
+  }
 }
 
 /* === Keyframe Animations === */
@@ -334,6 +400,51 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blinkCursor {
+  from, to { border-color: transparent; }
+  50% { border-color: hsl(var(--primary)); }
+}
+
+@keyframes floatParticle {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.1;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 hsl(var(--accent) / 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px hsl(var(--accent) / 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 hsl(var(--accent) / 0); }
+}
+
+@keyframes celebrationBounce {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
 }
 
 /* === Search Results Animations === */

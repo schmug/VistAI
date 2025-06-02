@@ -182,3 +182,52 @@ export function clearSearchHistory(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem("searchHistory");
 }
+
+/**
+ * Play a subtle UI sound effect (if enabled by user)
+ */
+export function playUISound(type: 'click' | 'success' | 'error' = 'click'): void {
+  if (typeof window === "undefined") return;
+  
+  // Check if user has disabled sounds
+  const soundsEnabled = window.localStorage.getItem("ui-sounds") !== "disabled";
+  if (!soundsEnabled) return;
+
+  // Create audio context for subtle sound effects
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Configure sound based on type
+    switch (type) {
+      case 'click':
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        break;
+      case 'success':
+        oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        break;
+      case 'error':
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        break;
+    }
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + (type === 'success' ? 0.3 : 0.1));
+  } catch (error) {
+    // Silently fail if audio context is not supported
+  }
+}
