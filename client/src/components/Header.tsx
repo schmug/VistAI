@@ -42,7 +42,7 @@ export default function Header() {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-gradient-primary">VistAI</h1>
+            <h1 className="text-xl font-bold animate-gradient bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">VistAI</h1>
             <Badge variant="accent" className="text-xs">Beta</Badge>
           </Link>
         </div>

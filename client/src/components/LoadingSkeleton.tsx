@@ -12,11 +12,22 @@ interface LoadingSkeletonProps {
  */
 export default function LoadingSkeleton({ count = 4, blink = false }: LoadingSkeletonProps) {
   const skeletonCls = blink ? "skeleton-glow blink" : "skeleton-glow"
+  
+  const loadingMessages = [
+    "Consulting the AI council...",
+    "Gathering wisdom from multiple minds...",
+    "Comparing perspectives across models...",
+    "Synthesizing intelligent responses...",
+    "Coordinating with AI experts...",
+    "Processing your query through neural networks..."
+  ];
+  
+  const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <i className="ri-loader-4-line animate-spin"></i>
-        <span>Searching...</span>
+      <div className="flex items-center gap-2 text-sm text-primary/80">
+        <i className="ri-loader-4-line animate-spin text-primary"></i>
+        <span className="animate-typing">{randomMessage}</span>
       </div>
       {Array.from({ length: count }).map((_, index) => (
         <Card key={index} className="glass-card p-5 animate-fade-in">

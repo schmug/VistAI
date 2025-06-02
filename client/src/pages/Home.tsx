@@ -45,10 +45,17 @@ export default function Home() {
   };
   
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in relative">
+      {/* Floating particles background */}
+      <div className="floating-particles">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div key={i} className="particle" />
+        ))}
+      </div>
+      
       <div className="text-center mb-8">
         <h1 className="text-4xl md:text-5xl font-bold mb-2">
-          <span className="text-gradient-primary">VistAI</span>
+          <span className="animate-gradient bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">VistAI</span>
         </h1>
         <p className="text-muted-foreground max-w-md mx-auto">
           Compare results from leading AI models in one search

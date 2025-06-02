@@ -126,7 +126,7 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   return (
     <Collapsible open={open}>
       <Card
-        className="result-card cursor-pointer animate-fade-in"
+        className="result-card cursor-pointer stagger-animation opacity-0"
         onClick={toggleOpen}
       >
       <CardHeader className="p-5 pb-2">
