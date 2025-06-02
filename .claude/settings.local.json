@@ -13,7 +13,8 @@
       "Bash(npm ci:*)",
       "Bash(npm test)",
       "Bash(/home/schmug/.nvm/versions/node/v23.10.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"recent-queries|getRecentQueries\" worker/worker.js)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(git add:*)"
     ]
   },
   "enableAllProjectMcpServers": false
