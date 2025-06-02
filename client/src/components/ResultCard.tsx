@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import ModelBadge from "./ModelBadge";
-import { trackResultClick } from "@/lib/openrouter";
+import { trackResultClick, submitFeedback } from "@/lib/openrouter";
 import { ModelResponse } from "@/lib/openrouter";
 
 /**
@@ -113,15 +113,27 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   };
   
   // Handle feedback
-  const handleFeedback = (type: "liked" | "disliked") => {
-    setFeedback(type);
-    toast({
-      title: type === "liked" ? "Thanks for your feedback!" : "We'll work on improving",
-      description: type === "liked" 
-        ? "We're glad this response was helpful" 
-        : "Thank you for helping us improve our results",
-    });
-  };
+  const handleFeedback = useCallback(async (type: "liked" | "disliked") => {
+    const feedbackType = type === "liked" ? "up" : "down";
+    
+    try {
+      await submitFeedback(result.id, feedbackType);
+      setFeedback(type);
+      toast({
+        title: type === "liked" ? "Thanks for your feedback!" : "We'll work on improving",
+        description: type === "liked" 
+          ? "We're glad this response was helpful" 
+          : "Thank you for helping us improve our results",
+      });
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+      toast({
+        title: "Failed to submit feedback",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    }
+  }, [result.id, toast]);
   
   return (
     <Collapsible open={open}>
