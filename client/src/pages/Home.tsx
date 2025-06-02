@@ -45,10 +45,10 @@ export default function Home() {
   };
   
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in">
       <div className="text-center mb-8">
         <h1 className="text-4xl md:text-5xl font-bold mb-2">
-          <span className="text-primary">Vist</span><span className="text-foreground">AI</span>
+          <span className="text-gradient-primary">VistAI</span>
         </h1>
         <p className="text-muted-foreground max-w-md mx-auto">
           Compare results from leading AI models in one search
@@ -66,7 +66,7 @@ export default function Home() {
                 <Link
                   key={suggestion}
                   href={`/search?q=${encodeURIComponent(suggestion)}`}
-                  className="text-xs bg-card px-3 py-1.5 rounded-full text-muted-foreground hover:bg-card/80 transition-colors"
+                  className="text-xs glass-card px-3 py-1.5 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
                 >
                   {suggestion}
                 </Link>
@@ -78,7 +78,7 @@ export default function Home() {
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
-                className="text-xs bg-card px-3 py-1.5 rounded-full text-muted-foreground cursor-pointer hover:bg-card/80 transition-colors"
+                className="text-xs glass-card px-3 py-1.5 rounded-full text-muted-foreground cursor-pointer hover:bg-primary/10 hover:text-primary transition-all"
                 onClick={() => handleSearch(suggestion)}
               >
 

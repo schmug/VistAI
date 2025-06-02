@@ -40,8 +40,8 @@ export default function Register() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[70vh]">
-      <Card className="w-full max-w-sm">
+    <div className="flex justify-center items-center min-h-[70vh] animate-fade-in">
+      <Card className="w-full max-w-sm glass-card">
         <CardHeader>
           <CardTitle>Register</CardTitle>
         </CardHeader>
