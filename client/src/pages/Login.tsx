@@ -64,9 +64,13 @@ export default function Login() {
               minLength={6}
               disabled={isLoading}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || !username || !password}>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 rounded-md bg-primary text-white disabled:opacity-50"
+              disabled={isLoading || !username || !password}
+            >
               {isLoading ? "Logging in..." : "Login"}
-            </Button>
+            </button>
             <p className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <button

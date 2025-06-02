@@ -57,16 +57,20 @@ export default function Register() {
             />
             <Input
               type="password"
-              placeholder="Password (min 6 characters)"
+              placeholder="Password (min 8 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               disabled={isLoading}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || !username || password.length < 6}>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 rounded-md bg-primary text-white disabled:opacity-50"
+              disabled={isLoading || !username || password.length < 8}
+            >
               {isLoading ? "Creating account..." : "Register"}
-            </Button>
+            </button>
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <button
@@ -85,7 +89,7 @@ export default function Register() {
         error={error}
         onDismiss={() => setError(null)}
         onRetry={() => {
-          if (username && password && password.length >= 6) {
+          if (username && password && password.length >= 8) {
             handleSubmit({ preventDefault: () => {} } as React.FormEvent);
           }
         }}
