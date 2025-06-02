@@ -16,6 +16,9 @@ const Settings = lazy(() => import("@/pages/Settings"));
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const Logout = lazy(() => import("@/pages/Logout"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Contact = lazy(() => import("@/pages/Contact"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 /**
@@ -45,6 +48,9 @@ export default function App() {
               <Route path="/login" component={Login} />
               <Route path="/register" component={Register} />
               <Route path="/logout" component={Logout} />
+              <Route path="/terms" component={Terms} />
+              <Route path="/privacy" component={Privacy} />
+              <Route path="/contact" component={Contact} />
               <Route component={NotFound} />
             </Switch>
           </Suspense>
