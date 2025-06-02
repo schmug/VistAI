@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { parseError, AppError } from "@/lib/errorHandling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ErrorNotification } from "@/components/ErrorNotification";
 import { useLocation } from "wouter";
 
@@ -40,8 +39,8 @@ export default function Register() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[70vh] animate-fade-in">
-      <Card className="w-full max-w-sm glass-card">
+    <div className="flex justify-center items-center min-h-[70vh]">
+      <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Register</CardTitle>
         </CardHeader>
@@ -64,9 +63,13 @@ export default function Register() {
               minLength={8}
               disabled={isLoading}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || !username || password.length < 8}>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+              disabled={isLoading || !username || password.length < 8}
+            >
               {isLoading ? "Creating account..." : "Register"}
-            </Button>
+            </button>
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <button
@@ -85,7 +88,7 @@ export default function Register() {
         error={error}
         onDismiss={() => setError(null)}
         onRetry={() => {
-          if (username && password && password.length >= 6) {
+          if (username && password && password.length >= 8) {
             handleSubmit({ preventDefault: () => {} } as React.FormEvent);
           }
         }}

@@ -64,4 +64,3 @@ test('track-click updates model stats with percentages', async () => {
   assert.strictEqual(a.displayName, 'A');
   assert.strictEqual(b.displayName, 'B');
 });
-
