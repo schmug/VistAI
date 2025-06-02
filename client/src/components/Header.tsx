@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +43,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-gradient-primary">VistAI</h1>
-            <span className="text-xs bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full text-primary/80 font-medium">Beta</span>
+            <Badge variant="accent" className="text-xs">Beta</Badge>
           </Link>
         </div>
         
