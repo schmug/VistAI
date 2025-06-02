@@ -33,3 +33,26 @@ test('authentication tokens are signed', async () => {
   const loginToken = loginCookie.split('token=')[1]?.split(';')[0] || ''
   assert.ok(loginToken && loginToken.split('.').length === 3)
 })
+
+/** Duplicate usernames should return 409 */
+test('register rejects duplicate usernames', async () => {
+  const db = new FakeD1Database()
+  const env = { DB: db, OPENROUTER_API_KEY: 'k', JWT_SECRET: 'secret' }
+
+  const req1 = new Request('http://localhost/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'u', password: 'password123' })
+  })
+  await worker.fetch(req1, env)
+
+  const req2 = new Request('http://localhost/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'u', password: 'password123' })
+  })
+  const res2 = await worker.fetch(req2, env)
+  assert.strictEqual(res2.status, 409)
+  const data = await res2.json()
+  assert.strictEqual(data.message, 'Username already exists')
+})
