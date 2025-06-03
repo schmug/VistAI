@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { getSearchHistory, clearSearchHistory } from "@/lib/utils";
+import { getSearchHistory, clearSearchHistory, cn } from "@/lib/utils";
 
 interface SearchHistoryProps {
   onSelect: (query: string) => void;
   show: boolean;
   onToggle: (show: boolean) => void;
+  /** Render as overlay dropdown instead of inline */
+  overlay?: boolean;
 }
 
 /**
@@ -15,7 +17,7 @@ interface SearchHistoryProps {
  * @param show - Whether to show the history dropdown
  * @param onToggle - Callback to control dropdown visibility
  */
-export function SearchHistory({ onSelect, show, onToggle }: SearchHistoryProps) {
+export function SearchHistory({ onSelect, show, onToggle, overlay = true }: SearchHistoryProps) {
   const [history, setHistory] = useState<string[]>([]);
 
   useEffect(() => {
@@ -49,7 +51,12 @@ export function SearchHistory({ onSelect, show, onToggle }: SearchHistoryProps) 
   }
 
   return (
-    <div className="absolute left-0 top-full mt-2 w-full z-50 bg-card border border-border rounded-md shadow-lg">
+    <div
+      className={cn(
+        overlay ? "absolute left-0 top-full mt-2 z-50" : "mt-2",
+        "w-full bg-card border border-border rounded-md shadow-lg"
+      )}
+    >
       {history.map((item) => (
         <Button
           key={item}
