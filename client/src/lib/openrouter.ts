@@ -298,3 +298,20 @@ export async function getLeaderboard(
   const data = await response.json();
   return data;
 }
+
+export interface ResultFeedbackStats {
+  stats: {
+    up: number;
+    down: number;
+  };
+  userFeedback: 'up' | 'down' | null;
+}
+
+/**
+ * Get feedback stats for a specific result.
+ */
+export async function getResultFeedback(resultId: number): Promise<ResultFeedbackStats> {
+  const response = await apiRequest("GET", `/api/result-feedback?resultId=${resultId}`);
+  const data = await response.json();
+  return data;
+}

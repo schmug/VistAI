@@ -284,17 +284,22 @@ export async function submitUserFeedback(db, { resultId, userId, feedbackType })
  * Get feedback stats for a specific result.
  */
 export async function getResultFeedbackStats(db, resultId) {
-  const { results } = await db
-    .prepare(
-      'SELECT feedback_type as feedbackType, COUNT(*) as count FROM user_feedback WHERE result_id = ? GROUP BY feedback_type'
-    )
-    .bind(resultId)
-    .all();
-  const stats = { up: 0, down: 0 };
-  results.forEach(r => {
-    stats[r.feedbackType] = r.count;
-  });
-  return stats;
+  try {
+    const { results } = await db
+      .prepare(
+        'SELECT feedback_type as feedbackType, COUNT(*) as count FROM user_feedback WHERE result_id = ? GROUP BY feedback_type'
+      )
+      .bind(resultId)
+      .all();
+    const stats = { up: 0, down: 0 };
+    results.forEach(r => {
+      stats[r.feedbackType] = r.count;
+    });
+    return stats;
+  } catch (error) {
+    // Return zero stats if user_feedback table doesn't exist
+    return { up: 0, down: 0 };
+  }
 }
 
 /**
@@ -302,13 +307,18 @@ export async function getResultFeedbackStats(db, resultId) {
  */
 export async function getUserFeedback(db, resultId, userId) {
   if (!userId) return null;
-  const { results } = await db
-    .prepare(
-      'SELECT feedback_type as feedbackType FROM user_feedback WHERE result_id = ? AND user_id = ?'
-    )
-    .bind(resultId, userId)
-    .all();
-  return results[0]?.feedbackType || null;
+  try {
+    const { results } = await db
+      .prepare(
+        'SELECT feedback_type as feedbackType FROM user_feedback WHERE result_id = ? AND user_id = ?'
+      )
+      .bind(resultId, userId)
+      .all();
+    return results[0]?.feedbackType || null;
+  } catch (error) {
+    // Return null if user_feedback table doesn't exist
+    return null;
+  }
 }
 
 /**

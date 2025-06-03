@@ -679,13 +679,15 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
+        
+        // Handle both authenticated and anonymous users
+        let userId = null;
         const secret = env.JWT_SECRET;
-        if (!secret) {
-          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        if (secret) {
+          const token = getTokenFromRequest(request);
+          const payload = verifyToken(token, secret);
+          userId = payload ? payload.userId : null;
         }
-        const token = getTokenFromRequest(request);
-        const payload = verifyToken(token, secret);
-        const userId = payload ? payload.userId : undefined;
 
         const click = await trackClick(env.DB, { resultId, userId });
         const stats = await getModelStatsWithPercent(env.DB);
@@ -804,6 +806,30 @@ export default {
 
         const leaderboard = await getGlobalLeaderboard(env.DB, type, limit);
         return jsonResponse(leaderboard, headers);
+      }
+
+      if (pathname === '/api/result-feedback' && request.method === 'GET') {
+        const resultId = parseInt(searchParams.get('resultId') || '0', 10);
+        if (!resultId) {
+          return jsonResponse({ message: 'Invalid result ID' }, headers, 400);
+        }
+        
+        // Get feedback stats
+        const stats = await getResultFeedbackStats(env.DB, resultId);
+        
+        // Get user's feedback if authenticated
+        let userFeedback = null;
+        const secret = env.JWT_SECRET;
+        if (secret) {
+          const token = getTokenFromRequest(request);
+          const payload = verifyToken(token, secret);
+          const userId = payload ? payload.userId : null;
+          if (userId) {
+            userFeedback = await getUserFeedback(env.DB, resultId, userId);
+          }
+        }
+        
+        return jsonResponse({ stats, userFeedback }, headers);
       }
 
       return new Response('Not Found', { status: 404, headers });
