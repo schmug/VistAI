@@ -21,7 +21,8 @@
       "Bash(git push:*)",
       "Bash(git commit:*)",
       "Bash(/home/schmug/.nvm/versions/node/v23.10.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"useState.*monthly\" client/src/components/SubscriptionModal.tsx)",
-      "Bash(wrangler d1 migrations list:*)"
+      "Bash(wrangler d1 migrations list:*)",
+      "Bash(npx wrangler:*)"
     ]
   },
   "enableAllProjectMcpServers": false

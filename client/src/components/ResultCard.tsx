@@ -54,12 +54,12 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
   const [open, setOpen] = useState(false);
   
-  // Fetch feedback stats when card is expanded
-  const { data: feedbackData, refetch: refetchFeedback } = useQuery({
+  // Fetch feedback stats immediately since buttons are always visible
+  const { data: feedbackData, refetch: refetchFeedback, isLoading: feedbackLoading } = useQuery({
     queryKey: [`/api/result-feedback`, result.id],
     queryFn: () => getResultFeedback(result.id),
-    enabled: open, // Only fetch when expanded
     refetchOnWindowFocus: false,
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   // Set initial feedback state from server data
@@ -162,62 +162,103 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
         <div className="flex justify-between items-center">
           <ModelBadge modelId={result.modelId} />
 
-          <div className="flex items-center gap-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopy();
-                    }}
-                  >
-                    <i className={copied ? "ri-check-line" : "ri-clipboard-line"}></i>
-                    <span className="sr-only">Copy to clipboard</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Copy to clipboard</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleShare();
-                    }}
-                  >
-                    <i className="ri-share-line"></i>
-                    <span className="sr-only">Share this result</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Share this result</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleOpen();
-              }}
-            >
-              <i className={open ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
-              <span className="sr-only">Toggle result</span>
-            </Button>
+          <div className="flex items-center gap-3">
+            {/* Feedback buttons - always visible */}
+            <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-1">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`flex items-center gap-1.5 px-2 py-1 h-8 ${
+                        feedback === "liked" 
+                          ? "text-green-600 bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900" 
+                          : "text-muted-foreground hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFeedback("liked");
+                      }}
+                    >
+                      <i className={`text-base ${feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}`}></i>
+                      <span className="text-xs font-medium min-w-[1rem] text-center">
+                        {feedbackData?.stats?.up || 0}
+                      </span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Helpful response</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`flex items-center gap-1.5 px-2 py-1 h-8 ${
+                        feedback === "disliked" 
+                          ? "text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900" 
+                          : "text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFeedback("disliked");
+                      }}
+                    >
+                      <i className={`text-base ${feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}`}></i>
+                      <span className="text-xs font-medium min-w-[1rem] text-center">
+                        {feedbackData?.stats?.down || 0}
+                      </span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Not helpful</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-1">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopy();
+                      }}
+                    >
+                      <i className={copied ? "ri-check-line" : "ri-clipboard-line"}></i>
+                      <span className="sr-only">Copy to clipboard</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Copy to clipboard</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleOpen();
+                }}
+              >
+                <i className={open ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}></i>
+                <span className="sr-only">Toggle result</span>
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -240,49 +281,15 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
       <CollapsibleContent>
         <CardFooter className="p-5 pt-2">
           <Separator className="mb-4" />
-        
-        <div className="w-full flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={feedback === "liked" ? "text-accent shadow-glow-success" : "text-muted-foreground hover:text-accent"}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFeedback("liked");
-              }}
-            >
-              <i className={feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}></i>
-              <span className="ml-1 text-xs">
-                {feedbackData?.stats?.up || 0}
-              </span>
-              <span className="sr-only">Helpful</span>
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className={feedback === "disliked" ? "text-error" : "text-muted-foreground hover:text-error"}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFeedback("disliked");
-              }}
-            >
-              <i className={feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}></i>
-              <span className="ml-1 text-xs">
-                {feedbackData?.stats?.down || 0}
-              </span>
-              <span className="sr-only">Not helpful</span>
-            </Button>
-          </div>
           
           {result.responseTime && (
-            <div className="text-xs text-muted-foreground-light font-mono">
-              {(result.responseTime / 1000).toFixed(2)}s
+            <div className="flex justify-end">
+              <div className="text-xs text-muted-foreground-light font-mono bg-muted/30 px-2 py-1 rounded">
+                Response time: {(result.responseTime / 1000).toFixed(2)}s
+              </div>
             </div>
           )}
-        </div>
-      </CardFooter>
+        </CardFooter>
       </CollapsibleContent>
       </Card>
     </Collapsible>
