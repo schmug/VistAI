@@ -171,7 +171,7 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`flex items-center gap-1.5 px-2 py-1 h-8 ${
+                      className={`flex items-center gap-1 px-2 py-1 h-8 ${
                         feedback === "liked" 
                           ? "text-green-600 bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900" 
                           : "text-muted-foreground hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
@@ -182,13 +182,16 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
                       }}
                     >
                       <i className={`text-base ${feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}`}></i>
-                      <span className="text-xs font-medium min-w-[1rem] text-center">
-                        {feedbackData?.stats?.up || 0}
-                      </span>
+                      {Array.from({ length: Math.min(feedbackData?.stats?.up || 0, 5) }).map((_, i) => (
+                        <i key={i} className="ri-thumb-up-fill text-xs opacity-60"></i>
+                      ))}
+                      {(feedbackData?.stats?.up || 0) > 5 && (
+                        <span className="text-xs font-medium">+{(feedbackData?.stats?.up || 0) - 5}</span>
+                      )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Helpful response</p>
+                    <p>Helpful response ({feedbackData?.stats?.up || 0} votes)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -199,7 +202,7 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`flex items-center gap-1.5 px-2 py-1 h-8 ${
+                      className={`flex items-center gap-1 px-2 py-1 h-8 ${
                         feedback === "disliked" 
                           ? "text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900" 
                           : "text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
@@ -210,13 +213,16 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
                       }}
                     >
                       <i className={`text-base ${feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}`}></i>
-                      <span className="text-xs font-medium min-w-[1rem] text-center">
-                        {feedbackData?.stats?.down || 0}
-                      </span>
+                      {Array.from({ length: Math.min(feedbackData?.stats?.down || 0, 5) }).map((_, i) => (
+                        <i key={i} className="ri-thumb-down-fill text-xs opacity-60"></i>
+                      ))}
+                      {(feedbackData?.stats?.down || 0) > 5 && (
+                        <span className="text-xs font-medium">+{(feedbackData?.stats?.down || 0) - 5}</span>
+                      )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Not helpful</p>
+                    <p>Not helpful ({feedbackData?.stats?.down || 0} votes)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
