@@ -62,10 +62,8 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="w-full max-w-2xl mx-auto px-4">
-        <div className="mb-8">
-          <SearchBar onSearch={handleSearch} />
-        </div>
+      <div className="w-full max-w-2xl mx-auto">
+        <SearchBar onSearch={handleSearch} overlayHistory={false} />
 
         {isTrending ? (
           <div className="mt-8 text-center">
