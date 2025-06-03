@@ -53,31 +53,39 @@ export function SearchHistory({ onSelect, show, onToggle, overlay = true }: Sear
   return (
     <div
       className={cn(
-        overlay ? "absolute left-0 top-full mt-2 z-50" : "mt-2",
-        "w-full bg-card border border-border rounded-md shadow-lg"
+        overlay ? "absolute left-0 top-full mt-2 z-[100]" : "",
+        "w-full bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-xl max-h-64 overflow-y-auto"
       )}
     >
-      {history.map((item) => (
-        <Button
-          key={item}
-          type="button"
-          variant="ghost"
-          className="w-full justify-start px-4 py-2 text-sm hover:bg-muted"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => handleSelect(item)}
-        >
-          {item}
-        </Button>
-      ))}
-      <Button
-        type="button"
-        variant="ghost"
-        className="w-full justify-start px-4 py-2 text-sm border-t hover:bg-muted"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={handleClearHistory}
-      >
-        Clear history
-      </Button>
+      <div className="py-2">
+        {history.map((item, index) => (
+          <Button
+            key={item}
+            type="button"
+            variant="ghost"
+            className="w-full justify-start px-4 py-2.5 text-sm hover:bg-muted/70 transition-colors rounded-none text-left"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => handleSelect(item)}
+          >
+            <i className="ri-time-line text-muted-foreground mr-2 text-xs"></i>
+            <span className="truncate">{item}</span>
+          </Button>
+        ))}
+        {history.length > 0 && (
+          <div className="border-t border-border mt-2 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full justify-start px-4 py-2.5 text-sm hover:bg-muted/70 transition-colors rounded-none text-muted-foreground"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleClearHistory}
+            >
+              <i className="ri-delete-bin-line mr-2 text-xs"></i>
+              Clear history
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
