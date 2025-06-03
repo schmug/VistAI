@@ -3,11 +3,17 @@ export class FakeD1Database {
   results: any[] = [];
   clicks: any[] = [];
   users: any[] = [];
+  userFeedback: any[] = [];
+  trendingMetrics: any[] = [];
+  modelRankings: any[] = [];
   modelStats: Record<string, {clickCount: number; searchCount: number; updatedAt: string}>;
   nextSearchId = 1;
   nextResultId = 1;
   nextClickId = 1;
   nextUserId = 1;
+  nextFeedbackId = 1;
+  nextTrendingId = 1;
+  nextRankingId = 1;
   constructor(initialStats: Record<string, {clickCount: number; searchCount: number; updatedAt: string}> = {}) {
     this.modelStats = { ...initialStats };
   }
@@ -76,6 +82,54 @@ export class FakeD1Database {
           const arr = Object.entries(db.modelStats)
             .map(([modelId, s]) => ({ modelId, clickCount: s.clickCount, searchCount: s.searchCount, updatedAt: s.updatedAt }));
           return { results: arr };
+        }
+        if (q.includes('INSERT') && q.includes('user_feedback')) {
+          const row = { 
+            id: db.nextFeedbackId++, 
+            resultId: a[0], 
+            userId: a[1], 
+            feedbackType: a[2], 
+            createdAt: a[3] 
+          };
+          db.userFeedback.push(row);
+          return { results: [row] };
+        }
+        if (q.includes('INSERT') && q.includes('trending_metrics')) {
+          const row = { 
+            id: db.nextTrendingId++,
+            modelId: a[0],
+            timePeriod: a[1],
+            positiveFeedback: a[2],
+            negativeFeedback: a[3],
+            totalSearches: a[4],
+            totalClicks: a[5],
+            trendScore: a[6],
+            periodStart: a[7],
+            periodEnd: a[8],
+            createdAt: a[9]
+          };
+          db.trendingMetrics.push(row);
+          return { results: [row] };
+        }
+        if (q.includes('SELECT') && q.includes('trending_metrics')) {
+          const period = a[0];
+          const limit = a[1];
+          const filtered = db.trendingMetrics
+            .filter(m => m.timePeriod === period)
+            .sort((a, b) => b.trendScore - a.trendScore)
+            .slice(0, limit);
+          return {
+            results: filtered.map(m => ({
+              modelId: m.modelId,
+              trendScore: m.trendScore,
+              positiveFeedback: m.positiveFeedback,
+              negativeFeedback: m.negativeFeedback,
+              totalSearches: m.totalSearches,
+              totalClicks: m.totalClicks,
+              periodStart: m.periodStart,
+              periodEnd: m.periodEnd
+            }))
+          };
         }
         return { results: [] };
       },

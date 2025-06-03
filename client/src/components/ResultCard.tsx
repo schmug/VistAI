@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, memo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo, useCallback, memo, useEffect } from "react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import ModelBadge from "./ModelBadge";
-import { trackResultClick } from "@/lib/openrouter";
+import { trackResultClick, submitFeedback, getResultFeedback } from "@/lib/openrouter";
 import { ModelResponse } from "@/lib/openrouter";
 
 /**
@@ -53,6 +53,21 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
   const [open, setOpen] = useState(false);
+  
+  // Fetch feedback stats when card is expanded
+  const { data: feedbackData, refetch: refetchFeedback } = useQuery({
+    queryKey: [`/api/result-feedback`, result.id],
+    queryFn: () => getResultFeedback(result.id),
+    enabled: open, // Only fetch when expanded
+    refetchOnWindowFocus: false,
+  });
+
+  // Set initial feedback state from server data
+  useEffect(() => {
+    if (feedbackData?.userFeedback) {
+      setFeedback(feedbackData.userFeedback === 'up' ? 'liked' : 'disliked');
+    }
+  }, [feedbackData?.userFeedback]);
   const preview = useMemo(() => 
     result.snippet || result.content.split(/\n/)[0], 
     [result.snippet, result.content]
@@ -113,15 +128,29 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
   };
   
   // Handle feedback
-  const handleFeedback = (type: "liked" | "disliked") => {
-    setFeedback(type);
-    toast({
-      title: type === "liked" ? "Thanks for your feedback!" : "We'll work on improving",
-      description: type === "liked" 
-        ? "We're glad this response was helpful" 
-        : "Thank you for helping us improve our results",
-    });
-  };
+  const handleFeedback = useCallback(async (type: "liked" | "disliked") => {
+    const feedbackType = type === "liked" ? "up" : "down";
+    
+    try {
+      await submitFeedback(result.id, feedbackType);
+      setFeedback(type);
+      // Refetch feedback stats to get updated counts
+      refetchFeedback();
+      toast({
+        title: type === "liked" ? "Thanks for your feedback!" : "We'll work on improving",
+        description: type === "liked" 
+          ? "We're glad this response was helpful" 
+          : "Thank you for helping us improve our results",
+      });
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+      toast({
+        title: "Failed to submit feedback",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    }
+  }, [result.id, toast, refetchFeedback]);
   
   return (
     <Collapsible open={open}>
@@ -224,6 +253,9 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
               }}
             >
               <i className={feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}></i>
+              <span className="ml-1 text-xs">
+                {feedbackData?.stats?.up || 0}
+              </span>
               <span className="sr-only">Helpful</span>
             </Button>
             
@@ -237,6 +269,9 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
               }}
             >
               <i className={feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}></i>
+              <span className="ml-1 text-xs">
+                {feedbackData?.stats?.down || 0}
+              </span>
               <span className="sr-only">Not helpful</span>
             </Button>
           </div>

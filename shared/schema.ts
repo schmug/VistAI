@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, real, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -88,3 +88,83 @@ export type Click = typeof clicks.$inferSelect;
 
 export type InsertModelStat = z.infer<typeof insertModelStatSchema>;
 export type ModelStat = typeof modelStats.$inferSelect;
+
+// User feedback on results (thumbs up/down)
+export const userFeedback = pgTable("user_feedback", {
+  id: serial("id").primaryKey(),
+  resultId: integer("result_id").notNull(),
+  userId: integer("user_id"),
+  feedbackType: text("feedback_type").notNull(), // 'up' or 'down'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueUserResult: unique().on(table.resultId, table.userId),
+}));
+
+export const insertUserFeedbackSchema = createInsertSchema(userFeedback).pick({
+  resultId: true,
+  userId: true,
+  feedbackType: true,
+});
+
+// Model rankings based on various metrics
+export const modelRankings = pgTable("model_rankings", {
+  id: serial("id").primaryKey(),
+  modelId: text("model_id").notNull(),
+  rankingType: text("ranking_type").notNull(), // 'overall', 'trending', 'personalized'
+  userId: integer("user_id"), // NULL for global rankings, specific user for personalized
+  score: real("score").notNull().default(0),
+  rankPosition: integer("rank_position").notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueModelRanking: unique().on(table.modelId, table.rankingType, table.userId, table.periodStart),
+}));
+
+export const insertModelRankingSchema = createInsertSchema(modelRankings).pick({
+  modelId: true,
+  rankingType: true,
+  userId: true,
+  score: true,
+  rankPosition: true,
+  periodStart: true,
+  periodEnd: true,
+});
+
+// Trending analysis data
+export const trendingMetrics = pgTable("trending_metrics", {
+  id: serial("id").primaryKey(),
+  modelId: text("model_id").notNull(),
+  timePeriod: text("time_period").notNull(), // 'hour', 'day', 'week'
+  positiveFeedback: integer("positive_feedback").notNull().default(0),
+  negativeFeedback: integer("negative_feedback").notNull().default(0),
+  totalSearches: integer("total_searches").notNull().default(0),
+  totalClicks: integer("total_clicks").notNull().default(0),
+  trendScore: real("trend_score").notNull().default(0),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueTrendingPeriod: unique().on(table.modelId, table.timePeriod, table.periodStart),
+}));
+
+export const insertTrendingMetricSchema = createInsertSchema(trendingMetrics).pick({
+  modelId: true,
+  timePeriod: true,
+  positiveFeedback: true,
+  negativeFeedback: true,
+  totalSearches: true,
+  totalClicks: true,
+  trendScore: true,
+  periodStart: true,
+  periodEnd: true,
+});
+
+export type InsertUserFeedback = z.infer<typeof insertUserFeedbackSchema>;
+export type UserFeedback = typeof userFeedback.$inferSelect;
+
+export type InsertModelRanking = z.infer<typeof insertModelRankingSchema>;
+export type ModelRanking = typeof modelRankings.$inferSelect;
+
+export type InsertTrendingMetric = z.infer<typeof insertTrendingMetricSchema>;
+export type TrendingMetric = typeof trendingMetrics.$inferSelect;

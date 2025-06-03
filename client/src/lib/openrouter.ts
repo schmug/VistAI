@@ -206,3 +206,112 @@ export async function getTopModels(limit: number = 5): Promise<ModelStats[]> {
   const data = await response.json();
   return data;
 }
+
+export interface UserFeedback {
+  id: number;
+  resultId: number;
+  userId: number;
+  feedbackType: 'up' | 'down';
+  createdAt: Date;
+}
+
+/**
+ * Submit user feedback (thumbs up/down) for a result.
+ */
+export async function submitFeedback(
+  resultId: number,
+  feedbackType: 'up' | 'down'
+): Promise<UserFeedback> {
+  const response = await apiRequest("POST", "/api/submit-feedback", {
+    resultId,
+    feedbackType,
+  });
+  const data = await response.json();
+  return data.feedback;
+}
+
+export interface TrendingModel {
+  modelId: string;
+  displayName: string;
+  trendScore: number;
+  trending: 'up' | 'down' | 'stable';
+  positiveFeedback: number;
+  negativeFeedback: number;
+  totalSearches: number;
+  totalClicks: number;
+  periodStart: string;
+  periodEnd: string;
+}
+
+/**
+ * Get trending models based on recent performance.
+ */
+export async function getTrendingModels(
+  period: 'hour' | 'day' | 'week' = 'day',
+  limit: number = 10
+): Promise<TrendingModel[]> {
+  const response = await apiRequest("GET", `/api/trending-models?period=${period}&limit=${limit}`);
+  const data = await response.json();
+  return data;
+}
+
+export interface PersonalizedRanking {
+  modelId: string;
+  displayName: string;
+  rankPosition: number;
+  personalScore: number;
+  totalResults: number;
+  userClicks: number;
+  userLikes: number;
+  userDislikes: number;
+}
+
+/**
+ * Get personalized model rankings for the current user.
+ */
+export async function getPersonalizedRankings(limit: number = 10): Promise<PersonalizedRanking[]> {
+  const response = await apiRequest("GET", `/api/personalized-rankings?limit=${limit}`);
+  const data = await response.json();
+  return data;
+}
+
+export interface LeaderboardEntry {
+  modelId: string;
+  displayName: string;
+  rankPosition: number;
+  score: number;
+  clickCount?: number;
+  searchCount?: number;
+  positiveFeedback?: number;
+  negativeFeedback?: number;
+  trendScore?: number;
+}
+
+/**
+ * Get global model leaderboard.
+ */
+export async function getLeaderboard(
+  type: 'overall' | 'trending' = 'overall',
+  limit: number = 20
+): Promise<LeaderboardEntry[]> {
+  const response = await apiRequest("GET", `/api/leaderboard?type=${type}&limit=${limit}`);
+  const data = await response.json();
+  return data;
+}
+
+export interface ResultFeedbackStats {
+  stats: {
+    up: number;
+    down: number;
+  };
+  userFeedback: 'up' | 'down' | null;
+}
+
+/**
+ * Get feedback stats for a specific result.
+ */
+export async function getResultFeedback(resultId: number): Promise<ResultFeedbackStats> {
+  const response = await apiRequest("GET", `/api/result-feedback?resultId=${resultId}`);
+  const data = await response.json();
+  return data;
+}

@@ -12,6 +12,13 @@ import {
   findUserById,
   hashPassword,
   verifyPassword,
+  submitUserFeedback,
+  getResultFeedbackStats,
+  getUserFeedback,
+  updateTrendingMetrics,
+  getTrendingModels,
+  calculatePersonalizedRankings,
+  getGlobalLeaderboard,
 } from './db.js';
 import crypto from 'node:crypto';
 
@@ -340,6 +347,126 @@ paths:
                       type: string
                     createdAt:
                       type: string
+  /api/submit-feedback:
+    post:
+      summary: Submit thumbs up/down feedback for a result
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resultId:
+                  type: integer
+                feedbackType:
+                  type: string
+                  enum: [up, down]
+      responses:
+        '200':
+          description: Feedback submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  feedback:
+                    type: object
+  /api/trending-models:
+    get:
+      summary: Get trending models based on recent performance
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [hour, day, week]
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Trending models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    modelId:
+                      type: string
+                    displayName:
+                      type: string
+                    trendScore:
+                      type: number
+                    trending:
+                      type: string
+  /api/personalized-rankings:
+    get:
+      summary: Get personalized model rankings for the current user
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Personalized rankings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    modelId:
+                      type: string
+                    displayName:
+                      type: string
+                    rankPosition:
+                      type: integer
+                    personalScore:
+                      type: number
+  /api/leaderboard:
+    get:
+      summary: Get global model leaderboard
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [overall, trending]
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Model leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    modelId:
+                      type: string
+                    displayName:
+                      type: string
+                    rankPosition:
+                      type: integer
+                    score:
+                      type: number
 `;
 
 const swaggerHtml = `<!DOCTYPE html>
@@ -556,13 +683,15 @@ export default {
         if (typeof resultId !== 'number') {
           return jsonResponse({ message: 'Invalid click data' }, headers, 400);
         }
+        
+        // Handle both authenticated and anonymous users
+        let userId = null;
         const secret = env.JWT_SECRET;
-        if (!secret) {
-          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        if (secret) {
+          const token = getTokenFromRequest(request);
+          const payload = verifyToken(token, secret);
+          userId = payload ? payload.userId : null;
         }
-        const token = getTokenFromRequest(request);
-        const payload = verifyToken(token, secret);
-        const userId = payload ? payload.userId : undefined;
 
         const click = await trackClick(env.DB, { resultId, userId });
         const stats = await getModelStatsWithPercent(env.DB);
@@ -597,6 +726,114 @@ export default {
         const limit = parseInt(searchParams.get('limit') || '5', 10);
         const queries = await getRecentQueries(env.DB, limit);
         return jsonResponse(queries, headers);
+      }
+
+      if (pathname === '/api/submit-feedback' && request.method === 'POST') {
+        const body = await request.json();
+        const { resultId, feedbackType } = body;
+        if (typeof resultId !== 'number' || !['up', 'down'].includes(feedbackType)) {
+          return jsonResponse({ message: 'Invalid feedback data' }, headers, 400);
+        }
+        const secret = env.JWT_SECRET;
+        if (!secret) {
+          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        }
+        const token = getTokenFromRequest(request);
+        const payload = verifyToken(token, secret);
+        const userId = payload ? payload.userId : null;
+
+        if (!userId) {
+          return jsonResponse({ message: 'Authentication required for feedback' }, headers, 401);
+        }
+
+        const feedback = await submitUserFeedback(env.DB, { resultId, userId, feedbackType });
+        
+        // Update trending metrics when feedback is submitted
+        try {
+          await updateTrendingMetrics(env.DB, 'day');
+        } catch (err) {
+          console.warn('Failed to update trending metrics:', err);
+        }
+
+        return jsonResponse({ success: true, feedback }, headers);
+      }
+
+      if (pathname === '/api/trending-models' && request.method === 'GET') {
+        const period = searchParams.get('period') || 'day';
+        const limit = parseInt(searchParams.get('limit') || '10', 10);
+        
+        // Update trending metrics before fetching
+        try {
+          await updateTrendingMetrics(env.DB, period);
+        } catch (err) {
+          console.warn('Failed to update trending metrics:', err);
+        }
+
+        const models = await getTrendingModels(env.DB, period, limit);
+        return jsonResponse(models, headers);
+      }
+
+      if (pathname === '/api/personalized-rankings' && request.method === 'GET') {
+        const limit = parseInt(searchParams.get('limit') || '10', 10);
+        const secret = env.JWT_SECRET;
+        if (!secret) {
+          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
+        }
+        const token = getTokenFromRequest(request);
+        const payload = verifyToken(token, secret);
+        const userId = payload ? payload.userId : null;
+
+        if (!userId) {
+          return jsonResponse({ message: 'Authentication required for personalized rankings' }, headers, 401);
+        }
+
+        const rankings = await calculatePersonalizedRankings(env.DB, userId, limit);
+        return jsonResponse(rankings, headers);
+      }
+
+      if (pathname === '/api/leaderboard' && request.method === 'GET') {
+        const type = searchParams.get('type') || 'overall';
+        const limit = parseInt(searchParams.get('limit') || '20', 10);
+        
+        if (!['overall', 'trending'].includes(type)) {
+          return jsonResponse({ message: 'Invalid leaderboard type' }, headers, 400);
+        }
+
+        // Update trending metrics if requesting trending leaderboard
+        if (type === 'trending') {
+          try {
+            await updateTrendingMetrics(env.DB, 'day');
+          } catch (err) {
+            console.warn('Failed to update trending metrics:', err);
+          }
+        }
+
+        const leaderboard = await getGlobalLeaderboard(env.DB, type, limit);
+        return jsonResponse(leaderboard, headers);
+      }
+
+      if (pathname === '/api/result-feedback' && request.method === 'GET') {
+        const resultId = parseInt(searchParams.get('resultId') || '0', 10);
+        if (!resultId) {
+          return jsonResponse({ message: 'Invalid result ID' }, headers, 400);
+        }
+        
+        // Get feedback stats
+        const stats = await getResultFeedbackStats(env.DB, resultId);
+        
+        // Get user's feedback if authenticated
+        let userFeedback = null;
+        const secret = env.JWT_SECRET;
+        if (secret) {
+          const token = getTokenFromRequest(request);
+          const payload = verifyToken(token, secret);
+          const userId = payload ? payload.userId : null;
+          if (userId) {
+            userFeedback = await getUserFeedback(env.DB, resultId, userId);
+          }
+        }
+        
+        return jsonResponse({ stats, userFeedback }, headers);
       }
 
       return new Response('Not Found', { status: 404, headers });

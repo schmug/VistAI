@@ -19,6 +19,7 @@ const Logout = lazy(() => import("@/pages/Logout"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Contact = lazy(() => import("@/pages/Contact"));
+const Leaderboard = lazy(() => import("@/pages/Leaderboard"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 /**
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/terms" component={Terms} />
               <Route path="/privacy" component={Privacy} />
               <Route path="/contact" component={Contact} />
+              <Route path="/leaderboard" component={Leaderboard} />
               <Route component={NotFound} />
             </Switch>
           </Suspense>

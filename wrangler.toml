@@ -28,6 +28,7 @@ database_name = "vistai"
 # Run: wrangler d1 create vistai
 # Then copy the database_id from the output
 database_id = "88697d9a-39f5-4698-9df0-5b8ff40ffb7a"
+migrations_dir = "./worker/migrations"
 
 # Production database (optional - use same DB or create separate one)
 [[env.production.d1_databases]]

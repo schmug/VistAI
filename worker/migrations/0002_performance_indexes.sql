@@ -1,5 +1,9 @@
 -- Performance indexes for faster queries
 
+-- First, add user_id column to clicks table if it doesn't exist
+-- This handles cases where the initial schema wasn't applied correctly
+ALTER TABLE clicks ADD COLUMN user_id INTEGER;
+
 -- Index for searching queries by text (for popular/recent queries)
 CREATE INDEX IF NOT EXISTS idx_searches_query ON searches(query);
 

@@ -59,6 +59,14 @@ export default function Header() {
           )}
           
           <nav className="flex items-center gap-3">
+            <Link
+              href="/leaderboard"
+              className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-lg hover:bg-primary/10"
+            >
+              <i className="ri-trophy-line text-xl"></i>
+              <span className="sr-only">Leaderboard</span>
+            </Link>
+            
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
