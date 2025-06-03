@@ -734,18 +734,17 @@ export default {
         if (typeof resultId !== 'number' || !['up', 'down'].includes(feedbackType)) {
           return jsonResponse({ message: 'Invalid feedback data' }, headers, 400);
         }
+        
+        // Handle both authenticated and anonymous users for feedback
+        let userId = null;
         const secret = env.JWT_SECRET;
-        if (!secret) {
-          return jsonResponse({ message: 'JWT_SECRET is not set' }, headers, 500);
-        }
-        const token = getTokenFromRequest(request);
-        const payload = verifyToken(token, secret);
-        const userId = payload ? payload.userId : null;
-
-        if (!userId) {
-          return jsonResponse({ message: 'Authentication required for feedback' }, headers, 401);
+        if (secret) {
+          const token = getTokenFromRequest(request);
+          const payload = verifyToken(token, secret);
+          userId = payload ? payload.userId : null;
         }
 
+        // Anonymous users can still submit feedback (userId will be null)
         const feedback = await submitUserFeedback(env.DB, { resultId, userId, feedbackType });
         
         // Update trending metrics when feedback is submitted

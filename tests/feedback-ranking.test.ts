@@ -121,7 +121,7 @@ describe('Feedback System API Tests', () => {
     assert(Array.isArray(personal));
   });
 
-  it('should require authentication for feedback submission', async () => {
+  it('should allow anonymous feedback submission', async () => {
     const db = new FakeD1Database();
     
     const feedbackReq = new Request('http://localhost/api/submit-feedback', {
@@ -141,7 +141,10 @@ describe('Feedback System API Tests', () => {
       JWT_SECRET: 'test-secret'
     });
     
-    assert.strictEqual(feedbackRes.status, 401);
+    assert.strictEqual(feedbackRes.status, 200);
+    const data = await feedbackRes.json();
+    assert.strictEqual(data.success, true);
+    assert.ok(data.feedback);
   });
 
   it('should validate feedback type', async () => {
