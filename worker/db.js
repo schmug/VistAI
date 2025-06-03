@@ -246,12 +246,18 @@ export async function submitUserFeedback(db, { resultId, userId, feedbackType })
   const now = new Date().toISOString();
   
   try {
-    const { results } = await db
-      .prepare(
-        'INSERT OR REPLACE INTO user_feedback (result_id, user_id, feedback_type, created_at) VALUES (?,?,?,?) RETURNING id, result_id as resultId, user_id as userId, feedback_type as feedbackType, created_at as createdAt'
-      )
-      .bind(resultId, userId, feedbackType, now)
-      .all();
+    // For logged-in users, use INSERT OR REPLACE to allow updating their feedback
+    // For anonymous users, always INSERT (allow multiple anonymous votes)
+    let query, params;
+    if (userId) {
+      query = 'INSERT OR REPLACE INTO user_feedback (result_id, user_id, feedback_type, created_at) VALUES (?,?,?,?) RETURNING id, result_id as resultId, user_id as userId, feedback_type as feedbackType, created_at as createdAt';
+      params = [resultId, userId, feedbackType, now];
+    } else {
+      query = 'INSERT INTO user_feedback (result_id, user_id, feedback_type, created_at) VALUES (?,?,?,?) RETURNING id, result_id as resultId, user_id as userId, feedback_type as feedbackType, created_at as createdAt';
+      params = [resultId, null, feedbackType, now];
+    }
+    
+    const { results } = await db.prepare(query).bind(...params).all();
     return results[0];
   } catch (error) {
     // If table doesn't exist, create a simple one and try again
@@ -266,12 +272,17 @@ export async function submitUserFeedback(db, { resultId, userId, feedbackType })
         )
       `).run();
       
-      const { results } = await db
-        .prepare(
-          'INSERT OR REPLACE INTO user_feedback (result_id, user_id, feedback_type, created_at) VALUES (?,?,?,?) RETURNING id, result_id as resultId, user_id as userId, feedback_type as feedbackType, created_at as createdAt'
-        )
-        .bind(resultId, userId, feedbackType, now)
-        .all();
+      // Retry the insert after creating the table
+      let query, params;
+      if (userId) {
+        query = 'INSERT OR REPLACE INTO user_feedback (result_id, user_id, feedback_type, created_at) VALUES (?,?,?,?) RETURNING id, result_id as resultId, user_id as userId, feedback_type as feedbackType, created_at as createdAt';
+        params = [resultId, userId, feedbackType, now];
+      } else {
+        query = 'INSERT INTO user_feedback (result_id, user_id, feedback_type, created_at) VALUES (?,?,?,?) RETURNING id, result_id as resultId, user_id as userId, feedback_type as feedbackType, created_at as createdAt';
+        params = [resultId, null, feedbackType, now];
+      }
+      
+      const { results } = await db.prepare(query).bind(...params).all();
       return results[0];
     } catch (fallbackError) {
       console.error('Failed to submit feedback:', fallbackError);
