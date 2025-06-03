@@ -426,6 +426,10 @@ export default {
         if (!username || !password || password.length < 8) {
           return jsonResponse({ message: 'Invalid user data' }, headers, 400);
         }
+        const existing = await findUser(env.DB, username);
+        if (existing) {
+          return jsonResponse({ message: 'Username already exists' }, headers, 409);
+        }
         const user = await createUser(env.DB, { username, password });
         const secret = env.JWT_SECRET;
         if (!secret) {
