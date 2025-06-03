@@ -63,7 +63,7 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
   };
 
   const handleBlur = () => {
-    setTimeout(() => setShowHistory(false), 100);
+    setTimeout(() => setShowHistory(false), 200);
   };
 
 
@@ -93,54 +93,57 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div className={cn(
-        "relative flex items-center glass-card search-bar-glow rounded-full transition-all",
-        compact ? "px-4 py-2" : "px-5 py-3"
-      )}>
-        <i className={cn("ri-search-line text-primary/80 mr-3", compact ? "text-base" : "text-xl")}></i>
-        
-        <Textarea
-          ref={inputRef}
-          rows={1}
-          placeholder="Search across multiple AI models..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit(e as unknown as FormEvent);
-            }
-          }}
-          className={cn(
-            "flex-1 resize-none overflow-y-auto border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
-            compact ? "text-base" : "text-lg"
-          )}
-          style={{ maxHeight: MAX_TEXTAREA_HEIGHT }}
-        />
-        
-        <div className="flex items-center gap-2">
-          <VoiceInput compact={compact} onResult={handleVoiceResult} />
+    <div className="w-full relative">
+      <form onSubmit={handleSubmit} className="w-full">
+        <div className={cn(
+          "flex items-center glass-card search-bar-glow rounded-full transition-all",
+          compact ? "px-4 py-2" : "px-5 py-3"
+        )}>
+          <i className={cn("ri-search-line text-primary/80 mr-3", compact ? "text-base" : "text-xl")}></i>
           
-          {!compact && (
-            <Button 
-              type="submit" 
-              size="icon" 
-              className="rounded-full"
-            >
-              <i className="ri-search-line text-xl"></i>
-              <span className="sr-only">Search</span>
-            </Button>
-          )}
+          <Textarea
+            ref={inputRef}
+            rows={1}
+            placeholder="Search across multiple AI models..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e as unknown as FormEvent);
+              }
+            }}
+            className={cn(
+              "flex-1 resize-none overflow-y-auto border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+              compact ? "text-base" : "text-lg"
+            )}
+            style={{ maxHeight: MAX_TEXTAREA_HEIGHT }}
+          />
+          
+          <div className="flex items-center gap-2">
+            <VoiceInput compact={compact} onResult={handleVoiceResult} />
+            
+            {!compact && (
+              <Button 
+                type="submit" 
+                size="icon" 
+                className="rounded-full"
+              >
+                <i className="ri-search-line text-xl"></i>
+                <span className="sr-only">Search</span>
+              </Button>
+            )}
+          </div>
         </div>
-        <SearchHistory
-          show={showHistory}
-          onSelect={handleHistorySelect}
-          onToggle={setShowHistory}
-        />
-      </div>
-    </form>
+      </form>
+      
+      <SearchHistory
+        show={showHistory}
+        onSelect={handleHistorySelect}
+        onToggle={setShowHistory}
+      />
+    </div>
   );
 }
