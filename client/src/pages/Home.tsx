@@ -63,7 +63,7 @@ export default function Home() {
       </div>
 
       <div className="w-full max-w-2xl mx-auto">
-        <SearchBar onSearch={handleSearch} />
+        <SearchBar onSearch={handleSearch} overlayHistory={false} />
 
         {isTrending ? (
           <div className="mt-5 text-center">

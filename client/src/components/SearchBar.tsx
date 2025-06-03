@@ -15,6 +15,8 @@ interface SearchBarProps {
   compact?: boolean;
   /** Callback function called when a search is submitted */
   onSearch: (query: string) => void;
+  /** Display search history as overlay dropdown */
+  overlayHistory?: boolean;
 }
 
 /**
@@ -47,7 +49,7 @@ const MAX_TEXTAREA_HEIGHT = 160;
  * />
  * ```
  */
-export default function SearchBar({ initialQuery = "", compact = false, onSearch }: SearchBarProps) {
+export default function SearchBar({ initialQuery = "", compact = false, onSearch, overlayHistory = true }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
   const [showHistory, setShowHistory] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -139,6 +141,7 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
           show={showHistory}
           onSelect={handleHistorySelect}
           onToggle={setShowHistory}
+          overlay={overlayHistory}
         />
       </div>
     </form>
