@@ -66,7 +66,7 @@ export default function Home() {
         <SearchBar onSearch={handleSearch} overlayHistory={false} />
 
         {isTrending ? (
-          <div className="mt-5 text-center">
+          <div className="mt-8 text-center">
             <h2 className="text-sm font-medium mb-2">Trending searches</h2>
             <div className="flex flex-wrap justify-center gap-2">
               {suggestions.map((suggestion) => (
@@ -81,7 +81,7 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-wrap justify-center gap-2 mt-5">
+          <div className="flex flex-wrap justify-center gap-2 mt-8">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}

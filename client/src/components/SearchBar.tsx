@@ -65,7 +65,7 @@ export default function SearchBar({ initialQuery = "", compact = false, onSearch
   };
 
   const handleBlur = () => {
-    setTimeout(() => setShowHistory(false), 100);
+    setTimeout(() => setShowHistory(false), 200);
   };
 
 
