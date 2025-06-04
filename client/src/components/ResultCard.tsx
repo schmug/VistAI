@@ -164,29 +164,27 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
 
           <div className="flex items-center gap-3">
             {/* Feedback buttons - always visible */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-full transition-all ${
+                      className={`flex items-center gap-2 px-3 py-2 h-9 rounded-lg border transition-all ${
                         feedback === "liked" 
-                          ? "text-green-600 bg-green-100/80 hover:bg-green-200/80 dark:bg-green-900/30 dark:hover:bg-green-800/40" 
-                          : "text-muted-foreground hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-900/20"
+                          ? "text-green-700 bg-green-50 border-green-200 hover:bg-green-100 dark:text-green-400 dark:bg-green-950/50 dark:border-green-800 dark:hover:bg-green-900/50" 
+                          : "text-gray-600 bg-white border-gray-200 hover:text-green-600 hover:bg-green-50 hover:border-green-200 dark:text-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:hover:text-green-400 dark:hover:bg-green-950/30"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleFeedback("liked");
                       }}
                     >
-                      <i className={`text-sm ${feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}`}></i>
-                      {(feedbackData?.stats?.up || 0) > 0 && (
-                        <span className="text-xs font-medium min-w-[1rem] text-center">
-                          {feedbackData?.stats?.up}
-                        </span>
-                      )}
+                      <i className={`text-lg ri-thumb-up-fill`}></i>
+                      <span className="text-sm font-medium">
+                        {feedbackData?.stats?.up || 0}
+                      </span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -201,22 +199,20 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-full transition-all ${
+                      className={`flex items-center gap-2 px-3 py-2 h-9 rounded-lg border transition-all ${
                         feedback === "disliked" 
-                          ? "text-red-600 bg-red-100/80 hover:bg-red-200/80 dark:bg-red-900/30 dark:hover:bg-red-800/40" 
-                          : "text-muted-foreground hover:text-red-600 hover:bg-red-100/50 dark:hover:bg-red-900/20"
+                          ? "text-red-700 bg-red-50 border-red-200 hover:bg-red-100 dark:text-red-400 dark:bg-red-950/50 dark:border-red-800 dark:hover:bg-red-900/50" 
+                          : "text-gray-600 bg-white border-gray-200 hover:text-red-600 hover:bg-red-50 hover:border-red-200 dark:text-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:hover:text-red-400 dark:hover:bg-red-950/30"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleFeedback("disliked");
                       }}
                     >
-                      <i className={`text-sm ${feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}`}></i>
-                      {(feedbackData?.stats?.down || 0) > 0 && (
-                        <span className="text-xs font-medium min-w-[1rem] text-center">
-                          {feedbackData?.stats?.down}
-                        </span>
-                      )}
+                      <i className={`text-lg ri-thumb-down-fill`}></i>
+                      <span className="text-sm font-medium">
+                        {feedbackData?.stats?.down || 0}
+                      </span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
