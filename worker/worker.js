@@ -541,8 +541,6 @@ export default {
       if (pathname === '/api/status' && request.method === 'GET') {
         return jsonResponse({
           status: 'ok',
-          apiKey: Boolean(apiKey),
-          db: Boolean(env.DB),
           time: new Date().toISOString(),
         }, headers);
       }
@@ -550,8 +548,29 @@ export default {
       if (pathname === '/api/register' && request.method === 'POST') {
         const body = await request.json();
         const { username, password } = body;
-        if (!username || !password || password.length < 8) {
-          return jsonResponse({ message: 'Invalid user data' }, headers, 400);
+        // Enhanced password validation
+        if (!username || !password) {
+          return jsonResponse({ message: 'Username and password are required' }, headers, 400);
+        }
+        
+        if (username.length < 3 || username.length > 50) {
+          return jsonResponse({ message: 'Username must be 3-50 characters' }, headers, 400);
+        }
+        
+        if (password.length < 12) {
+          return jsonResponse({ message: 'Password must be at least 12 characters' }, headers, 400);
+        }
+        
+        // Check password complexity
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasLowercase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+        const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        
+        if (!hasUppercase || !hasLowercase || !hasNumbers || !hasSpecialChars) {
+          return jsonResponse({ 
+            message: 'Password must contain uppercase, lowercase, numbers, and special characters' 
+          }, headers, 400);
         }
         const existing = await findUser(env.DB, username);
         if (existing) {
