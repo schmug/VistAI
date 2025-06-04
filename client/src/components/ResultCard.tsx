@@ -164,34 +164,33 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
 
           <div className="flex items-center gap-3">
             {/* Feedback buttons - always visible */}
-            <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-1">
+            <div className="flex items-center gap-1">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`flex items-center gap-1 px-2 py-1 h-8 ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-full transition-all ${
                         feedback === "liked" 
-                          ? "text-green-600 bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900" 
-                          : "text-muted-foreground hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                          ? "text-green-600 bg-green-100/80 hover:bg-green-200/80 dark:bg-green-900/30 dark:hover:bg-green-800/40" 
+                          : "text-muted-foreground hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-900/20"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleFeedback("liked");
                       }}
                     >
-                      <i className={`text-base ${feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}`}></i>
-                      {Array.from({ length: Math.min(feedbackData?.stats?.up || 0, 5) }).map((_, i) => (
-                        <i key={i} className="ri-thumb-up-fill text-xs opacity-60"></i>
-                      ))}
-                      {(feedbackData?.stats?.up || 0) > 5 && (
-                        <span className="text-xs font-medium">+{(feedbackData?.stats?.up || 0) - 5}</span>
+                      <i className={`text-sm ${feedback === "liked" ? "ri-thumb-up-fill" : "ri-thumb-up-line"}`}></i>
+                      {(feedbackData?.stats?.up || 0) > 0 && (
+                        <span className="text-xs font-medium min-w-[1rem] text-center">
+                          {feedbackData?.stats?.up}
+                        </span>
                       )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Helpful response ({feedbackData?.stats?.up || 0} votes)</p>
+                    <p>Helpful response</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -202,27 +201,26 @@ const ResultCard = memo(function ResultCard({ result }: ResultCardProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`flex items-center gap-1 px-2 py-1 h-8 ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-full transition-all ${
                         feedback === "disliked" 
-                          ? "text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900" 
-                          : "text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                          ? "text-red-600 bg-red-100/80 hover:bg-red-200/80 dark:bg-red-900/30 dark:hover:bg-red-800/40" 
+                          : "text-muted-foreground hover:text-red-600 hover:bg-red-100/50 dark:hover:bg-red-900/20"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleFeedback("disliked");
                       }}
                     >
-                      <i className={`text-base ${feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}`}></i>
-                      {Array.from({ length: Math.min(feedbackData?.stats?.down || 0, 5) }).map((_, i) => (
-                        <i key={i} className="ri-thumb-down-fill text-xs opacity-60"></i>
-                      ))}
-                      {(feedbackData?.stats?.down || 0) > 5 && (
-                        <span className="text-xs font-medium">+{(feedbackData?.stats?.down || 0) - 5}</span>
+                      <i className={`text-sm ${feedback === "disliked" ? "ri-thumb-down-fill" : "ri-thumb-down-line"}`}></i>
+                      {(feedbackData?.stats?.down || 0) > 0 && (
+                        <span className="text-xs font-medium min-w-[1rem] text-center">
+                          {feedbackData?.stats?.down}
+                        </span>
                       )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Not helpful ({feedbackData?.stats?.down || 0} votes)</p>
+                    <p>Not helpful</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
