@@ -26,11 +26,11 @@ import crypto from 'node:crypto';
  * Fallback model list used when dynamic fetch fails.
  */
 export const FALLBACK_MODELS = [
-  'google/gemini-2.0-flash-001',
-  'openai/gpt-4o-mini',
-  'anthropic/claude-3.7-sonnet',
   'google/gemini-2.5-pro-preview',
-  'deepseek/deepseek-chat-v3-0324:free',
+  'anthropic/claude-sonnet-4',
+  'openai/gpt-4o-mini', 
+  'deepseek/deepseek-r1-0528:free',
+  'meta-llama/llama-3.3-8b-instruct:free',
 ];
 
 function base64url(input) {
@@ -1017,23 +1017,54 @@ function extractSnippet(content = '') {
 export { extractSnippet };
 
 async function fetchTopModels(apiKey, limit = 4) {
-  const resp = await fetch(`https://openrouter.ai/api/v1/models/top?limit=${limit}`, {
+  // Fetch all available models and select top performing ones
+  const resp = await fetch('https://openrouter.ai/api/v1/models', {
     headers: { Authorization: `Bearer ${apiKey}` }
   });
   if (!resp.ok) {
-    throw new Error(`Failed to fetch top models: ${resp.status}`);
+    throw new Error(`Failed to fetch models: ${resp.status}`);
   }
   const data = await resp.json();
-  return (data.data || []).map((m) => m.id);
+  
+  // Filter for high-quality, popular models that are likely to work well
+  const popularModels = [
+    'google/gemini-2.5-pro-preview',
+    'anthropic/claude-sonnet-4', 
+    'openai/gpt-4o-mini',
+    'deepseek/deepseek-r1-0528:free',
+    'google/gemini-2.5-flash-preview-05-20',
+    'anthropic/claude-3.7-sonnet',
+    'meta-llama/llama-3.3-8b-instruct:free'
+  ];
+  
+  // Get available model IDs
+  const availableModels = (data.data || []).map(m => m.id);
+  
+  // Return popular models that are actually available, up to the limit
+  const validModels = popularModels.filter(model => availableModels.includes(model));
+  return validModels.slice(0, limit);
 }
 
 async function fetchTrendingModel(apiKey) {
-  const resp = await fetch('https://openrouter.ai/api/v1/models/trending?limit=1', {
+  // Get a high-performing model as "trending"
+  const resp = await fetch('https://openrouter.ai/api/v1/models', {
     headers: { Authorization: `Bearer ${apiKey}` }
   });
   if (!resp.ok) {
-    throw new Error(`Failed to fetch trending model: ${resp.status}`);
+    throw new Error(`Failed to fetch models: ${resp.status}`);
   }
   const data = await resp.json();
-  return data.data && data.data[0] ? data.data[0].id : '';
+  
+  // Look for a good trending model - prioritize newer, high-performance models
+  const trendingCandidates = [
+    'deepseek/deepseek-r1-0528:free',
+    'anthropic/claude-sonnet-4',
+    'google/gemini-2.5-flash-preview-05-20',
+    'mistralai/devstral-small:free'
+  ];
+  
+  const availableModels = (data.data || []).map(m => m.id);
+  const trending = trendingCandidates.find(model => availableModels.includes(model));
+  
+  return trending || '';
 }
