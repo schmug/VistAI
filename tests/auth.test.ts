@@ -12,7 +12,7 @@ test('authentication tokens are signed', async () => {
   const regReq = new Request('http://localhost/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'u', password: 'password123' }),
+    body: JSON.stringify({ username: 'testuser', password: 'StrongPass123!' }),
   })
   const regRes = await worker.fetch(regReq, env)
   const cookie = regRes.headers.get('Set-Cookie') || ''
@@ -26,7 +26,7 @@ test('authentication tokens are signed', async () => {
   const loginReq = new Request('http://localhost/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'u', password: 'password123' }),
+    body: JSON.stringify({ username: 'testuser', password: 'StrongPass123!' }),
   })
   const loginRes = await worker.fetch(loginReq, env)
   const loginCookie = loginRes.headers.get('Set-Cookie') || ''
@@ -42,14 +42,14 @@ test('register rejects duplicate usernames', async () => {
   const req1 = new Request('http://localhost/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'u', password: 'password123' })
+    body: JSON.stringify({ username: 'testuser', password: 'StrongPass123!' })
   })
   await worker.fetch(req1, env)
 
   const req2 = new Request('http://localhost/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'u', password: 'password123' })
+    body: JSON.stringify({ username: 'testuser', password: 'StrongPass123!' })
   })
   const res2 = await worker.fetch(req2, env)
   assert.strictEqual(res2.status, 409)

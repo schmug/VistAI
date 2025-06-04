@@ -24,7 +24,8 @@
       "Bash(wrangler d1 migrations list:*)",
       "Bash(npx wrangler:*)",
       "Bash(cp:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm audit:*)"
     ]
   },
   "enableAllProjectMcpServers": false
