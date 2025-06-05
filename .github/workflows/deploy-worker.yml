@@ -1,5 +1,8 @@
 name: Deploy Cloudflare Worker
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main ]
@@ -21,4 +24,3 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: deploy
-
